@@ -1,0 +1,52 @@
+{
+  "name": "Arkada",
+  "description": "arkada.txt™ — тёмное стекло dev.txt для клиента Steam: те же цвета, скругления и шрифт, что в Kapsula, Aura и core.txt.",
+  "author": "dev.txt",
+  "version": "0.1.0",
+  "tags": ["Dark", "Glass", "Minimal", "dev.txt"],
+  "Steam-WebKit": "webkit.css",
+  "Patches": [
+    { "MatchRegexString": "^Steam$", "TargetCss": "libraryroot.custom.css" },
+    { "MatchRegexString": ".friendsui-container", "TargetCss": "friends.custom.css" },
+    { "MatchRegexString": ".ModalDialogPopup", "TargetCss": "base.css" },
+    { "MatchRegexString": ".FullModalOverlay", "TargetCss": "base.css" },
+    { "MatchRegexString": "Menu$", "TargetCss": "base.css" },
+    { "MatchRegexString": "Supernav$", "TargetCss": "base.css" },
+    { "MatchRegexString": "^notificationtoasts_", "TargetCss": "base.css" },
+    { "MatchRegexString": "^OverlayBrowser_Browser$", "TargetCss": "base.css" },
+    { "MatchRegexString": "^SP Overlay:", "TargetCss": "base.css" }
+  ],
+  "Conditions": {
+    "Акцент": {
+      "description": "Цвет главных кнопок, выделения и подсветки. Если стоит плагин Arkada и в core.txt выбран общий цвет экосистемы, в окнах клиента действует он.",
+      "default": "Как в dev.txt",
+      "values": {
+        "Как в dev.txt": {},
+        "Фирменный оранжевый": { "TargetCss": { "affects": [".*"], "src": "options/accent-brand.css" } },
+        "Синий": { "TargetCss": { "affects": [".*"], "src": "options/accent-blue.css" } },
+        "Зелёный": { "TargetCss": { "affects": [".*"], "src": "options/accent-green.css" } },
+        "Красный": { "TargetCss": { "affects": [".*"], "src": "options/accent-red.css" } },
+        "Янтарный": { "TargetCss": { "affects": [".*"], "src": "options/accent-orange.css" } },
+        "Жёлтый": { "TargetCss": { "affects": [".*"], "src": "options/accent-yellow.css" } },
+        "Фиолетовый": { "TargetCss": { "affects": [".*"], "src": "options/accent-purple.css" } },
+        "Розовый": { "TargetCss": { "affects": [".*"], "src": "options/accent-pink.css" } }
+      }
+    },
+    "Скруглённые углы": {
+      "description": "Скругления dev.txt: блок 18, строка 14, элемент управления 11, подсказка 9.",
+      "default": "yes",
+      "values": {
+        "yes": {},
+        "no": { "TargetCss": { "affects": [".*"], "src": "options/square.css" } }
+      }
+    },
+    "Шрифт dev.txt": {
+      "description": "Segoe UI Variable вместо шрифта Steam. Выключите, если где-то поехал текст.",
+      "default": "yes",
+      "values": {
+        "yes": { "TargetCss": { "affects": [".*"], "src": "options/font.css" } },
+        "no": {}
+      }
+    }
+  }
+}

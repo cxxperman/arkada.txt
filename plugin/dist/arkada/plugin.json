@@ -1,0 +1,9 @@
+{
+  "$schema": "https://raw.githubusercontent.com/SteamClientHomebrew/Millennium/main/src/system/plugin-schema.json",
+  "name": "arkada",
+  "common_name": "Arkada",
+  "description": "Tells the other dev.txt apps on this PC what Steam is doing: the running game, downloads, invites. Nothing leaves the computer.",
+  "version": "0.1.0",
+  "useBackend": false,
+  "backendType": "lua"
+}

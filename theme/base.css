@@ -1,0 +1,176 @@
+/* arkada.txt — основа темы: всё, что одинаково в любом окне клиента Steam.
+ * Здесь нет ни одного своего цвета, радиуса или длительности: только переменные --dt-… из tokens.css
+ * (его пишет tools/build.js из токенов kit.txt) и их смеси.
+ *
+ * Как тема держится за Steam, по убыванию надёжности:
+ *   1. Собственные переменные Steam (--color-greyneutral-…, --color-blue-…, --radius-…, --font-family):
+ *      Steam объявляет их в :root, тема только даёт им другие значения. Классы тут не участвуют.
+ *   2. Старые читаемые классы Steam без хеша (.DialogButton, .DialogContent, .title-area-icon, .friend…)
+ *      и классы, которые ставит сам Millennium (html.MillenniumWindow_…). Живут годами.
+ *   3. Хешированные классы (._3x1Hk…). Их мало, все собраны в помеченных блоках «ХРУПКОЕ»
+ *      в конце файлов; после обновления клиента ломаться может только это.
+ *      Проверка: node tools/check.js --steam-css <файлы css клиента>. */
+
+@import url("./tokens.css");
+
+:root {
+  /* Акцент: 1) общий цвет экосистемы из хаба (его ставит плагин arkada), 2) выбор в настройках темы,
+   * 3) акцент из токенов. */
+  --arkada-accent: var(--arkada-hub-accent, var(--arkada-accent-choice, var(--dt-accent)));
+  --arkada-accent-soft: color-mix(in srgb, var(--arkada-accent) 22%, transparent);
+  --arkada-accent-hi: color-mix(in srgb, var(--arkada-accent), white 12%);
+
+  /* Скругление: options/square.css ставит --arkada-round: 0 */
+  --arkada-r-block: calc(var(--dt-radius-block) * var(--arkada-round, 1));
+  --arkada-r-row: calc(var(--dt-radius-row) * var(--arkada-round, 1));
+  --arkada-r-control: calc(var(--dt-radius-control) * var(--arkada-round, 1));
+  --arkada-r-tip: calc(var(--dt-radius-tip) * var(--arkada-round, 1));
+
+  /* Непрозрачные ступени между фоном и «приподнятой» поверхностью — для мест, где стекло не к чему приложить */
+  --arkada-step-1: color-mix(in srgb, var(--dt-bg), var(--dt-surface) 50%);
+  --arkada-step-2: color-mix(in srgb, var(--dt-surface), var(--dt-raised) 40%);
+
+  /* ───────── 1. Переменные самого Steam ─────────
+   * Серая шкала Steam (1 — самый тёмный, 12 — самый светлый) пересажена на фон и поверхности dev.txt.
+   * От неё же Steam считает --color-accent-… и --color-dull-…, так что они меняются сами. */
+  --color-greyneutral-1: color-mix(in srgb, var(--dt-bg), black 35%);
+  --color-greyneutral-2: var(--dt-bg);
+  --color-greyneutral-3: var(--arkada-step-1);
+  --color-greyneutral-4: var(--dt-surface);
+  --color-greyneutral-5: color-mix(in srgb, var(--dt-surface), var(--dt-raised) 25%);
+  --color-greyneutral-6: color-mix(in srgb, var(--dt-surface), var(--dt-raised) 55%);
+  --color-greyneutral-7: var(--dt-raised);
+  --color-greyneutral-8: color-mix(in srgb, var(--dt-raised), white 9%);
+  --color-greyneutral-9: color-mix(in srgb, var(--dt-raised), white 16%);
+  --color-greyneutral-10: color-mix(in srgb, var(--dt-raised), white 32%);
+  --color-greyneutral-11: color-mix(in srgb, var(--dt-bg), white 58%);
+  --color-greyneutral-12: color-mix(in srgb, var(--dt-bg), white 76%);
+
+  /* Синий Steam (#1a9fff и соседи) — это его акцент */
+  --color-blue-7: color-mix(in srgb, var(--arkada-accent), black 22%);
+  --color-blue-8: var(--arkada-accent);
+  --color-blue-9: color-mix(in srgb, var(--arkada-accent), white 10%);
+  --color-blue-10: color-mix(in srgb, var(--arkada-accent), white 22%);
+  --color-blue-11: color-mix(in srgb, var(--arkada-accent), white 34%);
+
+  --color-text-light-title: var(--dt-label);
+  --color-text-light-subtitle: var(--dt-label);
+  --color-text-light-body: var(--dt-label-2);
+  --color-text-light-description: var(--dt-label-2);
+  --color-text-light-note: var(--dt-label-3);
+
+  --radius-sm: calc(var(--arkada-r-tip) / 2);
+  --radius-md: var(--arkada-r-tip);
+  --radius-lg: var(--arkada-r-control);
+}
+
+/* «Меньше движения» из хаба: плагин ставит атрибут, длительности обнуляются так же, как при системной настройке */
+:root[data-arkada-motion='reduced'] {
+  --dt-dur-press: 0ms;
+  --dt-dur-fast: 0ms;
+  --dt-dur-base: 0ms;
+  --dt-dur-slow: 0ms;
+  --dt-dur-reveal: 0ms;
+}
+
+/* ───────── Мелочи, общие для всех окон ───────── */
+::selection { background: color-mix(in srgb, var(--arkada-accent) 45%, transparent); }
+
+::-webkit-scrollbar { width: 12px; height: 12px; }
+::-webkit-scrollbar-track, ::-webkit-scrollbar-corner { background: transparent; }
+::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: var(--arkada-r-tip);
+  background-color: var(--dt-fill-2);
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background-color: var(--dt-fill-press); }
+
+/* ───────── 2. Кнопки и поля диалогов (читаемые классы Steam) ─────────
+ * !important здесь не от жадности: Steam задаёт эти свойства цепочкой
+ * button.<хеш>.DialogButton:enabled:active:hover — перебить её весом нельзя, не назвав хеш. */
+.DialogButton {
+  border-radius: calc(var(--arkada-r-block) - 2px) !important;
+  border: 1px solid var(--dt-edge) !important;
+  border-top-color: var(--dt-edge-top) !important;
+  background: var(--dt-glass) !important;
+  color: var(--dt-label) !important;
+  transition: transform var(--dt-dur-fast) var(--dt-ease-out) !important;
+}
+.DialogButton:enabled:hover { background: var(--dt-glass-hover) !important; }
+.DialogButton:enabled:active { transform: scale(0.965); transition-duration: var(--dt-dur-press) !important; }
+.DialogButton:disabled { opacity: 0.45; }
+.DialogButton.Primary {
+  background: linear-gradient(180deg, var(--arkada-accent-hi), var(--arkada-accent)) !important;
+  border-color: var(--dt-fill-press) !important;
+}
+.DialogButton.Primary:enabled:hover {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--arkada-accent), white 18%), color-mix(in srgb, var(--arkada-accent), white 6%)) !important;
+}
+
+.DialogInput,
+.DialogTextInputBase,
+.DialogDropDown {
+  border-radius: var(--arkada-r-control) !important;
+  background: var(--dt-fill) !important;
+  box-shadow: inset 0 0 0 1px var(--dt-edge) !important;
+  color: var(--dt-label) !important;
+}
+.DialogInput:focus,
+.DialogTextInputBase:focus,
+.DialogDropDown:hover {
+  background: var(--dt-fill-2) !important;
+  box-shadow: inset 0 0 0 1px var(--arkada-accent) !important;
+}
+.DialogCheckbox { border-radius: calc(var(--arkada-r-tip) / 2) !important; }
+
+/* ───────── Диалоги и окно настроек ─────────
+ * .DialogContent — тело любого диалога Steam и правая часть окна «Настройки». */
+.DialogContent {
+  background: var(--dt-surface) !important;
+  color: var(--dt-label-2);
+}
+.ModalPosition_Content .DialogContent {
+  border: 1px solid var(--dt-edge);
+  border-top-color: var(--dt-edge-top);
+  border-radius: var(--arkada-r-block);
+}
+.DialogHeader { color: var(--dt-label) !important; font-family: var(--dt-font-display) !important; }
+.DialogBody, .DialogBodyText { color: var(--dt-label-2); }
+.DialogLabel, .DialogToggle_Label { color: var(--dt-label); }
+.DialogControlsSectionHeader, .DialogSubHeader { color: var(--dt-label-3); }
+.ModalOverlayBackground { background: color-mix(in srgb, var(--dt-bg) 72%, transparent) !important; }
+
+/* Окно «Настройки» и окно свойств игры: класс на <html> ставит Millennium */
+html.MillenniumWindow_Settings body,
+html.MillenniumWindow_GameProperties body { background: var(--dt-bg); }
+
+/* ───────── Кнопки окна: свернуть, развернуть, закрыть ───────── */
+.title-area-icon { transition: background var(--dt-dur-fast) var(--dt-ease-out); }
+.title-area-icon:hover { background: var(--dt-fill-2) !important; }
+.title-area-icon.closeButton:hover { background: var(--dt-red) !important; }
+
+/* ═════════ ХРУПКОЕ: контекстные меню ═════════
+ * У меню Steam нет ни читаемых классов, ни своих переменных. Три хеша ниже (само меню, его содержимое,
+ * строка) не менялись несколько лет и есть в клиенте на день сборки темы, но гарантии нет.
+ * Если пропадут — меню просто останутся такими, какими их рисует Steam. */
+.PP7LM0Ow1K5qkR8WElLpt {
+  padding: 5px;
+  border: 1px solid var(--dt-edge);
+  border-top-color: var(--dt-edge-top);
+  border-radius: var(--arkada-r-row);
+  background: var(--dt-menu);
+  backdrop-filter: blur(24px);
+}
+._2EstNjFIIZm_WUSKm5Wt7n { background: none; }
+._1n7Wloe5jZ6fSuvV18NNWI {
+  border-radius: var(--arkada-r-tip);
+  color: var(--dt-label-2);
+  transition: background var(--dt-dur-press) var(--dt-ease-out);
+}
+._1n7Wloe5jZ6fSuvV18NNWI:hover {
+  background: var(--arkada-accent-soft);
+  color: var(--dt-label);
+}
+/* Окно меню прозрачное: фон даёт только само меню */
+html.MillenniumWindow_ContextMenu body { background: transparent; }

@@ -1,0 +1,5 @@
+# Millennium's compiler, installed by `npm install` in plugin/ only when the .star build is wanted
+plugin/node_modules/
+# its cache of typings and the short-named copy it is run from when the folder path is too long for Windows
+plugin/.millennium/
+plugin/sl.exe

@@ -1,0 +1,54 @@
+/* arkada.txt — список друзей и чат.
+ * Эта часть Steam старше остальных и до сих пор размечена читаемыми классами без хеша
+ * (.friend, .chatWindow, .msg…), поэтому хрупких селекторов здесь нет вовсе.
+ * Цвета состояний друга (в сети, в игре, отошёл) тема не меняет: они несут смысл. */
+
+@import url("./base.css");
+
+.friendsui-container { color: var(--dt-label-2); }
+html.MillenniumWindow_FriendsList body,
+html.MillenniumWindow_FriendChatWindow body { background: var(--dt-bg); }
+
+/* ───────── Список друзей ───────── */
+.friendListHeaderContainer {
+  background-color: var(--dt-surface) !important;
+  box-shadow: inset 0 -1px 0 var(--dt-separator);
+}
+.currentUserContainer { border-bottom-color: var(--dt-separator) !important; }
+.FriendsListContent,
+.friendlistListContainer { background: var(--dt-bg) !important; }
+
+.friend {
+  border-radius: var(--arkada-r-tip);
+  transition: background-color var(--dt-dur-press) var(--dt-ease-out) !important;
+}
+.friend:hover { background-color: var(--dt-fill) !important; }
+.friend.Friend_ContextMenuActive { background-color: var(--arkada-accent-soft) !important; }
+
+.friendSearchInput {
+  border-radius: var(--arkada-r-control) !important;
+  background: var(--dt-fill) !important;
+}
+
+/* ───────── Чат ───────── */
+.chatWindow { background: var(--dt-bg) !important; }
+.ChatTabs,
+.titleBarContainer { background: var(--dt-surface) !important; }
+.chatTab { border-radius: var(--arkada-r-tip) var(--arkada-r-tip) 0 0; }
+
+.chatWindow .chatEntry {
+  background-color: var(--dt-surface) !important;
+  box-shadow: inset 0 1px 0 var(--dt-separator);
+  transition-duration: var(--dt-dur-base) !important;
+  transition-timing-function: var(--dt-ease-out) !important;
+}
+.msg { border-radius: var(--arkada-r-tip); }
+.msg:hover { background-color: var(--dt-fill) !important; }
+
+/* Приглашение в игру внутри чата — карточка из стекла */
+.msg.ChatMessageInvite {
+  border: 1px solid var(--dt-edge);
+  border-top-color: var(--dt-edge-top);
+  border-radius: var(--arkada-r-row);
+  background: var(--dt-glass) !important;
+}

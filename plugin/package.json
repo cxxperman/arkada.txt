@@ -1,0 +1,15 @@
+{
+  "name": "arkada-plugin",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Arkada plugin for Millennium: Steam → the dev.txt hub",
+  "license": "MIT",
+  "scripts": {
+    "build": "node build.js",
+    "build:star": "node build-star.js",
+    "test:star": "node build-star.js && node ../test/plugin.test.js --bundle dist-star/bundle.js"
+  },
+  "devDependencies": {
+    "@steambrew/starlight": "1.1.7"
+  }
+}

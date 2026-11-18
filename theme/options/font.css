@@ -1,0 +1,12 @@
+/* Настройка темы «Шрифт dev.txt: да». Segoe UI Variable вместо Motiva Sans.
+ * Steam называет свой шрифт почти в каждом правиле, поэтому замена идёт по всем элементам сразу;
+ * моноширинный текст остаётся моноширинным. Значки Steam рисует картинками SVG, а не шрифтом. */
+:root {
+  --font-family: var(--dt-font-text);
+}
+body, body *:not(code, pre, kbd, samp, tt) {
+  font-family: var(--dt-font-text) !important;
+}
+code, pre, kbd, samp, tt {
+  font-family: var(--dt-font-mono) !important;
+}

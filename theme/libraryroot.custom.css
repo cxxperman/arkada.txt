@@ -1,0 +1,54 @@
+/* arkada.txt — главное окно Steam: шапка, библиотека, страница игры.
+ * Основа (переменные, кнопки, диалоги, меню) — в base.css. */
+
+@import url("./base.css");
+
+html.MillenniumWindow_MainSteamWindow body { background: var(--dt-bg); }
+
+/* ═════════ ХРУПКОЕ: каркас главного окна ═════════
+ * Большие поверхности библиотеки Steam красит напрямую, цветом в хешированном классе: ни переменных,
+ * ни читаемых имён у них нет. Здесь ровно девять таких классов — по одному на поверхность — и только
+ * цвет, кромка и скругление: размеры и раскладку тема не трогает, поэтому устаревший класс ничего не ломает,
+ * а лишь возвращает этой поверхности родной цвет Steam.
+ * Что есть что, сверено с css клиента на день сборки темы (см. README, «Что не проверено»). */
+
+/* Шапка окна: меню Steam, навигация, кнопки окна */
+._3Z7VQ1IMk4E3HsHvrkLNgo {
+  background: var(--dt-bg);
+  box-shadow: inset 0 -1px 0 var(--dt-separator);
+}
+/* Светящаяся линия под шапкой у активного окна */
+._3pXasCUulX4jjqO79s4q_F { display: none; }
+/* Строка адреса над страницами магазина и сообщества */
+._1bGewp3tfzqAF6fVTFFUOz .UkR3sY319PuaUNuUWks2K {
+  background: var(--dt-bg);
+  box-shadow: none;
+}
+
+/* Левая колонка библиотеки и её верхняя строка */
+._3x1HklzyDs4TEjACrRO2tB {
+  background: var(--arkada-step-1);
+  background-image: none;
+}
+._2TKEazUUS3TlniZfpc8OOe {
+  background: none;
+  box-shadow: none;
+}
+/* Кнопка «Главная» */
+._3pSPluBgf0NeR1kkCLWMhR {
+  border: 1px solid var(--dt-edge);
+  border-top-color: var(--dt-edge-top);
+  border-radius: var(--arkada-r-control);
+  background: var(--dt-glass);
+  color: var(--dt-label);
+}
+._3pSPluBgf0NeR1kkCLWMhR:hover { background: var(--dt-glass-hover); }
+/* Поиск по библиотеке */
+._20QAC4WMXm8qFE8waUT5oo {
+  border-radius: var(--arkada-r-control);
+  background: var(--dt-fill);
+}
+
+/* Главная библиотеки и страница игры */
+._2Dd4T78PcCTUVgOtDGFY5j { background: var(--dt-bg); }
+._2l416KfEtI4CL0mCUEmOBw { background-color: var(--dt-bg); }

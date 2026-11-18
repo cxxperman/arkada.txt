@@ -1,0 +1,20 @@
+# The same plugin for Millennium's newer packed format (.star), built by its own compiler, starlight:
+#   npm install          (inside this folder; nothing is installed globally)
+#   npm run build:star   → dist-star/arkada.star
+# The folder layout Millennium also loads (plugin.json + .millennium/Dist/index.js) is built by build.js
+# and needs none of this.
+# There is deliberately no [dev] section and no output_path = "auto": with them starlight writes into the
+# Steam folder and restarts the plugin in a running Steam.
+
+[plugin]
+id = "arkada"
+name = "Arkada"
+version = "0.1.0"
+author = "dev.txt"
+description = "Tells the other dev.txt apps on this PC what Steam is doing: the running game, downloads, invites. Nothing leaves the computer."
+
+[frontend]
+entry = "src/star.mjs"
+
+[compiler]
+output_path = "dist-star/arkada.star"
