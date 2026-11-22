@@ -231,11 +231,12 @@ let PluginEntryPointMain = function () {
         const STORAGE_KEY = 'arkada.settings';
         const FRIENDS_EVERY_MS = 15000;
 
-        // The three switches shown on the settings page of core.txt
+        // The four switches shown on the settings page of core.txt
         const SWITCHES = [
           { key: 'shareGames', label: 'Показывать игры другим приложениям dev.txt', hint: 'Какая игра запущена и какие достижения получены' },
           { key: 'shareDownloads', label: 'Показывать загрузки', hint: 'Что Steam скачивает сейчас, сколько готово и с какой скоростью' },
           { key: 'shareInvites', label: 'Показывать приглашения', hint: 'Кто и в какую игру зовёт' },
+          { key: 'shareMessages', label: 'Показывать сообщения', hint: 'Кто и что написал в личных сообщениях' },
         ];
 
         const INVITE_URL = /^steam:\/\/(joinlobby|rungame|remoteplay\/connect)\/\d[A-Za-z0-9/_%.:?&=+~@,-]*$/i;
@@ -249,7 +250,7 @@ let PluginEntryPointMain = function () {
           let stopped = false;
 
           // ───────── Settings ─────────
-          const settings = { shareGames: true, shareDownloads: true, shareInvites: true };
+          const settings = { shareGames: true, shareDownloads: true, shareInvites: true, shareMessages: true };
           try {
             const saved = JSON.parse((storage && storage.getItem(STORAGE_KEY)) || '{}');
             for (const s of SWITCHES) if (typeof saved[s.key] === 'boolean') settings[s.key] = saved[s.key];
@@ -342,7 +343,7 @@ let PluginEntryPointMain = function () {
               if (settings.shareGames) hub.event(APP + '.achievement', { appId, game: str(t.game) || steam.appName(appId), title: base.title, text: base.text, icon: base.icon });
               return;
             }
-            if (kind === 'friend message')
+            if (kind === 'friend message' && settings.shareMessages)
               hub.event(APP + '.message', { steamid: validSteamId(t.steamid) ? t.steamid : '', from: base.title, text: base.text, icon: base.icon });
           }
 

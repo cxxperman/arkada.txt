@@ -78,7 +78,7 @@ node tools/check.js --steam-css <файлы css клиента>
 | `arkada.game` | `{ appId, name, since }`, пока игра запущена; иначе `null`. `since` — время запуска, миллисекунды |
 | `arkada.downloads` | `{ appId, name, progress, bytesPerSecond, paused }`; `progress` от 0 до 1. Ничего не качается — `null` |
 | `arkada.friends` | `{ online, inGame }` — сколько друзей в сети и сколько из них в игре. Сверяется раз в 15 секунд |
-| `arkada.settings` | три переключателя для страницы настроек core.txt |
+| `arkada.settings` | четыре переключателя для страницы настроек core.txt |
 
 События (хаб их не помнит). Берутся из всплывающих уведомлений Steam — если Steam решил уведомление не показывать, события нет:
 
@@ -102,6 +102,7 @@ node tools/check.js --steam-css <файлы css клиента>
 - `shareGames` — «Показывать игры другим приложениям dev.txt». Выключено: `arkada.game` пуст, достижения не сообщаются.
 - `shareDownloads` — «Показывать загрузки».
 - `shareInvites` — «Показывать приглашения».
+- `shareMessages` — «Показывать сообщения». Выключено: событие `arkada.message` не отправляется.
 
 Настройки хранятся в `localStorage` страницы Steam под ключом `arkada.settings`.
 

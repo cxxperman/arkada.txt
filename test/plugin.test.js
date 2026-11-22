@@ -125,7 +125,8 @@ async function main() {
     ['shareGames', 'switch', 'Показывать игры другим приложениям dev.txt', true],
     ['shareDownloads', 'switch', 'Показывать загрузки', true],
     ['shareInvites', 'switch', 'Показывать приглашения', true],
-  ]), 'arkada.settings: three switches, all on', items);
+    ['shareMessages', 'switch', 'Показывать сообщения', true],
+  ]), 'arkada.settings: four switches, all on', items);
   await until(() => state('arkada.friends'), 'arkada.friends');
   ok(eq(state('arkada.friends'), { online: 2, inGame: 1 }), 'arkada.friends: online and in-game counts', state('arkada.friends'));
   ok(state('arkada.downloads') === undefined || state('arkada.downloads') === null, 'arkada.downloads is empty while nothing downloads');
@@ -190,7 +191,7 @@ async function main() {
   ok(true, 'arkada.settings comes again, whole, with the new value');
   await until(() => state('arkada.game') === null, 'game hidden');
   ok(true, 'with games hidden arkada.game becomes null although the game still runs');
-  ok(eq(JSON.parse(page.storage.getItem(STORAGE_KEY)), { shareGames: false, shareDownloads: true, shareInvites: true }), 'the setting is saved in localStorage of the Steam page', page.storage.getItem(STORAGE_KEY));
+  ok(eq(JSON.parse(page.storage.getItem(STORAGE_KEY)), { shareGames: false, shareDownloads: true, shareInvites: true, shareMessages: true }), 'the setting is saved in localStorage of the Steam page', page.storage.getItem(STORAGE_KEY));
   const before = seen.events.length;
   page.steam.toast({ strTest: 'Achievement' }, { title: 'Hidden one', appid: 730 }, true);
   await sleep(250);
@@ -202,6 +203,14 @@ async function main() {
   page.steam.toast({ strTest: 'Friend Message' }, { body: 'again', steamid: '76561198000000002', response_steamurl: 'steam://joinlobby/730/5/6' }, true);
   await sleep(250);
   ok(r.ok && seen.events.length === before, 'with invites hidden an invite makes no event');
+  r = await tester.command('arkada', 'settings.set', { key: 'shareMessages', value: false });
+  page.steam.toast({ strTest: 'Friend Message' }, { title: 'Liza', body: 'hidden text', steamid: '76561198000000001' }, true);
+  await sleep(250);
+  ok(r.ok && seen.events.length === before, 'with messages hidden a message makes no event');
+  r = await tester.command('arkada', 'settings.set', { key: 'shareMessages', value: true });
+  page.steam.toast({ strTest: 'Friend Message' }, { title: 'Liza', body: 'visible text', steamid: '76561198000000001' }, true);
+  await until(() => seen.events.length === before + 1, 'message event after switching back on');
+  ok(r.ok && seen.events[seen.events.length - 1].topic === 'arkada.message', 'switched back on → a message makes an event again', seen.events[seen.events.length - 1]);
   r = await tester.command('arkada', 'settings.set', { key: 'volume', value: true });
   ok(!r.ok && r.error === 'unknown-key', 'an unknown key is refused with ok: false', r);
   r = await tester.command('arkada', 'settings.set', { key: 'shareInvites', value: 'yes' });
@@ -270,7 +279,7 @@ async function main() {
     storage: { getItem: k => stored[k] || null, setItem() { throw new Error('closed'); } },
     friendsEveryMs: 30,
   });
-  ok(eq(lone.settings(), { shareGames: true, shareDownloads: false, shareInvites: true }), 'saved settings are read back at start; unknown fields are dropped', lone.settings());
+  ok(eq(lone.settings(), { shareGames: true, shareDownloads: false, shareInvites: true, shareMessages: true }), 'saved settings are read back at start; unknown fields are dropped', lone.settings());
   ok(!said.some(([t, d]) => t === 'arkada.downloads' && d), 'with downloads hidden a download is not reported');
   counts.online = 3; counts.inGame = 2;
   await until(() => said.some(([t, d]) => t === 'arkada.friends' && d && d.online === 3 && d.inGame === 2), 'friends change');
