@@ -1,0 +1,268 @@
+/*
+ * Arkada over Steam Enhanced: their design tokens (upstream/steam-enhanced/core/tokens.css) with
+ * the values of dev.txt (theme/tokens.css, the --dt-… variables of kit.txt).
+ *
+ * tools/build-se.js writes dist/arkada/arkada/tokens.css = theme/tokens.css + this file, and
+ * skin.json loads it into every window through a Patch (".*").
+ *
+ * Specificity, not order: their tokens sit on :root (0,1,0) and their settings
+ * (options/appearance/*.css, options/startup/*.css) on :root:root (0,2,0). These rules use
+ * html:root (0,1,1): they beat the defaults whichever sheet loads first, and a setting the user
+ * picks (Corners: Sharp, Font: Xmind…) still beats them.
+ *
+ * Two blocks: the base mapping (text, accent, radii, font, motion) and, below, the Windows 11
+ * look (surfaces, controls, materials, type). Their CSS that draws with values of its own is
+ * covered by overlay/win11.css.
+ */
+html:root {
+  --se-divider: var(--dt-separator);
+  --se-bg-ink: color-mix(in srgb, var(--dt-bg), black 50%);
+
+  /* Text: primary, secondary, tertiary */
+  --se-text: var(--dt-label);
+  --se-text-strong: var(--dt-label);
+  --se-text-dim: var(--dt-label-2);
+  --se-text-muted: var(--dt-label-2);
+  --se-text-faint: var(--dt-label-3);
+
+  /* Accent: the hub's (plugin Arkada, core.txt), else the "Акцент" setting, else dev.txt's.
+     RootColors (their colour picker) is gone from skin.json; --se-color-accent is kept for the
+     few places that read it directly (client/loader.js). */
+  --se-accent: var(--arkada-hub-accent, var(--arkada-accent-choice, var(--dt-accent)));
+  --se-color-accent: var(--se-accent);
+  --se-spin-head: var(--se-accent);
+  --se-spin-dot-color: var(--se-accent);
+
+  /* Radii: dev.txt has two, block 8 (panels, cards, menus) and control 4 (rows, buttons, tips) */
+  --se-radius-xs: 2px;
+  --se-radius-sm: var(--dt-radius-row);
+  --se-radius-md: var(--dt-radius-control);
+  --se-radius-ml: var(--dt-radius-block);
+  --se-radius-lg: var(--dt-radius-block);
+  --se-radius-xl: var(--dt-radius-block);
+
+  /* Type: Segoe UI Variable (the "Font" setting still picks SN Pro, Xmind or Motiva Sans) */
+  --se-font: var(--dt-font-text);
+  --se-font-mono: var(--dt-font-mono);
+
+  /* Motion: Fluent's decelerate curve and dev.txt's durations (0ms under reduced motion) */
+  --se-ease: var(--dt-ease-out);
+  --se-dur-fast: var(--dt-dur-fast);
+  --se-dur: var(--dt-dur-fast);
+  --se-dur-mid: var(--dt-dur-base);
+  --se-dur-slow: var(--dt-dur-base);
+  --se-dur-relaxed: var(--dt-dur-slow);
+  --se-dur-long: var(--dt-dur-slow);
+  --se-dur-slower: var(--dt-dur-reveal);
+
+  /* Window entrance: a plain fade (their Splash and Logo show their mark); the setting can say None */
+  --se-entrance: fade;
+}
+
+/*
+ * The Windows 11 look (WinUI 3 / Fluent 2), through their tokens first; overlay/win11.css then
+ * covers what their CSS draws with values of its own.
+ *
+ *   window      Mica: --dt-bg with a trace of the accent; the pane and the page sit on it
+ *   layers      Fluent's: white 3–6 % over the window, a 1 px edge (white ~8 %), radius 8 / 4
+ *   acrylic     only on what pops up (menus, tooltips, dropdowns, toasts): --se-blur-panel;
+ *               bars and chips over art are plain layers (--se-blur-bar, --se-blur-chip: none)
+ *   accent      one chain (hub → setting "Акцент" → dev.txt), flat: AccentButton, no gradient, no glow
+ *   selection   a soft neutral fill and a 3 px accent pill (NavigationView, ListView)
+ *   type        title 20 semibold, body 14, caption 12, sentence case, no tracking
+ *   shadows     Fluent's flyout and card depths, light
+ */
+html:root {
+  --arkada-accent: var(--se-accent);
+  --arkada-accent-hover: color-mix(in srgb, var(--arkada-accent), white 10%);
+  --arkada-accent-press: color-mix(in srgb, var(--arkada-accent), black 14%);
+  --arkada-on-accent: var(--dt-label);
+  --arkada-on-accent-press: color-mix(in srgb, var(--dt-label) 78%, transparent);
+  --arkada-layer: color-mix(in srgb, white 3.5%, transparent);
+  --arkada-layer-2: color-mix(in srgb, white 5.5%, transparent);
+  --arkada-edge: color-mix(in srgb, white 8%, transparent);
+  --arkada-control: color-mix(in srgb, white 6%, transparent);
+  --arkada-control-hover: color-mix(in srgb, white 8.5%, transparent);
+  --arkada-control-press: color-mix(in srgb, white 3.5%, transparent);
+  --arkada-select: color-mix(in srgb, white 7%, transparent);
+  --arkada-select-hover: color-mix(in srgb, white 9.5%, transparent);
+  --arkada-critical: var(--dt-red);
+  --arkada-shadow-flyout: 0 8px 16px color-mix(in srgb, black 26%, transparent);
+  --arkada-shadow-card: 0 2px 4px color-mix(in srgb, black 14%, transparent);
+  --arkada-acrylic: color-mix(in srgb, var(--dt-raised) 84%, transparent);
+  /* For the Arkada plugin: which backdrop to ask Windows for. "off" unless the setting «Подложка окна»
+     says mica or acrylic (options/backdrop-*.css); the plugin reads it, arkada/backdrop.css draws it */
+  --arkada-backdrop: off;
+  /* For the Arkada plugin: its features that replace separate plugins, each switched off by its setting in the
+     tab «Arkada» (options/feature-*-off.css); the plugin reads them (plugin/src/features.js, plugin/src/share.js) */
+  --arkada-kapsula: on;
+  --arkada-disk-size: on;
+  --arkada-share: on;
+  /* For the Arkada plugin: the main window opens on the library's Home (on) or wherever Steam opens it
+     (off: options/start-library-off.css, setting «Начальная страница»); plugin/src/startpage.js reads it */
+  --arkada-start-library: on;
+
+  /* Window and surfaces: Mica, then opaque layers for the places that need a solid fill */
+  --se-bg: color-mix(in srgb, var(--dt-bg) 96%, var(--arkada-accent));
+  --se-sidebar: var(--se-bg);
+  --se-surface: color-mix(in srgb, var(--se-bg), white 3.5%);
+  --se-surface-2: color-mix(in srgb, var(--se-bg), white 6%);
+  --se-hover: color-mix(in srgb, var(--se-bg), white 7%);
+  --se-selected: color-mix(in srgb, var(--se-bg), white 8%);
+  --se-pill: var(--arkada-control);
+  --se-track: color-mix(in srgb, white 16%, transparent);
+  --se-border-strong: color-mix(in srgb, white 16%, transparent);
+  --se-field: color-mix(in srgb, var(--se-bg), white 4%);
+  --se-check: var(--arkada-control);
+  --se-chip: color-mix(in srgb, var(--dt-bg) 70%, transparent);
+  --se-chip-hover: color-mix(in srgb, var(--dt-bg) 85%, transparent);
+  --se-hairline: var(--arkada-edge);
+  --se-control: var(--arkada-control);
+  --se-control-off: color-mix(in srgb, white 24%, transparent);
+
+  /* Accent and its states */
+  --se-accent-hover: var(--arkada-accent-hover);
+  --se-accent-surface: color-mix(in srgb, var(--arkada-accent) 14%, var(--se-bg));
+  --se-accent-tint: color-mix(in srgb, var(--arkada-accent) 12%, transparent);
+  --se-on-accent: var(--arkada-on-accent);
+  --se-link: var(--arkada-accent);
+  --se-focus-outline: 2px solid var(--dt-label);
+  --se-focus-offset: 1px;
+
+  /* The main button: AccentButton. Play, Install and Resume are one flat accent face; Stop is
+     Windows' critical fill. No gradients, no glow. */
+  --se-play: var(--arkada-accent);
+  --se-play-hover: var(--arkada-accent-hover);
+  --se-play-glow: transparent;
+  --se-play-fill: var(--arkada-accent);
+  --se-install: var(--arkada-accent);
+  --se-install-fill: var(--arkada-accent);
+  --se-install-glow: transparent;
+  --se-stop: var(--arkada-critical);
+  --se-stop-fill: var(--arkada-critical);
+  --se-play-tint: color-mix(in srgb, var(--arkada-accent) 26%, transparent);
+  --se-play-tint-hover: color-mix(in srgb, var(--arkada-accent) 38%, transparent);
+  --se-install-tint: var(--se-play-tint);
+  --se-install-tint-hover: var(--se-play-tint-hover);
+  --se-stop-tint: color-mix(in srgb, var(--arkada-critical) 30%, transparent);
+  --se-stop-tint-hover: color-mix(in srgb, var(--arkada-critical) 45%, transparent);
+
+  /* Meaning colours from dev.txt: online is the system blue, in game green, errors red */
+  --se-online: var(--dt-blue);
+  --se-running: var(--dt-green);
+  --se-offline: var(--dt-label-3);
+  --se-danger: color-mix(in srgb, var(--dt-red), white 40%);
+  --se-danger-text: color-mix(in srgb, var(--dt-red), white 55%);
+  --se-danger-surface: color-mix(in srgb, var(--dt-red) 18%, var(--se-bg));
+  --se-danger-btn-bg-hover: var(--arkada-critical);
+  --se-warning: var(--dt-orange);
+  --se-gold: var(--dt-yellow);
+  --se-gold-text: color-mix(in srgb, var(--dt-yellow), white 30%);
+
+  /* Buttons: the default is Fluent's neutral control (fill and edge), the primary the accent */
+  --se-btn-bg: var(--arkada-control);
+  --se-btn-bg-hover: var(--arkada-control-hover);
+  --se-btn-edge: inset 0 0 0 1px var(--arkada-edge);
+  --se-btn-color: var(--dt-label);
+  --se-btn-color-hover: var(--dt-label);
+  --se-btn-primary-bg: var(--arkada-accent);
+  --se-btn-primary-bg-hover: var(--arkada-accent-hover);
+  --se-btn-primary-color: var(--arkada-on-accent);
+  --se-btn-ghost-color: var(--dt-label-2);
+  --se-btn-disabled-opacity: .4;
+  --se-glass-btn: var(--arkada-control);
+  --se-glass-btn-hover: var(--arkada-control-hover);
+  --se-glass-btn-line: var(--arkada-edge);
+  --se-glass-btn-shadow: none;
+  --se-chip-bg-on: var(--se-accent-surface);
+
+  /* Text fields: Fluent's TextBox, an accent line along the bottom when focused */
+  --se-field-bg: var(--se-field);
+  --se-field-edge: inset 0 0 0 1px var(--arkada-edge);
+  --se-field-edge-hover: inset 0 0 0 1px var(--arkada-edge);
+  --se-field-edge-focus: inset 0 -2px 0 var(--arkada-accent), inset 0 0 0 1px var(--arkada-edge);
+  --se-search-bg: var(--se-field);
+  --se-search-radius: var(--se-radius-md);
+  --se-search-edge: inset 0 0 0 1px var(--arkada-edge);
+  --se-search-edge-hover: inset 0 0 0 1px var(--arkada-edge);
+  --se-search-edge-focus: inset 0 -2px 0 var(--arkada-accent), inset 0 0 0 1px var(--arkada-edge);
+  --se-search-font: 400 var(--se-fs-md) var(--se-font);
+
+  /* Materials: acrylic for what pops up, plain layers for bars and chips over art */
+  --se-blur-panel: blur(30px) saturate(1.25);
+  --se-blur-chip: none;
+  --se-blur-bar: none;
+  --se-blur-scrim: none;
+  --se-panel-bg: var(--arkada-acrylic);
+  --se-panel-shadow: inset 0 0 0 1px var(--arkada-edge), var(--arkada-shadow-flyout);
+  --se-glass: color-mix(in srgb, var(--dt-bg) 86%, transparent);
+  --se-glass-bar: color-mix(in srgb, var(--se-bg) 92%, transparent);
+  --se-glass-chip: color-mix(in srgb, var(--dt-bg) 80%, transparent);
+  --se-glass-chip-line: var(--arkada-edge);
+  --se-price-bg: color-mix(in srgb, var(--dt-raised) 90%, transparent);
+
+  /* Depth: Fluent's two (card, flyout), no coloured rings */
+  --se-shadow-card: var(--arkada-shadow-card);
+  --se-shadow-sm: var(--arkada-shadow-card);
+  --se-shadow-md: var(--arkada-shadow-flyout);
+  --se-shadow-lg: var(--arkada-shadow-flyout);
+  --se-shadow-pop: inset 0 0 0 1px var(--arkada-edge), var(--arkada-shadow-flyout);
+  --se-shadow-hero: inset 0 0 0 1px var(--arkada-edge);
+  --se-shadow-tooltip: inset 0 0 0 1px var(--arkada-edge), var(--arkada-shadow-flyout);
+  --se-shadow-ring: inset 0 0 0 1px color-mix(in srgb, white 18%, transparent), var(--arkada-shadow-card);
+  --se-shadow-lift: inset 0 0 0 1px color-mix(in srgb, white 14%, transparent), var(--arkada-shadow-card);
+  --se-top-shadow: var(--arkada-shadow-flyout);
+  --se-elevation-1: var(--se-edge), var(--arkada-shadow-card);
+  --se-elevation-2: var(--se-edge), var(--arkada-shadow-flyout);
+  --se-elevation-3: var(--se-edge), var(--arkada-shadow-flyout);
+
+  /* Radii: menus and cards are blocks (8), controls 4; a pill stays a pill only where it is round */
+  --se-radius-menu: var(--se-radius-lg);
+  --se-radius-card: var(--se-radius-xl);
+
+  /* Type: Windows' ramp. Caption 12, body 14, subtitle 20, title 28; semibold, never bold */
+  --se-fs-2xs: 11px;
+  --se-fs-xs: 12px;
+  --se-fs-sm: 12px;
+  --se-fs-base: 14px;
+  --se-fs-md: 14px;
+  --se-fs-lg: 16px;
+  --se-fs-xl: 18px;
+  --se-fs-2xl: var(--dt-size-title);
+  --se-fs-3xl: var(--dt-size-title);
+  --se-fs-4xl: var(--dt-size-display);
+  --se-fs-headline: var(--dt-size-title);
+  --se-fs-display: var(--dt-size-display);
+  --se-fs-hero: clamp(28px, 2.6vw, 40px);
+  --se-label-lh: 16px;
+  --se-label-font: 600 var(--dt-size-caption)/var(--se-label-lh) var(--se-font);
+  --se-label-spacing: normal;
+  --se-label-color: var(--dt-label-2);
+  --se-type-badge: 600 var(--se-fs-xs)/1 var(--se-font);
+  --se-type-caption: 400 var(--se-fs-xs)/1.35 var(--se-font);
+  --se-type-label: 600 var(--se-fs-sm)/1 var(--se-font);
+  --se-type-small: 400 var(--se-fs-sm)/1.35 var(--se-font);
+  --se-type-control: 400 var(--se-fs-base)/1 var(--se-font);
+  --se-type-body: 400 var(--se-fs-base)/1.45 var(--se-font);
+  --se-type-control-lg: 600 var(--se-fs-md)/1 var(--se-font);
+  --se-type-body-lg: 400 var(--se-fs-md)/1.45 var(--se-font);
+  --se-type-title: 600 var(--se-fs-lg)/1.3 var(--se-font);
+  --se-type-title-lg: 600 var(--se-fs-xl)/1.3 var(--se-font);
+  --se-type-heading: 600 var(--se-fs-2xl)/1.3 var(--se-font);
+  --se-type-heading-lg: 600 var(--dt-size-display)/1.2 var(--se-font);
+  --se-menu-item-font: 400 var(--se-fs-base)/1.3 var(--se-font);
+
+  /* Motion: short, decelerating, no overshoot, no shrink on press */
+  --se-ease-spring: var(--dt-ease-out);
+  --se-ease-inout: var(--dt-ease-out);
+  --se-press-scale: 1;
+}
+
+/* "Less motion" from the hub (the plugin sets data-arkada-motion on <html>) */
+html:root[data-arkada-motion='reduced'] {
+  --dt-dur-press: 0ms;
+  --dt-dur-fast: 0ms;
+  --dt-dur-base: 0ms;
+  --dt-dur-slow: 0ms;
+  --dt-dur-reveal: 0ms;
+}

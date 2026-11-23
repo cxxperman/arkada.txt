@@ -1,0 +1,46 @@
+/* arkada.txt — страницы магазина и сообщества внутри клиента (их Millennium называет Steam-WebKit).
+ * Это обычные веб-страницы Valve со своей вёрсткой; тема трогает только рамку вокруг содержимого:
+ * полосы прокрутки, выделение, верхнюю полосу навигации магазина и главные кнопки.
+ * Сюда плагин arkada не дотягивается, поэтому акцент из хаба здесь не действует — только выбор
+ * в настройках темы или акцент из токенов.
+ * Имена ниже (#store_nav_area, .store_nav_bg, .btn_green_steamui…) — старые, без хеша, но взяты
+ * из вёрстки сайта, а не клиента, и в самом Steam не проверены. */
+
+@import url("./tokens.css");
+
+:root {
+  --arkada-accent: var(--arkada-accent-choice, var(--dt-accent));
+  --arkada-r-control: calc(var(--dt-radius-control) * var(--arkada-round, 1));
+  --arkada-r-tip: calc(var(--dt-radius-tip) * var(--arkada-round, 1));
+}
+
+::selection { background: color-mix(in srgb, var(--arkada-accent) 45%, transparent); }
+
+::-webkit-scrollbar { width: 12px; height: 12px; }
+::-webkit-scrollbar-track, ::-webkit-scrollbar-corner { background: transparent; }
+::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: var(--arkada-r-tip);
+  background-color: var(--dt-fill-2);
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background-color: var(--dt-fill-press); }
+
+/* Полоса навигации магазина: «Ваш магазин», «Новое и интересное», поиск */
+#store_nav_area .store_nav_bg {
+  border: 1px solid var(--dt-edge);
+  border-top-color: var(--dt-edge-top);
+  border-radius: var(--arkada-r-control);
+  background: var(--dt-glass);
+  box-shadow: none;
+}
+#store_nav_area .store_nav .tab:hover > span,
+#store_nav_area .store_nav .tab.focus > span { background: var(--dt-fill-2); border-radius: var(--arkada-r-tip); }
+#store_nav_search_term { border-radius: var(--arkada-r-tip); }
+
+/* Главные кнопки: «В корзину», «Играть», «Установить» */
+.btn_green_steamui,
+.btn_blue_steamui { border-radius: var(--arkada-r-control) !important; }
+.btn_green_steamui > span,
+.btn_blue_steamui > span { border-radius: var(--arkada-r-control) !important; }
+.btn_blue_steamui > span { background: var(--arkada-accent) !important; color: var(--dt-label) !important; }

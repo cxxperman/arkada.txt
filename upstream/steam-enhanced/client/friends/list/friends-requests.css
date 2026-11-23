@@ -1,0 +1,284 @@
+/* Continues friends.css (in order, see client/loader.js): Friend requests. */
+
+/*
+ * Friend requests (the requests button's view): the panel's section header with the back
+ * arrow as a tile; each request a friend row with its mutual friends, accept and ignore as
+ * 30 px tiles (green or red once chosen: Steam's.bright); Confirm and Ignore All as the
+ * theme's buttons, Confirm in the accent color once something is chosen (Steam's.dim
+ * until then). Steam's elements and clicks are untouched.
+ */
+.friendlist:not(.GamepadMode) {
+  --se-fd-ico-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E");
+  --se-fd-ico-x: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 7l10 10M17 7L7 17'/%3E%3C/svg%3E");
+  --se-fd-ico-back: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M19 12H5M11 6l-6 6 6 6'/%3E%3C/svg%3E");
+}
+
+.friendlist:not(.GamepadMode) .friendGroup:is(.friendRequests, .friendOutgoingRequests) {
+  position: relative;
+}
+
+.friendlist:not(.GamepadMode) .friendGroup:is(.friendRequests, .friendOutgoingRequests) .groupHeaderContainer > .groupName,
+.friendlist:not(.GamepadMode) .friendGroup:is(.friendRequests, .friendOutgoingRequests) .groupHeaderContainer > .groupName * {
+  color: var(--se-label-color) !important;
+}
+
+/*
+ * The header sits where the list's section headers do (friends-rows.css): a 30 px row 10 px
+ * down, flush with the list's inset, its chevron and label in their places; the back tile at its
+ * end as Group Chats' button is. Rows and the buttons below share the list's edges.
+ */
+.friendlist:not(.GamepadMode) .friendGroup:is(.friendRequests, .friendOutgoingRequests) .groupHeaderContainer > .groupName {
+  display: flex !important;
+  align-items: center;
+  height: 30px;
+  min-height: 30px;
+  margin: var(--se-space-2) 0 var(--se-space-half) !important;
+  padding: 0 var(--se-space-6) 0 var(--se-space-2) !important;
+  box-sizing: border-box;
+}
+
+.friendlist:not(.GamepadMode) .friendGroup:is(.friendRequests, .friendOutgoingRequests) .groupHeaderContainer > .groupName:hover {
+  background: none !important;
+}
+
+/* The header holds only the chevron, the label and the count pill (Steam's other count copies go) */
+.friendlist:not(.GamepadMode) .friendGroup:is(.friendRequests, .friendOutgoingRequests) .groupHeaderContainer > .groupName > :not(.ExpandPlusMinus, [data-se-count], .groupIcon) {
+  display: none !important;
+}
+
+.friendlist:not(.GamepadMode) .friendGroup:is(.friendRequests, .friendOutgoingRequests) .groupHeaderContainer > :not(.groupName) {
+  display: none !important;
+}
+
+/* The pending count: the red pill of the requests button in the Friends bar */
+.friendlist:not(.GamepadMode) .friendGroup:is(.friendRequests, .friendOutgoingRequests) .groupHeaderContainer > .groupName .groupCount {
+  margin-inline-start: 0 !important;
+}
+
+/* !important: Steam's friends UI CSS (steamui friends.css) styles the group name's text and spacing */
+.friendlist:not(.GamepadMode) .friendGroup.friendRequests .groupHeaderContainer > .groupName [data-se-count]::after {
+  display: inline-block !important;
+  box-sizing: border-box;
+  min-width: 18px;
+  height: 18px;
+  margin-inline-start: var(--se-space-2) !important;
+  padding: 0 var(--se-space-1) !important;
+  border-radius: var(--se-radius-pill) !important;
+  background: var(--se-danger) !important;
+  font: 800 var(--se-fs-2xs)/18px var(--se-font), sans-serif !important;
+  letter-spacing: 0 !important;
+  text-align: center;
+  color: var(--se-on-danger) !important;
+}
+
+/* Each request: a friend row, the buttons at its end */
+.friendlist:not(.GamepadMode) .friendInviteContainer {
+  display: flex !important;
+  align-items: center !important;
+  gap: var(--se-space-1);
+  margin: 0 !important;
+  padding: 0 var(--se-space-1) 0 0;
+  border-radius: var(--se-radius-sm);
+}
+
+.friendlist:not(.GamepadMode) .friendInviteContainer:hover {
+  background: var(--se-hover);
+}
+
+.friendlist:not(.GamepadMode) .friendInviteContainer > div:has(> .friend) {
+  display: flex;
+  align-items: center;
+  gap: var(--se-space-1);
+  flex: 1;
+  min-width: 0;
+}
+
+.friendlist:not(.GamepadMode) .friendInviteContainer .friend {
+  margin: 0 !important;
+  background: none !important;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.friendlist:not(.GamepadMode) .friendInviteContainer .friend.dim {
+  filter: none !important;
+  opacity: .45;
+}
+
+.friendlist:not(.GamepadMode) .friendInviteContainer .nOdcT-MoOaXGePXLyPe0H /* playerName */ {
+  color: var(--se-text) !important;
+}
+
+.friendlist:not(.GamepadMode) .friendInviteContainer :is(.inviteLabel, ._2Ri005Wg_uXDTa71kdRbcN /* richPresenceLabel */) {
+  -webkit-mask: none !important;
+  mask: none !important;
+  font: 500 var(--se-fs-sm)/1.3 var(--se-font), sans-serif !important;
+  color: var(--se-text-faint) !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Lit (hovered or selected): faint text steps up to muted, AA on --se-hover and --se-selected
+   (--se-text-faint is only 4.1 / 3.4 on them). !important: the label's own colour above */
+.friendlist:not(.GamepadMode) .friendInviteContainer:hover :is(.inviteLabel, ._2Ri005Wg_uXDTa71kdRbcN) {
+  color: var(--se-text-muted) !important;
+}
+
+.friendlist:not(.GamepadMode) .friendInviteContainer .mutualFriendNumber {
+  margin-inline-end: .25em;
+  font-weight: 700;
+  color: var(--se-online) !important;
+}
+
+/* A request isn't a friend yet: its avatar shows in full, with a neutral ring */
+.friendlist:not(.GamepadMode) .friendInviteContainer .friend .avatarHolder img.avatar {
+  filter: none !important;
+  opacity: 1 !important;
+}
+
+.friendlist:not(.GamepadMode) .friendInviteButtons {
+  flex: none;
+  display: flex !important;
+  align-items: center;
+  gap: var(--se-space-half);
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.friendlist:not(.GamepadMode) .friendInviteButton {
+  box-sizing: border-box;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: var(--se-tile-sm) !important;
+  height: var(--se-tile-sm) !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: var(--se-radius-sm) !important;
+  background: none !important;
+  box-shadow: none !important;
+  color: var(--se-text-muted) !important;
+  cursor: pointer;
+  transition: background-color var(--se-dur) ease-out, color var(--se-dur) ease-out;
+}
+
+.friendlist:not(.GamepadMode) .friendInviteButton > svg {
+  display: none !important;
+}
+
+.friendlist:not(.GamepadMode) .friendInviteButton::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  background: currentColor;
+  -webkit-mask: var(--se-fd-ico-x) center / contain no-repeat;
+  mask: var(--se-fd-ico-x) center / contain no-repeat;
+}
+
+.friendlist:not(.GamepadMode) .friendInviteButton.acceptFriendInvite::before {
+  -webkit-mask-image: var(--se-fd-ico-check);
+  mask-image: var(--se-fd-ico-check);
+}
+
+.friendlist:not(.GamepadMode) .friendInviteButton.acceptFriendInvite:hover {
+  background: color-mix(in srgb, var(--se-running) 14%, transparent) !important;
+  color: var(--se-running) !important;
+}
+
+.friendlist:not(.GamepadMode) .friendInviteButton.declineFriendInvite:hover {
+  background: color-mix(in srgb, var(--se-danger) 14%, transparent) !important;
+  color: var(--se-danger) !important;
+}
+
+.friendlist:not(.GamepadMode) .friendInviteButton.acceptFriendInvite.bright {
+  background: color-mix(in srgb, var(--se-running) 20%, transparent) !important;
+  color: var(--se-running) !important;
+}
+
+.friendlist:not(.GamepadMode) .friendInviteButton.declineFriendInvite.bright {
+  background: color-mix(in srgb, var(--se-danger) 20%, transparent) !important;
+  color: var(--se-danger) !important;
+}
+
+/* Confirm / Ignore All */
+.friendlist:not(.GamepadMode) .confirmInviteRequestContainer {
+  padding: var(--se-space-2) 0 var(--se-space-3) !important;
+}
+
+.friendlist:not(.GamepadMode) .confirmInviteRequestActions {
+  display: flex !important;
+  gap: var(--se-space-2);
+  margin: 0 !important;
+}
+
+.friendlist:not(.GamepadMode) .confirmInviteRequestContainer .confirmInviteButton {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--se-control-h);
+  margin: 0 !important;
+  padding: 0 var(--se-space-3) !important;
+  border-radius: var(--se-radius-sm);
+  background: var(--se-surface-2) !important;
+  font: 600 var(--se-fs-base) var(--se-font), sans-serif !important;
+  color: var(--se-text) !important;
+  cursor: pointer;
+  transition: background-color var(--se-dur) ease-out, color var(--se-dur) ease-out;
+}
+
+.friendlist:not(.GamepadMode) .confirmInviteRequestContainer .confirmInviteButton:hover {
+  background: var(--se-hover) !important;
+  color: var(--se-text-strong) !important;
+}
+
+.friendlist:not(.GamepadMode) .confirmInviteRequestContainer .confirmInviteButton.confirmInvites:not(.dim) {
+  background: var(--se-accent) !important;
+  color: var(--se-bg-ink) !important;
+}
+
+.friendlist:not(.GamepadMode) .confirmInviteRequestContainer .confirmInviteButton.confirmInvites:not(.dim):hover {
+  filter: brightness(1.08);
+}
+
+.friendlist:not(.GamepadMode) .confirmInviteRequestContainer .confirmInviteButton.confirmInvites.dim {
+  background: var(--se-white-04) !important;
+  color: var(--se-text-faint) !important;
+  cursor: default;
+}
+
+/* Back to the friends list: a 26 px tile at the header's end, centred on its 30 px row */
+.friendlist:not(.GamepadMode) .confirmInviteRequestContainer .cancelAddFriends {
+  position: absolute !important;
+  top: 12px !important;
+  right: 2px !important;
+  inset-inline-end: 2px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px !important;
+  height: 26px !important;
+  border-radius: var(--se-radius-sm);
+  color: var(--se-text-muted);
+  cursor: pointer;
+  z-index: calc(var(--se-z-raised) + 1);
+}
+
+.friendlist:not(.GamepadMode) .confirmInviteRequestContainer .cancelAddFriends:hover {
+  background: var(--se-hover);
+  color: var(--se-text-strong);
+}
+
+.friendlist:not(.GamepadMode) .confirmInviteRequestContainer .cancelAddFriends > svg {
+  display: none !important;
+}
+
+.friendlist:not(.GamepadMode) .confirmInviteRequestContainer .cancelAddFriends::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  background: currentColor;
+  -webkit-mask: var(--se-fd-ico-back) center / contain no-repeat;
+  mask: var(--se-fd-ico-back) center / contain no-repeat;
+}

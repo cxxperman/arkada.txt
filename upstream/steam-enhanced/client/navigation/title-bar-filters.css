@@ -1,0 +1,81 @@
+/*
+ * Continues nav-rail.css and title-bar.css (in order, see client/loader.js): the view picker's
+ * tile, the avatar ring from the account's status, and the library list kept beside a Store
+ * page. The Library Filters panel is client/navigation/filters-panel.css.
+ */
+
+/* The picker is an icon tile: its count shows under the Steam lockup (title-bar.js), not on it. */
+html body.se-header-actions-ready[data-se-list] .se-sidebar-icons ._3A3N3EnrSNMQLL058Qbzsn {
+  display: none !important;
+}
+
+/*
+ * Avatar ring from the account's status (client/navigation/nav-rail.js sets data-se-status).
+ * :not(#se-none) matches the weight of the gray default above, which used to win.
+ */
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u ._3yD46y5pd3zOGR7CzKs0mC[data-se-status="online"]:not(#se-none) {
+  --se-status: var(--se-online);
+}
+
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u ._3yD46y5pd3zOGR7CzKs0mC[data-se-status="away"]:not(#se-none) {
+  --se-status: var(--se-away);
+}
+
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u ._3yD46y5pd3zOGR7CzKs0mC[data-se-status="ingame"]:not(#se-none) {
+  --se-status: var(--se-running);
+}
+
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u ._3yD46y5pd3zOGR7CzKs0mC[data-se-status="offline"]:not(#se-none) {
+  --se-status: var(--se-offline);
+}
+
+/* Keep Steam's mounted Library list beside the normal Store browser. */
+html body.se-header-actions-ready[data-se-store-list]:not(.se-list-hidden) ._1rDh5rXSFZJOqCa4UpnI4z {
+  box-sizing: border-box;
+  padding-inline-start: var(--se-list-w) !important;
+}
+
+html body.se-header-actions-ready[data-se-store-list]:not(.se-list-hidden) .RGNMWtyj73_-WdhflrmuY {
+  display: flex !important;
+  position: absolute !important;
+  inset: 0 auto 0 0 !important;
+  width: var(--se-list-w) !important;
+  height: 100% !important;
+  z-index: var(--se-z-sticky);
+  background: var(--se-sidebar);
+  overflow: hidden;
+}
+
+html body.se-header-actions-ready[data-se-store-list]:not(.se-list-hidden) .RGNMWtyj73_-WdhflrmuY > ._3xRRJfD2xy95i9NhJxLTp0 {
+  display: flex !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+}
+
+html body.se-header-actions-ready[data-se-store-list]:not(.se-list-hidden) ._3xRRJfD2xy95i9NhJxLTp0 > :not(._9sPoVBFyE_vE87mnZJ5aB) {
+  display: none !important;
+}
+
+html body.se-header-actions-ready[data-se-store-list]:not(.se-list-hidden) ._3xRRJfD2xy95i9NhJxLTp0 > ._9sPoVBFyE_vE87mnZJ5aB {
+  display: flex !important;
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 100% !important;
+}
+
+/* The retained list was measured at zero while the Library view was hidden (size: above). */
+html body.se-header-actions-ready[data-se-store-list]:not(.se-list-hidden) ._9sPoVBFyE_vE87mnZJ5aB {
+  max-width: var(--se-list-w) !important;
+  visibility: visible !important;
+}
+
+html body.se-header-actions-ready[data-se-store-list]:not(.se-list-hidden) ._9sPoVBFyE_vE87mnZJ5aB ._3x1HklzyDs4TEjACrRO2tB {
+  display: flex !important;
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 100% !important;
+  visibility: visible !important;
+}

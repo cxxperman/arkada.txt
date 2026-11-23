@@ -1,0 +1,119 @@
+/*
+ * Web base: what every page on every site the theme loads on shares (Store, Community,
+ * Support, Checkout: html.se-store, .se-community, .se-help, .se-checkout, set by each site's
+ * loader before any stylesheet). Tokens are core/tokens.css, loaded just before this file.
+ */
+
+/* ---------- Motion and focus ---------- */
+
+/* Reduced motion: no animation or transition anywhere the theme reaches. */
+@media (prefers-reduced-motion: reduce) {
+  html:is(.se-store, .se-community, .se-help, .se-checkout) *,
+  html:is(.se-store, .se-community, .se-help, .se-checkout) *::before,
+  html:is(.se-store, .se-community, .se-help, .se-checkout) *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/*
+ * A dropdown or suggestion list opening: a short fade as it settles 4 px down into place (the
+ * theme's dropdown, web/shared/select.css; the Store's search suggestions). The client's
+ * counterpart is se-menu-in (core/motion.css).
+ */
+@keyframes se-drop-in {
+  from {
+    opacity: 0;
+    transform: translateY(calc(-1 * var(--se-space-1)));
+  }
+}
+
+/* One keyboard focus ring for every control, Steam's and the theme's (text fields keep their own). */
+html:is(.se-store, .se-community, .se-help, .se-checkout):not(#se-none) :is(a, button, select, [role="button"], [tabindex]):not(input, textarea):focus-visible {
+  outline: var(--se-focus-outline) !important;
+  outline-offset: var(--se-focus-offset);
+}
+
+/* ---------- Breadcrumbs ----------
+ * Steam's trail above a page's title (.breadcrumbs; .forum_breadcrumbs on discussions), one look
+ * on every site: small faint text, the links a step brighter and white on hover, the current page
+ * between. Pages keep only their own spacing. Two designs of their own are left out: the glass
+ * pills over the app page's hero (web/store/app/hero.css) and the trail under a guide's header
+ * card (web/community/guide/page.css).
+ * !important: Steam's own rules (store, community and help CSS) set color, font and
+ * text-transform on the trail and its links, inline on some pages.
+ */
+html:is(.se-store, .se-community, .se-help, .se-checkout):not(.se-app-hero-on, #se-none) :is(.breadcrumbs, .forum_breadcrumbs):not(.sharedfiles_item_page_header + .breadcrumbs) {
+  color: var(--se-text-faint) !important;
+  font: var(--se-type-small) !important;
+  letter-spacing: .02em;
+  text-transform: none !important;
+}
+
+html:is(.se-store, .se-community, .se-help, .se-checkout):not(.se-app-hero-on, #se-none) :is(.breadcrumbs, .forum_breadcrumbs):not(.sharedfiles_item_page_header + .breadcrumbs) .blockbg {
+  padding: 0 !important;
+  background: none !important;
+}
+
+html:is(.se-store, .se-community, .se-help, .se-checkout):not(.se-app-hero-on, #se-none) :is(.breadcrumbs, .forum_breadcrumbs):not(.sharedfiles_item_page_header + .breadcrumbs) a {
+  color: var(--se-text-muted) !important;
+  text-decoration: none !important;
+  transition: color var(--se-dur);
+}
+
+html:is(.se-store, .se-community, .se-help, .se-checkout):not(.se-app-hero-on, #se-none) :is(.breadcrumbs, .forum_breadcrumbs):not(.sharedfiles_item_page_header + .breadcrumbs) a:hover {
+  color: var(--se-white) !important;
+}
+
+html:is(.se-store, .se-community, .se-help, .se-checkout):not(.se-app-hero-on, #se-none) :is(.breadcrumbs, .forum_breadcrumbs):not(.sharedfiles_item_page_header + .breadcrumbs) .breadcrumb_current_page {
+  color: var(--se-text-dim) !important;
+}
+
+/* ---------- Footer ----------
+ * Steam's footer (#footer; its hashed React classes vary, the id and the --footer-bg-color
+ * hook it reads don't): the theme's page colour under a hairline, instead of Steam's
+ * translucent blue. The same React footer closes Community and Support pages, so it applies
+ * on every site the theme loads on.
+ */
+html:is(.se-store, .se-community, .se-help, .se-checkout):not(#se-none) #footer {
+  --footer-bg-color: var(--se-bg);
+  background-color: var(--se-bg) !important;
+  box-shadow: var(--se-rule-top);
+  color: var(--se-text-faint);
+}
+
+html.se-store:not(#se-none) #footer a {
+  color: var(--se-text-muted);
+  transition: color var(--se-dur);
+}
+
+html.se-store:not(#se-none) #footer a:hover {
+  color: var(--se-text);
+}
+
+/*
+ * The "•••" options button on a capsule or upload (store.css .ds_options, shared_global.css
+ * .ugc_options): a glass circle with three dots, accent when pointed at. One look on every site.
+ */
+html:is(.se-store-rows, .se-store-dlc, .se-store-search):not(#se-none) .ds_options > div,
+html.se-community-ui:not(#se-none) .ugc_options > div {
+  position: static;
+  width: var(--se-hit);
+  height: var(--se-hit);
+  border-radius: 50%;
+  background: var(--se-icon-dots-light) center / var(--se-icon-glyph) no-repeat, var(--se-glass-chip);
+  backdrop-filter: var(--se-blur-chip);
+  box-shadow: inset 0 0 0 1px var(--se-glass-chip-line), var(--se-shadow-sm);
+}
+
+html:is(.se-store-rows, .se-store-dlc, .se-store-search):not(#se-none) .ds_options:is(:hover, :focus-within) > div,
+html.se-community-ui:not(#se-none) .ugc_options:is(:hover, :focus-within) > div {
+  background: var(--se-icon-dots-ink) center / var(--se-icon-glyph) no-repeat, var(--se-accent);
+}
+
+html:is(.se-store-rows, .se-store-dlc, .se-store-search):not(#se-none) .ds_options:active > div,
+html.se-community-ui:not(#se-none) .ugc_options:active > div {
+  transform: scale(var(--se-press-scale));
+}

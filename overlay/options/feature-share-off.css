@@ -1,0 +1,12 @@
+/*
+ * Theme setting (skin.json Conditions): «Кнопка «Поделиться»», Выкл. The button lives in the store page
+ * (plugin/src/share.js, the plugin's webkit script): it is hidden here at once, and the script reads
+ * --arkada-share on the page's <html> and does not put it in again.
+ */
+:root:root {
+  --arkada-share: off;
+}
+
+#arkada-share {
+  display: none !important;
+}

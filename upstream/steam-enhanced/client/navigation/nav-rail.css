@@ -1,0 +1,629 @@
+/*
+ * The navigation: a 60px rail down the left edge (Store, Library, Community and Profile; the bell,
+ * Settings and your avatar at its foot) and the 48px title bar (the Steam button, the list
+ * header, the search, then Downloads and Friends). Game-list filter
+ * controls and search live in the title bar, with the dropdown Library Filters panel.
+ * Paired with client/navigation/nav-rail.js and the title-bar*.js parts beside it.
+ *
+ * Continued, by section, in title-bar.css, title-bar-filters.css, filters-panel.css (same folder), listed
+ * after this file in client/loader.js: together they keep one file's order.
+ */
+:root {
+  --se-brand-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%2292 92 328 328%22%3E%3Cdefs%3E%3CclipPath id=%22c%22%3E%3Ccircle cx=%22256%22 cy=%22256%22 r=%22146%22/%3E%3C/clipPath%3E%3Cmask id=%22k%22 maskUnits=%22userSpaceOnUse%22 x=%2292%22 y=%2292%22 width=%22328%22 height=%22328%22%3E%3Crect x=%2292%22 y=%2292%22 width=%22328%22 height=%22328%22 fill=%22%23fff%22/%3E%3Ccircle cx=%22302%22 cy=%22212%22 r=%2235.5%22 fill=%22%23000%22/%3E%3Ccircle cx=%22302%22 cy=%22212%22 r=%2225.5%22 fill=%22%23fff%22/%3E%3Ccircle cx=%22218%22 cy=%22304%22 r=%2226.5%22 fill=%22%23000%22/%3E%3Cpath d=%22M 218 304 L 94 252%22 stroke=%22%23000%22 stroke-width=%2248%22 stroke-linecap=%22round%22/%3E%3Cpath d=%22M 218 304 L 94 252%22 stroke=%22%23fff%22 stroke-width=%2235%22 stroke-linecap=%22round%22/%3E%3Ccircle cx=%22218%22 cy=%22304%22 r=%2218.5%22 fill=%22%23fff%22/%3E%3C/mask%3E%3C/defs%3E%3Ccircle cx=%22256%22 cy=%22256%22 r=%22150%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%2222%22/%3E%3Cg clip-path=%22url%28%23c%29%22%3E%3Cg fill=%22%23000%22 fill-opacity=%22.32%22%3E%3Crect width=%22104%22 height=%22144%22 rx=%2214%22 transform=%22translate%28216 232%29 rotate%28-15%29 translate%28-52 -72%29%22/%3E%3Crect width=%22108%22 height=%22148%22 rx=%2214%22 transform=%22translate%28248 226%29 rotate%28-3%29 translate%28-54 -74%29%22/%3E%3Crect width=%22108%22 height=%22148%22 rx=%2214%22 transform=%22translate%28280 234%29 rotate%2810%29 translate%28-54 -74%29%22/%3E%3C/g%3E%3Cg mask=%22url%28%23k%29%22%3E%3Cpath d=%22M 189.2 282.4 L 262.1 178.4 A 52 52 0 1 1 335.6 251.9 L 241.6 330.8 A 36 36 0 1 1 189.2 282.4 Z%22 fill=%22%23000%22/%3E%3Cpath d=%22M 218 304 L 94 252%22 stroke=%22%23000%22 stroke-width=%2235%22 stroke-linecap=%22round%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+/*
+ * Native controls remain mounted in their React owners; only layout changes.
+ * The rail's surface: rail and title bar share the game list's color.
+ */
+html body.se-header-actions-ready::before {
+  content: '';
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: var(--se-z-sticky);
+  width: var(--se-rail-width);
+  background: var(--se-rail-bg);
+  pointer-events: none;
+}
+
+/* Page buttons (top and size from the :not(#se-none) rules below) */
+html body.se-header-actions-ready ._3Z3ohQ8-1NKnCZkbS6fvy {
+  position: fixed;
+  z-index: calc(var(--se-z-sticky) + 2);
+  height: auto;
+  min-height: 0;
+  max-height: calc(100vh - var(--se-rail-top));
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+html body.se-header-actions-ready ._3Z3ohQ8-1NKnCZkbS6fvy ._2D64jIEK7wpUR_NlObDW76 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+html body.se-header-actions-ready ._3Z3ohQ8-1NKnCZkbS6fvy ._2D64jIEK7wpUR_NlObDW76 > ._7AlhCx3XGzBeIrQaCneUD {
+  flex: 0 0 auto;
+  align-self: center;
+}
+
+html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > * {
+  flex-shrink: 0;
+  margin-inline: 0;
+}
+
+html body.se-header-actions-ready ._3yD46y5pd3zOGR7CzKs0mC {
+  width: var(--se-steam-home-width, 44px) !important;
+  min-width: var(--se-steam-home-width, 44px) !important;
+  padding: 0 !important;
+  justify-content: center;
+}
+
+html body.se-header-actions-ready ._3yD46y5pd3zOGR7CzKs0mC > :not(:first-child) {
+  display: none;
+}
+
+/*
+ * The window's Wrapper draws a 0.5px black edge when not maximized. It shifts the whole frame
+ * half a pixel, so the content frame's sides no longer meet the fixed rail and dock, and the
+ * Wrapper's black ground showed through as a line beside the game list and the dock. The rail
+ * and dock already cover the window's sides: drop the edge.
+ */
+html body.se-header-actions-ready ._1ENHEsrSLcTRtPQFl1F-wL {
+  border: 0;
+}
+
+html body.se-header-actions-ready ._1rDh5rXSFZJOqCa4UpnI4z {
+  margin-inline-start: var(--se-rail-width);
+  min-width: 0;
+  position: relative;
+}
+
+/*
+ * Round the content frame's top corners where it meets the title bar, rail and friends dock.
+ * Painted as rail-colored corner masks so nothing inside the frame is clipped.
+ */
+html body.se-header-actions-ready ._1rDh5rXSFZJOqCa4UpnI4z::before,
+html body.se-header-actions-ready ._1rDh5rXSFZJOqCa4UpnI4z::after {
+  --se-frame-r: var(--se-radius-lg);
+  content: '';
+  position: absolute;
+  top: 0;
+  z-index: calc(var(--se-z-sticky) + 20);
+  width: var(--se-frame-r);
+  height: var(--se-frame-r);
+  pointer-events: none;
+}
+
+html body.se-header-actions-ready ._1rDh5rXSFZJOqCa4UpnI4z::before {
+  left: 0;
+  background: radial-gradient(circle at 100% 100%, transparent calc(var(--se-frame-r) - .5px), var(--se-rail-bg) var(--se-frame-r));
+}
+
+html body.se-header-actions-ready ._1rDh5rXSFZJOqCa4UpnI4z::after {
+  right: 0;
+  background: radial-gradient(circle at 0 100%, transparent calc(var(--se-frame-r) - .5px), var(--se-rail-bg) var(--se-frame-r));
+}
+
+/*
+ * The same top corners on the Library pane beside the game list. clip-path rounds only what
+ * is painted, so the pane keeps its own scrolling; the list's surface shows through the cut.
+ */
+html body.se-header-actions-ready ._3xRRJfD2xy95i9NhJxLTp0 {
+  background: var(--se-rail-bg);
+}
+
+html body.se-header-actions-ready ._3xRRJfD2xy95i9NhJxLTp0 > :not(._9sPoVBFyE_vE87mnZJ5aB, ._298_NBin_2wV9a3P1Smj5i) {
+  clip-path: inset(0 round var(--se-radius-lg) var(--se-radius-lg) 0 0);
+}
+
+/* In a column, flex-basis controls height rather than width. */
+html body.se-header-actions-ready ._3Z3ohQ8-1NKnCZkbS6fvy .se-native-header-button,
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u .se-native-header-button,
+html body.se-header-actions-ready ._3Z3ohQ8-1NKnCZkbS6fvy .se-header-action,
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u .se-header-action,
+html body.se-header-actions-ready ._3Z3ohQ8-1NKnCZkbS6fvy ._2Szzh5sKyGgnLUR870zbDE,
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u ._2Szzh5sKyGgnLUR870zbDE,
+html body.se-header-actions-ready ._3Z3ohQ8-1NKnCZkbS6fvy ._3yD46y5pd3zOGR7CzKs0mC,
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u ._3yD46y5pd3zOGR7CzKs0mC,
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u ._5wILZhsLODVwGfcJ0hKmJ:not(.se-header-action):not(.se-native-header-button) {
+  box-sizing: border-box;
+  flex: 0 0 var(--se-steam-home-height, 36px) !important;
+  width: var(--se-steam-home-width, 44px) !important;
+  min-width: var(--se-steam-home-width, 44px) !important;
+  max-width: var(--se-steam-home-width, 44px) !important;
+  height: var(--se-steam-home-height, 36px) !important;
+  min-height: var(--se-steam-home-height, 36px) !important;
+  max-height: var(--se-steam-home-height, 36px) !important;
+  margin: 0 !important;
+}
+
+html body.se-header-actions-ready ._3yD46y5pd3zOGR7CzKs0mC > :first-child {
+  margin: 0 !important;
+  align-self: center;
+}
+
+/* Notifications use a nested icon wrapper instead of a direct SVG child. */
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u ._3mGEzzp18imtSzGPkduedi {
+  width: var(--se-steam-home-width, 44px);
+  height: var(--se-steam-home-height, 36px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+}
+
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u .RtSv39ZoBOySnb8XQ5hJf {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+
+/*
+ * The bell's glyph is the theme's ::before. Steam's own icon box (its SVG already hidden) kept
+ * its 16px beside it, so the pair centered together and pushed the bell 8px left: drop it.
+ */
+html body.se-header-actions-ready ._3Z7VQ1IMk4E3HsHvrkLNgo .RtSv39ZoBOySnb8XQ5hJf > :is(.Vy5kHbMfQZiqjJWvcWar7, svg, :has(svg)):not(#se-none) {
+  display: none !important;
+}
+
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u ._3yD46y5pd3zOGR7CzKs0mC {
+  background-color: var(--se-surface-2);
+  border-radius: var(--se-radius-sm);
+}
+
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u ._3yD46y5pd3zOGR7CzKs0mC:hover {
+  background-color: var(--se-hover);
+}
+
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u ._3yD46y5pd3zOGR7CzKs0mC > :first-child {
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u ._3yD46y5pd3zOGR7CzKs0mC > :first-child img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+}
+
+html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > .se-header-actions {
+  order: 0;
+}
+
+html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > ._3LKQ3S_yqrebeNLF6aeiog,
+html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > :has(._3LKQ3S_yqrebeNLF6aeiog) {
+  order: 1;
+}
+
+html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > :is(._5wILZhsLODVwGfcJ0hKmJ, :has(._5wILZhsLODVwGfcJ0hKmJ:not(.se-header-action))):not(.se-header-actions):not(.se-header-action):not(._3LKQ3S_yqrebeNLF6aeiog):not(:has(._3LKQ3S_yqrebeNLF6aeiog)) {
+  order: 2;
+}
+
+html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > ._3mGEzzp18imtSzGPkduedi,
+html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > :has(.RtSv39ZoBOySnb8XQ5hJf) {
+  order: 3;
+}
+
+html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > .se-header-action[data-se-action="settings"] {
+  order: 4;
+}
+
+html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > .se-header-action[data-se-action="games"] {
+  order: 3;
+}
+
+html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > ._3yD46y5pd3zOGR7CzKs0mC,
+html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > :has(._3yD46y5pd3zOGR7CzKs0mC) {
+  order: 5;
+}
+
+/*
+ * Navigation layout: the rail, on top of client/header/header-actions.css.
+ * One 60 px rail that shares the game list's color, a 48 px title bar (--se-rail-bar) holding
+ * the Steam button, list controls, search and the window controls, 40 px icon buttons without tiles at rest, an accent bar on
+ * the current page, a dot on the bell, a ring for downloads and a rounded-square avatar.
+ * Every control is still native element; only paint and position change.
+ */
+html body.se-header-actions-ready {
+  --se-rail-bg: var(--se-sidebar);
+  --se-rail-btn: 40px;
+  --se-rail-bar: 48px;
+  /* Tall enough for a 40 px Steam button in the corner */
+  --se-rail-width: 60px;
+  /* The one gap between rail buttons, top and foot alike */
+  --se-rail-gap: 9px;
+  /* Where the page icons start: one gap under the hide-list toggle in the corner */
+  --se-rail-top: calc((var(--se-rail-bar) + var(--se-rail-btn)) / 2 + var(--se-rail-gap));
+  /* The title-bar search field, and the Filters panel under it: centred until nav-rail.js
+     measures its place into <body> */
+  --se-title-search-w: min(600px, calc(100vw - 520px));
+  --se-title-search-x: calc(50vw - var(--se-title-search-w) / 2);
+  /* The tools inside it: the game-type scope chip at its start, Filters at its end */
+  --se-title-tool-h: 32px;
+}
+
+/* The title bar. Rail controls read their size from these, so pin them inside it. */
+html body.se-header-actions-ready ._3Z7VQ1IMk4E3HsHvrkLNgo {
+  --se-steam-home-width: var(--se-rail-btn);
+  --se-steam-home-height: var(--se-rail-btn);
+  position: relative;
+  z-index: calc(var(--se-z-sticky) + 1);
+  flex-basis: var(--se-rail-bar) !important;
+  height: var(--se-rail-bar) !important;
+  min-height: var(--se-rail-bar) !important;
+  padding: 0 !important;
+  background: var(--se-rail-bg) !important;
+  box-shadow: none !important;
+}
+
+html body.se-header-actions-ready .qP17eBPXkfezFfexZ4hC3 {
+  height: var(--se-rail-bar);
+  align-self: center;
+}
+
+/* Steam menu button moves to the top of the rail, under the title bar. */
+html body.se-header-actions-ready ._3s0lkohH8wU2do0K1il28Y:not(#se-none) {
+  position: fixed;
+  top: calc(var(--se-rail-bar) + 12px);
+  left: 0;
+  z-index: calc(var(--se-z-sticky) + 2);
+  box-sizing: border-box;
+  width: var(--se-rail-width) !important;
+  height: var(--se-rail-btn) !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Page buttons: full-width column so the accent bar can sit on the rail's edge. */
+html body.se-header-actions-ready ._3Z3ohQ8-1NKnCZkbS6fvy:not(#se-none) {
+  top: calc(var(--se-rail-bar) + 12px + var(--se-rail-btn));
+  left: 0;
+  width: var(--se-rail-width);
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+html body.se-header-actions-ready ._3Z3ohQ8-1NKnCZkbS6fvy::before {
+  content: '';
+  flex: 0 0 1px;
+  width: 24px;
+  height: 1px;
+  margin: 0 0 var(--se-space-2);
+  background: var(--se-divider);
+}
+
+html body.se-header-actions-ready ._3Z3ohQ8-1NKnCZkbS6fvy ._2D64jIEK7wpUR_NlObDW76:not(#se-none) {
+  gap: var(--se-rail-gap);
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  height: auto;
+  flex: 0 0 auto;
+}
+
+/*
+ * Steam pads each page item 10 px left/right (4 px on the first); that pushed the
+ * buttons off the rail's center line and hid the accent bar. center a full-width row.
+ */
+html body.se-header-actions-ready ._3Z3ohQ8-1NKnCZkbS6fvy ._2D64jIEK7wpUR_NlObDW76 > ._7AlhCx3XGzBeIrQaCneUD:not(#se-none) {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: var(--se-rail-width);
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-self: stretch;
+}
+
+/* No tiles at rest; a soft fill on hover. */
+html body.se-header-actions-ready ._3Z7VQ1IMk4E3HsHvrkLNgo .se-native-header-button:not(#se-none),
+html body.se-header-actions-ready ._3Z3ohQ8-1NKnCZkbS6fvy .se-native-header-button:not(#se-none),
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u .se-native-header-button:not(#se-none),
+html body.se-header-actions-ready ._3Z7VQ1IMk4E3HsHvrkLNgo .se-header-action:not(#se-none),
+html body.se-header-actions-ready ._3Z3ohQ8-1NKnCZkbS6fvy .se-header-action:not(#se-none),
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u .se-header-action:not(#se-none),
+html body.se-header-actions-ready ._3Z7VQ1IMk4E3HsHvrkLNgo ._2Szzh5sKyGgnLUR870zbDE:not(#se-none),
+html body.se-header-actions-ready ._3Z3ohQ8-1NKnCZkbS6fvy ._2Szzh5sKyGgnLUR870zbDE:not(#se-none),
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u ._2Szzh5sKyGgnLUR870zbDE:not(#se-none),
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u ._5wILZhsLODVwGfcJ0hKmJ:not(.se-header-action):not(.se-native-header-button):not(#se-none) {
+  background: transparent !important;
+  border-radius: var(--se-radius-md) !important;
+  color: var(--se-text-muted);
+  box-shadow: none !important;
+  transition: background-color var(--se-dur) ease-out, color var(--se-dur) ease-out;
+}
+
+html body.se-header-actions-ready ._3Z7VQ1IMk4E3HsHvrkLNgo .se-native-header-button:not(#se-none):hover,
+html body.se-header-actions-ready ._3Z3ohQ8-1NKnCZkbS6fvy .se-native-header-button:not(#se-none):hover,
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u .se-native-header-button:not(#se-none):hover,
+html body.se-header-actions-ready ._3Z7VQ1IMk4E3HsHvrkLNgo .se-header-action:not(#se-none):hover,
+html body.se-header-actions-ready ._3Z3ohQ8-1NKnCZkbS6fvy .se-header-action:not(#se-none):hover,
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u .se-header-action:not(#se-none):hover,
+html body.se-header-actions-ready ._3Z7VQ1IMk4E3HsHvrkLNgo ._2Szzh5sKyGgnLUR870zbDE:not(#se-none):hover,
+html body.se-header-actions-ready ._3Z3ohQ8-1NKnCZkbS6fvy ._2Szzh5sKyGgnLUR870zbDE:not(#se-none):hover,
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u ._2Szzh5sKyGgnLUR870zbDE:not(#se-none):hover,
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u ._5wILZhsLODVwGfcJ0hKmJ:not(.se-header-action):not(.se-native-header-button):not(#se-none):hover {
+  background: var(--se-hover) !important;
+  color: var(--se-text-strong);
+}
+
+html body.se-header-actions-ready .se-native-header-button[data-se-icon="steam"]:not(#se-none) {
+  color: var(--se-text);
+}
+
+/* Current page: accent tint and a bar on the rail's left edge. */
+html body.se-header-actions-ready ._7AlhCx3XGzBeIrQaCneUD._1gqEjB5QsKT_NftD1dEsdZ:not(._2cO0HdvLEGAdhosLekWsmo) ._19axKcqYRuaJ8vdYKYmtTQ:not(#se-none) {
+  background: var(--se-accent-tint) !important;
+  color: var(--se-accent) !important;
+  text-shadow: none;
+}
+
+html body.se-header-actions-ready ._7AlhCx3XGzBeIrQaCneUD._1gqEjB5QsKT_NftD1dEsdZ:not(._2cO0HdvLEGAdhosLekWsmo) ._19axKcqYRuaJ8vdYKYmtTQ.se-menu-icon:not(#se-none)::after {
+  content: '' !important;
+  display: block !important;
+  position: absolute;
+  left: -10px;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  height: auto;
+  border-radius: 0 3px 3px 0;
+  background: var(--se-accent);
+  animation: none;
+}
+
+/* Bell: transparent with a green dot when there is something new. Announcements gets the same
+   dot while a post in its menu is unread (client/header/announcements.js). */
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u .RtSv39ZoBOySnb8XQ5hJf:not(#se-none) {
+  position: relative;
+  background: transparent !important;
+  width: var(--se-rail-btn);
+  height: var(--se-rail-btn);
+  border-radius: var(--se-radius-md);
+  color: var(--se-text-muted);
+}
+
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u .RtSv39ZoBOySnb8XQ5hJf:not(#se-none):hover {
+  background: var(--se-hover) !important;
+  color: var(--se-text-strong);
+}
+
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u .RtSv39ZoBOySnb8XQ5hJf._3L1c8C0o_xXzPy26aoLBFd::after,
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u ._5wILZhsLODVwGfcJ0hKmJ:not(.se-header-action):not(.se-native-header-button)[data-se-unread]::after {
+  content: '';
+  position: absolute;
+  top: 9px;
+  right: 10px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--se-accent);
+  box-shadow: 0 0 0 2px var(--se-rail-bg);
+  pointer-events: none;
+}
+
+/*
+ * Downloads: a ring around the icon instead of a bar. An SVG arc (client/header/header-actions.js)
+ * from twelve o'clock, with rounded ends over a faint track, eased between updates.
+ */
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u .se-header-action .se-download-progress {
+  inset: 4px;
+  width: auto;
+  height: auto;
+  border-radius: 50%;
+  overflow: visible;
+  background: none;
+}
+
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u .se-header-action .se-download-progress::before {
+  display: none;
+}
+
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u .se-download-ring {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  transform: rotate(-90deg);
+}
+
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u .se-download-ring circle {
+  fill: none;
+  stroke-width: 2.5;
+}
+
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u .se-download-ring-track {
+  stroke: var(--se-white-10);
+}
+
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u .se-download-ring-value {
+  stroke: var(--se-accent);
+  stroke-linecap: round;
+  stroke-dasharray: 0 100;
+  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--se-accent) 45%, transparent));
+  transition: stroke-dasharray .6s var(--se-ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u .se-download-ring-value {
+    transition: none;
+  }
+}
+
+/* Avatar: a rounded square (as in the toasts), with a status ring (blue online, green in game, gray otherwise). */
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u ._3yD46y5pd3zOGR7CzKs0mC:not(#se-none) {
+  background: transparent !important;
+  --se-status: var(--se-offline);
+}
+
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u ._3yD46y5pd3zOGR7CzKs0mC:not(#se-none) > :first-child {
+  width: 30px !important;
+  height: 30px !important;
+  flex: 0 0 30px;
+  border-radius: var(--se-avatar-radius);
+  overflow: hidden;
+  box-shadow: 0 0 0 2px var(--se-rail-bg), 0 0 0 4px var(--se-status);
+}
+
+/* Steam's status strip on the avatar's edge: the ring already shows the status. Anything in the
+   avatar that isn't the picture (or a wrapper holding it) goes. */
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u ._3yD46y5pd3zOGR7CzKs0mC:not(#se-none) > :first-child :is(.avatarStatus, :not(img):not(:has(img))):not(img) {
+  display: none !important;
+}
+
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u ._3yD46y5pd3zOGR7CzKs0mC:not(#se-none):hover > :first-child {
+  box-shadow: 0 0 0 2px var(--se-rail-bg), 0 0 0 4px var(--se-status), 0 0 0 7px var(--se-hairline);
+}
+
+/*
+ * A button stays lit while its menu is open: Steam's menus (data-se-menu-open, set by
+ * client/header/menu/placement.js), the theme's own (aria-expanded, client/shared/popup-layer.js).
+ */
+html body.se-header-actions-ready ._3Z7VQ1IMk4E3HsHvrkLNgo :is(.se-header-action, .se-native-header-button, ._2Szzh5sKyGgnLUR870zbDE, .RtSv39ZoBOySnb8XQ5hJf):is([data-se-menu-open], [aria-expanded="true"]):not(#se-none),
+html body.se-header-actions-ready ._3Z7VQ1IMk4E3HsHvrkLNgo ._5wILZhsLODVwGfcJ0hKmJ:not(.se-header-action):not(.se-native-header-button)[aria-expanded="true"]:not(#se-none),
+html body.se-header-actions-ready ._3Z7VQ1IMk4E3HsHvrkLNgo [data-se-menu-open] > .se-native-header-button:not(#se-none) {
+  background: var(--se-hover) !important;
+  color: var(--se-text-strong);
+}
+
+/* A page icon's section menu (client/navigation/nav-rail.js) lights it the same way; the
+   current page keeps its accent tint. */
+html body.se-header-actions-ready .se-menu-icon[aria-expanded="true"]:not(#se-none) {
+  background: var(--se-hover) !important;
+  color: var(--se-text-strong);
+}
+
+html body.se-header-actions-ready ._3Z7VQ1IMk4E3HsHvrkLNgo ._3yD46y5pd3zOGR7CzKs0mC[data-se-menu-open]:not(#se-none) > :first-child {
+  box-shadow: 0 0 0 2px var(--se-rail-bg, var(--se-sidebar)), 0 0 0 4px var(--se-status), 0 0 0 7px var(--se-white-10);
+}
+
+/*
+ * The title bar's right end: Friends. Add a Game and Big Picture aren't kept;
+ * the bell, Announcements, Games, Downloads, Settings (a menu: Steam Settings, Millennium, Library Manager;
+ * client/header/header-actions.js) and your avatar are at the rail's foot.
+ */
+html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm,
+html body.se-header-actions-ready .se-header-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--se-space-1);
+}
+
+/*
+ * The title bar's right end in the rail's rhythm: Friends & Chat and the window controls are
+ * rail tiles (--se-rail-btn) with the rail's one gap (--se-rail-gap) between every pair,
+ * Friends and minimize included. The controls' end inset stays their 10 px
+ * (client/header/header-actions.css), the rail's own (60 - 40) / 2.
+ */
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u {
+  padding-inline-end: var(--se-rail-gap);
+}
+
+html body.se-header-actions-ready .qP17eBPXkfezFfexZ4hC3 {
+  --se-wc-size: var(--se-rail-btn);
+}
+
+html body.se-header-actions-ready .qP17eBPXkfezFfexZ4hC3:has(.title-area:not(.OSX)) {
+  width: calc(3 * var(--se-rail-btn) + 2 * var(--se-rail-gap) + 10px);
+}
+
+html body.se-header-actions-ready .qP17eBPXkfezFfexZ4hC3 .title-area:not(.OSX) .title-bar-actions {
+  gap: var(--se-rail-gap);
+}
+
+/* …and the rail tiles' corners */
+html body.se-header-actions-ready .qP17eBPXkfezFfexZ4hC3 .title-area:not(.OSX) .title-bar-actions .title-area-icon:is(.minimizeButton, .maximizeButton, .restoreButton, .closeButton) {
+  border-radius: var(--se-radius-md);
+}
+
+/* Not kept. Hidden, never removed: Steam's own buttons stay mounted. */
+html body.se-header-actions-ready .se-header-actions > [data-se-action="add"],
+html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > :is(._3LKQ3S_yqrebeNLF6aeiog, :has(._3LKQ3S_yqrebeNLF6aeiog)) {
+  display: none;
+}
+
+/*
+ * The rail's foot, centred in the rail, top to bottom: the bell, Announcements (Steam's own
+ * button, its tip from client/header/header-tooltips.js; its news menu on click,
+ * client/header/announcements.js), Games (its menu: Steam's Games
+ * items, client/navigation/nav-rail.js), Downloads (its card on click,
+ * client/header/downloads-card.js), Settings, your avatar and your
+ * name under it (data-se-name, client/navigation/nav-rail.js). Their
+ * menus open beside it (client/header/menu/placement.js, client/header/header-actions.js);
+ * hovering the avatar shows your card (client/friends/dock/friend-card.js).
+ */
+html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > :is(.se-header-action:is([data-se-action="settings"], [data-se-action="games"]), ._3mGEzzp18imtSzGPkduedi, :has(.RtSv39ZoBOySnb8XQ5hJf), ._3yD46y5pd3zOGR7CzKs0mC, :has(._3yD46y5pd3zOGR7CzKs0mC)),
+html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > .se-header-actions > .se-header-action[data-se-action="downloads"],
+html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > :is(._5wILZhsLODVwGfcJ0hKmJ, :has(._5wILZhsLODVwGfcJ0hKmJ:not(.se-header-action))):not(.se-header-actions, .se-header-action, ._3LKQ3S_yqrebeNLF6aeiog, :has(._3LKQ3S_yqrebeNLF6aeiog)) {
+  position: fixed;
+  left: calc((var(--se-rail-width) - var(--se-rail-btn)) / 2);
+  z-index: calc(var(--se-z-sticky) + 2);
+  --se-rail-name-h: calc(var(--se-fs-2xs) * 1.3 + var(--se-space-1));
+}
+
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u ._3yD46y5pd3zOGR7CzKs0mC[data-se-name]:not(#se-none) {
+  position: relative;
+  overflow: visible !important;
+}
+
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u ._3yD46y5pd3zOGR7CzKs0mC[data-se-name]:not(#se-none)::after {
+  content: attr(data-se-name);
+  position: absolute;
+  top: calc(100% + var(--se-space-1));
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(var(--se-rail-width) - var(--se-space-2));
+  font: 600 var(--se-fs-2xs)/1.3 var(--se-font);
+  color: var(--se-text-muted);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+html body.se-header-actions-ready ._1-9sir4j_KQiMqdkZjQN0u ._3yD46y5pd3zOGR7CzKs0mC[data-se-name]:not(#se-none):hover::after {
+  color: var(--se-text-strong);
+}
+
+/* Each its own rule: in one :is() the settings selector's weight would win every offset,
+   stacking the three on one spot. */
+html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > :is(._3yD46y5pd3zOGR7CzKs0mC, :has(._3yD46y5pd3zOGR7CzKs0mC)) {
+  bottom: calc(var(--se-space-3) + var(--se-rail-name-h));
+}
+
+html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > .se-header-action[data-se-action="settings"] {
+  bottom: calc(var(--se-space-3) + var(--se-rail-name-h) + var(--se-rail-btn) + var(--se-rail-gap));
+}
+
+html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > .se-header-actions > .se-header-action[data-se-action="downloads"] {
+  bottom: calc(var(--se-space-3) + var(--se-rail-name-h) + 2 * (var(--se-rail-btn) + var(--se-rail-gap)));
+}
+
+html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > .se-header-action[data-se-action="games"] {
+  bottom: calc(var(--se-space-3) + var(--se-rail-name-h) + 3 * (var(--se-rail-btn) + var(--se-rail-gap)));
+}
+
+html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > :is(._5wILZhsLODVwGfcJ0hKmJ, :has(._5wILZhsLODVwGfcJ0hKmJ:not(.se-header-action))):not(.se-header-actions, .se-header-action, ._3LKQ3S_yqrebeNLF6aeiog, :has(._3LKQ3S_yqrebeNLF6aeiog)) {
+  bottom: calc(var(--se-space-3) + var(--se-rail-name-h) + 4 * (var(--se-rail-btn) + var(--se-rail-gap)));
+}
+
+html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > :is(._3mGEzzp18imtSzGPkduedi, :has(.RtSv39ZoBOySnb8XQ5hJf)) {
+  bottom: calc(var(--se-space-3) + var(--se-rail-name-h) + 5 * (var(--se-rail-btn) + var(--se-rail-gap)));
+}

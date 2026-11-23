@@ -1,0 +1,171 @@
+Steam Enhanced, client/game-page/layout.js and layout.css: each column of the game page is a stack.
+
+Why. The overview grid placed its cards by auto-placement (`grid-auto-flow: row dense`) on 1px rows,
+each card spanning its height. While Steam fills the page (1-2.5 s: friends, cards, the review
+block, achievements and the feed come from the network), every card that grows changes the free
+places, and dense packing put cards into whichever gap now fits: cards of a column changed place,
+and a card that grew stood over the next one for a frame (its span was written in the next animation
+frame) before the next one went down. The page "jumped" on each opening.
+
+What. A card's place is fixed by its column and order (layout.css, as before) and nothing else:
+fit() lays each column out as a stack, from row 3 (rows 1 and 2: the play bar and the links), each
+card at the row where the ones above it end (`--se-row`), spanning its height (`--se-span`). A card
+that grows moves only the cards under it, in its own column, by exactly what it grew; none changes
+column or order. fit() runs in the ResizeObserver's callback (after layout, before paint: the new
+places are in the same frame as the new size) and after a pass adds or removes cards. Column and
+order are read from the computed style once per node (getComputedStyle, again only if its section
+name changes). A card not measured yet keeps the span it has, or gets none (it is not drawn until
+then). A script that knows a page's layout (Arkada's cache of each game's page) can hold rows at
+the top of a column for cards Steam mounts late (the cover, the description: ~1 s in): `--se-hold-<column>:
+"rows:order"` on the grid; cards ordered before `order` fill the held rows as they come, so the cards
+under them do not move. destroy() removes `--se-row` too.
+
+--- a/client/game-page/layout.js
++++ b/client/game-page/layout.js
+@@ -74,6 +74,18 @@
+   const sized = new Set();
+   // Each piece's height as its ResizeObserver last reported it (fit() reads no layout)
+   const heights = new WeakMap();
++  // Which column a piece stands in (0: the left one) and its order there, as layout.css gives
++  // them: read once per node and section name (neither changes for a node otherwise)
++  const slots = new WeakMap();
++  const slotOf = (el) => {
++    let s = slots.get(el);
++    if (!s || s.sec !== el.dataset.seSec) {
++      const cs = getComputedStyle(el);
++      s = { col: cs.gridColumnStart === '1' ? 0 : 1, order: parseInt(cs.order, 10) || 0, sec: el.dataset.seSec };
++      slots.set(el, s);
++    }
++    return s;
++  };
+ 
+   function pieces(c) {
+     const out = [];
+@@ -92,18 +104,45 @@
+     return out;
+   }
+ 
+-  function fit() {
+-    live.fitQueued = 0;
+-    const c = document.querySelector(CONTAINER);
+-    if (!c) return;
+-    for (const el of pieces(c)) {
++  /*
++   * Each column is a stack: its pieces in their order (layout.css), one under another from row 3
++   * (rows 1 and 2: the play bar and the links). A piece's first row (--se-row) is the sum of the
++   * spans above it in its column, so a piece that grows moves only the pieces under it, in its
++   * own column, and no piece ever changes column or place in the order.
++   */
++  function fit(c) {
++    const cols = [[], []];
++    pieces(c).forEach((el, i) => {
+       const h = heights.get(el);
+       // Not measured yet (observed this frame, or a node Steam made anew): a span it already has
+-      // stays; writing 1 stood the piece on one row, over the pieces under it, until its size came
+-      if (h === undefined && el.style.getPropertyValue('--se-span')) continue;
+-      setVar(el, '--se-span', String(h > 0 ? Math.ceil((h + GAP) / ROW) : 1));
+-    }
++      // stays; one with none gets none (it is not drawn until it has its size)
++      if (h !== undefined) setVar(el, '--se-span', String(h > 0 ? Math.ceil((h + GAP) / ROW) : 1));
++      const s = slotOf(el);
++      const span = h === 0 ? 0 : parseInt(el.style.getPropertyValue('--se-span'), 10) || 0;
++      cols[s.col].push([s.order, i, el, span]);
++    });
++    cols.forEach((list, col) => {
++      list.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
++      // --se-hold-<col> on the grid, "rows:order": rows kept at the top of the column for pieces
++      // ordered before `order` that are not here yet (a script that knows the page's layout);
++      // the pieces that come take their rows out of it
++      const [hr, ho] = (c.style.getPropertyValue('--se-hold-' + col) || '').split(':').map(Number);
++      let held = hr > 0 ? hr : 0;
++      let row = 3;
++      for (const [order, , el, span] of list) {
++        if (held && order >= ho) {
++          row += held;
++          held = 0;
++        }
++        setVar(el, '--se-row', String(row));
++        row += span;
++        if (held) held = Math.max(0, held - span);
++      }
++    });
+   }
++  const fitAll = () => {
++    for (const c of document.querySelectorAll(CONTAINER)) if (c.querySelector(COLUMNS)) fit(c);
++  };
+ 
+   // Sizes change only through the ResizeObserver (it also reports each piece once on observe).
+   function placeSpans(c) {
+@@ -112,7 +151,8 @@
+         for (const entry of entries) {
+           heights.set(entry.target, entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height);
+         }
+-        if (!live.fitQueued) live.fitQueued = requestAnimationFrame(fit);
++        // Placed in the same frame, before it is painted: a piece that grew never covers the next
++        fitAll();
+       });
+     }
+     for (const el of sized) {
+@@ -127,6 +167,8 @@
+         live.sizer.observe(el);
+       }
+     }
++    // A piece added or removed moves the ones under it with no size reported
++    fit(c);
+   }
+ 
+   function layout() {
+--- a/client/game-page/layout.css
++++ b/client/game-page/layout.css
+@@ -148,7 +148,8 @@
+  * Two-column CSS Grid layout.
+  * Dissolves AppGameInfoContainer, ColumnContainer, LeftColumn, and
+  * RightColumn via `display: contents` so child cards participate in a single
+- * grid and stack independently using `--se-span` row spans.
++ * grid: each column a stack, a card at the row the cards above it end (`--se-row`), spanning
++ * its height (`--se-span`).
+  */
+ ._27RcNu8aXKBpYkHcNNrt-X {
+   /* Container */
+@@ -162,7 +163,7 @@
+   grid-template-columns: clamp(220px, 26%, var(--se-col-w)) minmax(0, 1fr) minmax(0, 1fr);
+   grid-template-rows: auto auto;
+   grid-auto-rows: 1px;
+-  grid-auto-flow: row dense;
++  grid-auto-flow: row;
+   column-gap: var(--se-space-5);
+   row-gap: 0;
+   align-items: start;
+@@ -174,7 +175,7 @@
+ 
+ :where(._27RcNu8aXKBpYkHcNNrt-X > *, ._27RcNu8aXKBpYkHcNNrt-X > ._25oBZpa3dUcMw8QAsa2u67 > ._2jPMy2QZr8bWi6yrk5ZzHA > ._37mmOlZM_8n5yJAG5CHiW7 > *, ._27RcNu8aXKBpYkHcNNrt-X > .OhSdLYuggDtBcWjYP0j_9 > *, ._27RcNu8aXKBpYkHcNNrt-X > .OhSdLYuggDtBcWjYP0j_9 > :is(._2aor4XVOYzN1PBSREk0UbO, ._1sZgBDTw5NH-yuVDZK1SUU) > *) {
+   grid-column: 2 / -1;
+-  grid-row-end: span var(--se-span, 1);
++  grid-row: var(--se-row, auto) / span var(--se-span, 1);
+   min-width: 0;
+   order: 60;
+   margin: 0 0 var(--se-space-4) !important;
+@@ -417,11 +418,11 @@
+  * dissolved by display: contents above): placed here instead.
+  */
+ ._27RcNu8aXKBpYkHcNNrt-X :is(._1Id6ZFEUVa5PKEMIvSg4nE, ._3cntzF30xAuwn1ARWJjvCb):not(#se-none) {
+-  grid-row: auto / span var(--se-span, 1) !important;
++  grid-row: var(--se-row, auto) / span var(--se-span, 1) !important;
+ }
+ 
+ ._27RcNu8aXKBpYkHcNNrt-X :is(._2AMl0koRXkR77BaY7Sa3Ie, .nkIX48cHLbjc0eaP5CNmM):not(#se-none) {
+-  grid-row: auto / span var(--se-span, 1) !important;
++  grid-row: var(--se-row, auto) / span var(--se-span, 1) !important;
+   grid-column: 2 / -1 !important;
+ }
+ 
+--- a/client/game-page/main.js
++++ b/client/game-page/main.js
+@@ -202,6 +202,7 @@
+       }
+       document.querySelectorAll('.se-assoc-collapsed').forEach((el) => el.classList.remove('se-assoc-collapsed'));
+       document.querySelectorAll('[style*="--se-span"]').forEach((el) => el.style.removeProperty('--se-span'));
++      document.querySelectorAll('[style*="--se-row"]').forEach((el) => el.style.removeProperty('--se-row'));
+       sized.clear();
+       document.querySelectorAll('[style*="--se-pct"]').forEach((el) => el.style.removeProperty('--se-pct'));
+       removeEventListener('DOMContentLoaded', start);

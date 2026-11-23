@@ -1,0 +1,38 @@
+/*
+ * Arkada over Steam Enhanced: their branding out. Loaded into every window with tokens.css
+ * (skin.json Patch ".*"). Their files stay untouched; these rules only swap the pictures and
+ * the word their CSS and scripts put on screen.
+ *
+ *   --se-brand-icon    their mark as a mask (title bar's Steam button, the list lockup)
+ *                      → a neutral four-tile glyph
+ *   --se-brand-mark    their mark in colour (inside spinners, the sign-in avatar) → none
+ *   --se-brand-logo    the About Steam dialog's logo → none
+ *   --se-brand-lockup  mark + "Steam Enhanced" on the sign-in chooser → none
+ *   --se-spinner-image the default spinner as a picture (it has their mark baked in) → a plain ring
+ *   the title bar's wordmark "Steam Enhanced" → "Arkada"
+ *
+ * Their Splash and Logo window entrances are taken out of skin.json (overlay/skin.json).
+ * html:root beats the :root these are declared on; the lockup's is declared on
+ * html[data-se-login="chooser"], hence the longer selector.
+ */
+html:root {
+  --se-brand-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='3' width='8' height='8' rx='2'/%3E%3Crect x='13' y='3' width='8' height='8' rx='2'/%3E%3Crect x='3' y='13' width='8' height='8' rx='2'/%3E%3Crect x='13' y='13' width='8' height='8' rx='4'/%3E%3C/svg%3E");
+  --se-brand-mark: none;
+  --se-brand-logo: none;
+  --se-spinner-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Cstyle%3Eg%7Btransform-origin:48px 48px;animation:r 1s linear infinite%7D@keyframes r%7Bto%7Btransform:rotate(360deg)%7D%7D%3C/style%3E%3Ccircle cx='48' cy='48' r='38' fill='none' stroke='%23fff' stroke-opacity='.12' stroke-width='6'/%3E%3Cg%3E%3Cpath d='M48 10a38 38 0 0 1 38 38' fill='none' stroke='%230A84FF' stroke-width='6' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+html:root[data-se-login] {
+  --se-brand-lockup: none;
+}
+
+/* The title bar's lockup (client/navigation/title-bar.js writes "Steam <em>Enhanced</em>"):
+   the word is drawn by ::after instead; the lockup's width follows it as before. */
+html body .se-list-brand-word:not(#se-none) {
+  font-size: 0;
+}
+
+html body .se-list-brand-word:not(#se-none)::after {
+  content: "Arkada";
+  font-size: var(--se-fs-md);
+}

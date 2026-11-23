@@ -1,0 +1,6 @@
+/* Theme setting (skin.json Conditions): Font, SN Pro. Arkada's default is Segoe UI Variable
+   (overlay/tokens.css); this brings back Steam Enhanced's own face, bundled in core/fonts/.
+   Doubled :root outranks html:root in arkada/tokens.css, as their other Font files do. */
+:root:root {
+  --se-font: "SN Pro", "Motiva Sans", Arial, sans-serif;
+}

@@ -1,6 +1,6 @@
 // Checks the plugin without Steam: the BUILT file (plugin/dist/arkada/.millennium/Dist/index.js) is run in a
 // made-up Steam page (test/fake-steam.js) against the reference hub of kit.txt, started here on a free port.
-//   node test/plugin.test.js [path to kit hub.js]      default: ../kit/hub/hub.js next to this folder
+//   node test/plugin.test.js [path to kit hub.js]      default: ../kit.txt/hub/hub.js next to this folder
 //   node test/plugin.test.js --bundle <file.js>        check another build of the same plugin, e.g. the script taken
 //                                                      out of dist-star/arkada.star (see README)
 // What this proves: the hub side of the plugin. What it cannot prove: that Steam really has the calls the
@@ -16,10 +16,11 @@ const root = path.join(__dirname, '..');
 const argv = process.argv.slice(2);
 const bundleAt = argv.indexOf('--bundle');
 const bundle = bundleAt >= 0 ? path.resolve(argv.splice(bundleAt, 2)[1]) : path.join(root, 'plugin', 'dist', 'arkada', '.millennium', 'Dist', 'index.js');
-const hubJs = path.resolve(argv[0] || path.join(root, '..', 'kit', 'hub', 'hub.js'));
+const hubJs = path.resolve(argv[0] || path.join(root, '..', 'kit.txt', 'hub', 'hub.js'));
 const { connect } = require(path.join(root, 'plugin', 'src', 'hub-client.js'));
 const { createArkada, STORAGE_KEY } = require(path.join(root, 'plugin', 'src', 'core.js'));
 const { makePage, browserLikeWebSocket } = require('./fake-steam.js');
+const { makeDomWindow } = require('./fake-dom.js');
 
 // Both the page and the tester below get a WebSocket that behaves as a browser's does (see fake-steam.js).
 // ARKADA_NODE_WEBSOCKET=1 leaves Node's own in place, to see that the hub client copes with that one too.
@@ -81,11 +82,18 @@ async function main() {
   const text = fs.readFileSync(bundle, 'utf8');
   const marker = /(= ?)42080(?![0-9])/g; // `const DEFAULT_PORT = 42080` — or `n=42080` once starlight has shortened the names
   ok((text.match(marker) || []).length === 1, 'built file has the hub port in exactly one place');
+  // Kapsula's port too goes to a free one: the check must never reach a Kapsula running on this PC
+  const kapsulaPort = await freePort();
+  const kMarker = /(PORT ?= ?)42071(?![0-9])/g;
+  ok((text.match(kMarker) || []).length === 1, "built file has Kapsula's port in exactly one place");
   const page = makePage({ WebSocket: globalThis.WebSocket });
+  // The theme's switches (tab «Arkada»): Kapsula off for now, the size on disk on
+  page.popupRoot.computed['--arkada-kapsula'] = 'off';
+  page.popupRoot.computed['--arkada-disk-size'] = 'on';
 
   // ───────── 1. Steam loads the plugin while the hub is not running ─────────
   console.log('1. Plugin loads without a hub');
-  vm.runInContext(text.replace(marker, '$1' + port), page.context, { filename: 'index.js' });
+  vm.runInContext(text.replace(marker, '$1' + port).replace(kMarker, '$1' + kapsulaPort), page.context, { filename: 'index.js' });
   await until(() => page.ipc.length === 1, 'plugin reports itself loaded to Millennium');
   ok(eq(page.ipc[0], [1, { pluginName: 'arkada' }]), 'tells Millennium it has loaded, as the Kapsula plugin does', page.ipc[0]);
   ok(typeof page.window.PLUGIN_LIST.arkada.default === 'function', 'registered in PLUGIN_LIST under "arkada"');
@@ -230,6 +238,104 @@ async function main() {
   await until(() => !('--arkada-hub-accent' in page.root.style.props), 'accent removed');
   ok(!('data-arkada-motion' in page.root.attrs) && !('--arkada-hub-accent' in late.style.props), 'accent: null gives the theme its own colour back');
 
+  // ───────── 7b. The window backdrop: theme → plugin → backend ─────────
+  console.log('7b. Window backdrop');
+  const B = '--arkada-backdrop', MARK = 'data-arkada-backdrop';
+  const lastCall = () => page.calls.backend[page.calls.backend.length - 1];
+  ok(page.calls.backend.length > 0 && eq(page.calls.backend[0], ['arkada', 'ApplyBackdrop', { mode: 'mica' }]),
+    'at start the theme says Mica (--arkada-backdrop in the main window) → the backend is asked for the windows already open', page.calls.backend[0]);
+  ok(page.root.attrs[MARK] === 'mica' && page.popupRoot.attrs[MARK] === 'mica', 'the backend said ok → <html data-arkada-backdrop="mica"> in every window', [page.root.attrs, page.popupRoot.attrs]);
+  ok(late.attrs[MARK] === 'mica', '…including a window opened later');
+  ok(page.storage.getItem('arkada.backdrop') === 'mica', 'the mode is remembered for the next start (windows open before the theme answers)');
+  let asked = page.calls.backend.length;
+  page.calls.opened.length = 0;
+  page.window.open('https://steamloopback.host/index.html?createflags=4114&minwidth=640', 'SP Desktop', 'width=800');
+  page.window.open('https://steamloopback.host/chat.html?a=1&createflags=2#x');
+  page.window.open('https://steamloopback.host/menu.html?createflags=999');
+  page.window.open('https://steamloopback.host/plain.html');
+  ok(eq(page.calls.opened, [
+    'https://steamloopback.host/index.html?createflags=274&minwidth=640',
+    'https://steamloopback.host/chat.html?a=1&createflags=274#x',
+    'https://steamloopback.host/menu.html?createflags=999',
+    'https://steamloopback.host/plain.html',
+  ]), 'window.open: createflags 4114 and 2 become 274 (see-through), other kinds and plain addresses are left alone', page.calls.opened);
+  await until(() => page.calls.backend.length > asked, 'backend asked after window.open');
+  ok(lastCall()[1] === 'ApplyBackdrop' && lastCall()[2].mode === 'mica' && lastCall()[2].only === 'new' && typeof lastCall()[2].afterMs === 'number',
+    'a window was opened → the backend is asked again, for the new window only', lastCall());
+  asked = page.calls.backend.length;
+  const fresh = page.steam.openPopup();
+  ok(fresh.attrs[MARK] === 'mica', 'a new Steam window gets the mark as soon as it appears');
+  await until(() => page.calls.backend.length > asked, 'backend asked for a new popup');
+  ok(true, '…and the backend is asked for it');
+
+  page.popupRoot.computed[B] = 'acrylic';
+  await until(() => page.root.attrs[MARK] === 'acrylic' && fresh.attrs[MARK] === 'acrylic', 'switched to acrylic');
+  ok(lastCall()[2].mode === 'acrylic', 'the setting changes to «Акрил» → backend asked for acrylic, the mark follows', lastCall());
+
+  page.backend.ok = false;
+  page.popupRoot.computed[B] = 'mica';
+  await until(() => lastCall()[2].mode === 'mica', 'mica asked again');
+  await sleep(100);
+  ok(!(MARK in page.root.attrs) && !(MARK in page.popupRoot.attrs), 'the backend says it did not work → no mark, the theme stays opaque', page.popupRoot.attrs);
+  page.backend.ok = true;
+
+  page.popupRoot.computed[B] = 'off';
+  await until(() => lastCall()[2].mode === 'off', 'off sent to the backend');
+  ok(!(MARK in page.root.attrs) && !(MARK in page.popupRoot.attrs) && !(MARK in fresh.attrs), 'the setting changes to «Выкл» → the backend puts the windows back, no mark anywhere');
+  page.calls.opened.length = 0;
+  page.window.open('https://steamloopback.host/index.html?createflags=4114');
+  ok(eq(page.calls.opened, ['https://steamloopback.host/index.html?createflags=4114']), 'with the backdrop off window.open is not rewritten', page.calls.opened);
+  ok(page.storage.getItem('arkada.backdrop') === 'off', '«Выкл» is remembered too');
+  page.popupRoot.computed[B] = 'mica';
+  await until(() => page.popupRoot.attrs[MARK] === 'mica', 'back to mica');
+  ok(page.log.length === 0 && problems.length === 0, 'nothing in the console and nothing thrown', [page.log, problems]);
+
+  // ───────── 7c. The features that replace other plugins ─────────
+  console.log('7c. Kapsula, size on disk, «Поделиться»');
+  const share = page.window.PLUGIN_LIST.arkada.arkadaShare;
+  ok(share && typeof share.friends === 'function' && typeof share.send === 'function', 'the plugin exports arkadaShare.friends / .send for the store pages (Millennium finds them among its exports)');
+  const fl = JSON.parse(share.friends());
+  ok(eq(fl.map(f => f.name), ['Liza', 'Timur', 'Offline']), 'arkadaShare.friends → the friends list as JSON, online first', fl);
+  const sr = JSON.parse(await share.send(JSON.stringify({ ids: ['76561198000000001', 'nope'], text: 'Dota 2 в Steam:\nhttps://store.steampowered.com/app/570/' })));
+  ok(eq(sr, [{ id: '76561198000000001', sent: true }]) && page.calls.chat.length === 1, "arkadaShare.send → the link goes to the chosen friend's chat; a bad id is dropped", [sr, page.calls.chat]);
+  let refused = false;
+  try { await share.send(JSON.stringify({ ids: [], text: 'x' })); } catch (e) { refused = true; }
+  ok(refused, 'arkadaShare.send with nobody to send to is refused');
+  // Kapsula switched on in the theme: the module starts and tries its port (nobody there: it waits quietly)
+  page.popupRoot.computed['--arkada-kapsula'] = 'on';
+  await sleep(2300);
+  ok(JSON.parse(page.storage.getItem('arkada.features') || '{}').kapsula === 'on', 'the theme says Kapsula on → the feature is on, and remembered', page.storage.getItem('arkada.features'));
+  page.popupRoot.computed['--arkada-kapsula'] = 'off';
+  await until(() => JSON.parse(page.storage.getItem('arkada.features') || '{}').kapsula === 'off', 'kapsula off again', 5000);
+  ok(page.log.length === 0 && problems.length === 0, 'Kapsula not running → nothing in the console, nothing thrown', [page.log, problems]);
+
+  // The webkit script in a store page: its button asks the client part for the friends
+  const webkitAt = path.join(path.dirname(bundle), 'webkit.js');
+  if (!fs.existsSync(webkitAt)) { ok(false, 'no webkit.js next to the bundle: ' + webkitAt); return; }
+  const webkitText = fs.readFileSync(webkitAt, 'utf8');
+  const store = makeDomWindow('https://store.steampowered.com/app/570/Dota_2/');
+  const sdoc = store.document;
+  const srow = sdoc.createElement('div'); srow.id = 'queueActionsCtn';
+  const sign = sdoc.createElement('div'); sign.id = 'ignoreBtn';
+  srow.appendChild(sign); sdoc.body.appendChild(srow);
+  const hub2 = sdoc.createElement('div'); hub2.id = 'appHubAppName'; hub2.textContent = 'Dota 2'; sdoc.body.appendChild(hub2);
+  // Millennium's callable("arkada", "frontend:arkadaShare.friends") reaches the client's exports
+  store.MILLENNIUM_API = { callable: (plugin, name) => (...a) => { const [obj, fn] = name.replace(/^frontend:/, '').split('.'); return page.window.PLUGIN_LIST[plugin][obj][fn](...a); } };
+  store.Object = Object;
+  vm.runInContext(webkitText, vm.createContext(store), { filename: 'webkit.js' });
+  await until(() => sdoc.getElementById('arkada-share'), 'share button in the store page');
+  ok(store.PLUGIN_LIST.arkada && typeof store.PLUGIN_LIST.arkada.default === 'function', "webkit.js registers in the page's PLUGIN_LIST under arkada");
+  ok(sdoc.getElementById('arkada-share').parentNode === srow && sdoc.getElementById('arkada-share').textContent.endsWith('Поделиться'), 'the store page gets «Поделиться» in its row of buttons');
+  sdoc.getElementById('arkada-share').querySelector('.btnv6_blue_hoverfade').click();
+  sdoc.querySelector('.arkada-share-menu').querySelectorAll('.arkada-share-item')[1].click();
+  await until(() => sdoc.querySelectorAll('.arkada-share-name').length === 3, 'friends in the dialog');
+  ok(eq(sdoc.querySelectorAll('.arkada-share-name').map(n => n.textContent), ['Liza', 'Timur', 'Offline']), "Отправить другу → the friends come from the client through Millennium's bridge");
+  sdoc.querySelectorAll('.arkada-share-friend')[1].click();
+  sdoc.querySelector('.arkada-share-primary').click();
+  await until(() => page.calls.chat.length === 2, 'sent from the store page');
+  ok(page.calls.chat[1][2] === 'Dota 2 в Steam:\nhttps://store.steampowered.com/app/570/', "Отправить → Steam's chat gets the game's name and link", page.calls.chat[1]);
+  ok(page.ipc.length === 1, 'the webkit script sends Millennium nothing of its own (only the client part reports itself loaded)', page.ipc.length);
+
   // ───────── 8. The hub restarts ─────────
   console.log('8. Hub restarts');
   await stopHub();
@@ -266,6 +372,8 @@ async function main() {
   ok(true, 'the hub clears arkada.game for everyone');
   ok(!Object.prototype.hasOwnProperty.call(page.window.NotificationStore, 'BShowToast'), "Steam's notification check is put back as it was");
   ok(page.calls.unregistered === 4, 'game and download listeners are unregistered', page.calls.unregistered);
+  ok(page.window.open === page.originalOpen, 'window.open is Steam\'s own again (the second load wrapped it once, not twice)');
+  ok(!('data-arkada-backdrop' in page.popupRoot.attrs) && !('data-arkada-backdrop' in page.root.attrs), 'the backdrop mark is taken off: the theme is opaque again');
   tester.close();
 
   // ───────── 10. The logic alone, with made-up Steam calls ─────────
@@ -287,6 +395,121 @@ async function main() {
   await sleep(150);
   ok(said.filter(([t]) => t === 'arkada.friends').length === n, 'friend counts are sent when they change, not on every look');
   lone.stop();
+
+  // ───────── 11. The backdrop logic alone (plugin/src/backdrop.js) ─────────
+  console.log('11. Backdrop logic alone (plugin/src/backdrop.js)');
+  const { createBackdrop, withTransparentFlags, STORAGE_KEY: BACKDROP_KEY } = require(path.join(root, 'plugin', 'src', 'backdrop.js'));
+  ok(withTransparentFlags('https://x/?createflags=4114') === 'https://x/?createflags=274' && withTransparentFlags('https://x/?createflags=41140') === 'https://x/?createflags=41140' &&
+    withTransparentFlags('https://x/?nocreateflags=2') === 'https://x/?nocreateflags=2' && withTransparentFlags(undefined) === undefined,
+    'only the createflags parameter, only 4114 and 2, nothing else in the address');
+  function fakeSteam(theme) {
+    const s = { theme, calls: [], marks: [], rewrite: null, unpatched: 0, readBackdrop: () => s.theme, markBackdrop: m => s.marks.push(m),
+      watchWindows: () => () => {}, patchWindowOpen(rewrite) { s.rewrite = rewrite; return () => { s.unpatched++; }; },
+      callBackend: (m, a) => { s.calls.push(a.mode); return Promise.resolve('{"ok":true}'); } };
+    return s;
+  }
+  const mem = new Map();
+  const memStore = { getItem: k => (mem.has(k) ? mem.get(k) : null), setItem: (k, v) => mem.set(k, v) };
+  let fs1 = fakeSteam('off');
+  let bd = createBackdrop({ steam: fs1, storage: memStore, everyMs: 20 });
+  await sleep(80);
+  ok(fs1.calls.length === 0 && fs1.rewrite('https://x/?createflags=4114') === 'https://x/?createflags=4114', 'theme says «Выкл» from the start → the backend is never called, window.open passes addresses through', fs1.calls);
+  bd.stop();
+  ok(fs1.unpatched === 1 && fs1.marks[fs1.marks.length - 1] === null, 'stop() gives window.open back and takes the mark off');
+  // Steam starts, the mode was Mica last time, but no window ever answers: the Arkada theme is not installed
+  mem.set(BACKDROP_KEY, 'mica');
+  fs1 = fakeSteam(null);
+  bd = createBackdrop({ steam: fs1, storage: memStore, everyMs: 20, giveUpMs: 60 });
+  ok(fs1.rewrite('https://x/?createflags=2') === 'https://x/?createflags=274', 'until the theme answers, the mode remembered from last time is used');
+  await until(() => bd.mode() === 'off', 'gives up without a theme');
+  await until(() => fs1.calls[fs1.calls.length - 1] === 'off', 'backend asked off');
+  ok(eq(fs1.calls, ['mica', 'off']) && mem.get(BACKDROP_KEY) === 'off', 'no theme answers for a while → back to off, the backend puts the windows back, and it is remembered', [fs1.calls, mem.get(BACKDROP_KEY)]);
+  bd.stop();
+  // A new window: asked at 60 ms; again at 400 and 1500 ms only while nothing new got patched
+  function openingSteam(patched) {
+    const s = fakeSteam('mica');
+    s.args = [];
+    s.watchWindows = cb => { s.opened = cb; return () => {}; };
+    s.watchShown = cb => { s.shown = cb; return () => {}; };
+    s.callBackend = (m, a) => { s.args.push(a); return Promise.resolve(JSON.stringify({ ok: true, patched: a.only === 'new' ? patched : 0 })); };
+    return s;
+  }
+  const newOnly = s => s.args.filter(a => a.only === 'new').length;
+  let fs2 = openingSteam(1);
+  bd = createBackdrop({ steam: fs2, storage: memStore, everyMs: 1000 });
+  await sleep(20);
+  fs2.opened({});
+  await sleep(1700);
+  ok(newOnly(fs2) === 1, 'the new window is patched at the first try → the backend is not asked again for it', fs2.args);
+  fs2.shown({});
+  await sleep(30);
+  ok(newOnly(fs2) === 2, 'a window comes on screen (a menu shown) → one new-window pass', fs2.args);
+  bd.stop();
+  fs2 = openingSteam(0);
+  bd = createBackdrop({ steam: fs2, storage: memStore, everyMs: 1000 });
+  await sleep(20);
+  fs2.opened({});
+  await sleep(1700);
+  ok(newOnly(fs2) === 3, 'not visible yet (nothing patched) → asked again at 400 and 1500 ms, and then no more', fs2.args);
+  bd.stop();
+
+  // Steam starting: a window whose setting file (options/backdrop-mica.css) is not in yet says "off" (tokens.css)
+  const { createSteam: createSteamFor } = require(path.join(root, 'plugin', 'src', 'steam.js'));
+  const winSays = v => ({ document: { documentElement: {} }, getComputedStyle: () => ({ getPropertyValue: () => v }) });
+  const popupsNow = [{ m_strName: 'contextmenu_3_uid0', window: winSays('off') }, { m_strName: 'SP Desktop_uid0', window: winSays(' mica') }];
+  const sj = createSteamFor({ document: { documentElement: {} }, getComputedStyle: () => ({ getPropertyValue: () => '' }), g_PopupManager: { GetPopups: () => popupsNow } });
+  ok(sj.readBackdrop() === 'mica', 'one window still loading says "off", the main window says mica → mica', sj.readBackdrop());
+  popupsNow[1].window = winSays('off');
+  ok(sj.readBackdrop() === 'off', '"off" only when every window that answers says off');
+  popupsNow.push({ m_strName: 'Friends', window: winSays('acrylic') });
+  popupsNow[1].window = winSays('mica');
+  ok(sj.readBackdrop() === 'mica', 'windows disagree on mica / acrylic → the main window decides');
+
+  // A single "off" read among mica ones is not believed; two in a row are
+  const fs3 = fakeSteam('mica');
+  bd = createBackdrop({ steam: fs3, storage: memStore, everyMs: 200 });
+  await sleep(100);
+  fs3.theme = 'off'; // read once, at 200 ms
+  await sleep(200);
+  fs3.theme = 'mica';
+  await sleep(300);
+  ok(bd.mode() === 'mica' && !fs3.calls.includes('off'), 'a moment of "off" (a window loading) does not turn the backdrop off', fs3.calls);
+  fs3.theme = 'off';
+  await until(() => bd.mode() === 'off', 'off confirmed');
+  ok(fs3.calls[fs3.calls.length - 1] === 'off' && fs3.marks[fs3.marks.length - 1] === null, '"off" read twice in a row → off: the backend puts the windows back, the mark goes', [fs3.calls, fs3.marks]);
+  bd.stop();
+
+  // «Размытие» (blur) is a mode like the others; set() switches without a restart and holds until set(null)
+  const fs5 = fakeSteam('acrylic');
+  fs5.callBackend = (m, a) => { fs5.calls.push(a.mode); return Promise.resolve(JSON.stringify({ ok: true, mode: a.mode })); };
+  bd = createBackdrop({ steam: fs5, storage: memStore, everyMs: 30 });
+  await until(() => fs5.calls.includes('acrylic'), 'acrylic asked');
+  bd.set('blur');
+  await until(() => fs5.calls[fs5.calls.length - 1] === 'blur' && fs5.marks[fs5.marks.length - 1] === 'blur', 'blur set');
+  await sleep(100);
+  ok(bd.mode() === 'blur' && fs5.marks[fs5.marks.length - 1] === 'blur', 'set("blur") → the backend is asked for blur, the windows are marked blur, and the theme\'s acrylic does not take it back', [fs5.calls, fs5.marks]);
+  bd.set(null);
+  await until(() => bd.mode() === 'acrylic', 'back to the theme');
+  ok(true, 'set(null) → back to the theme\'s setting');
+  bd.stop();
+  const popupsMenu = [{ m_strName: 'contextmenu_3_uid0', window: Object.assign(winSays('blur'), { document: { title: 'Games Root Menu', documentElement: makeAttrRoot() } }) },
+    { m_strName: 'SP Desktop_uid0', window: Object.assign(winSays('blur'), { document: { title: 'Steam', documentElement: makeAttrRoot() } }) }];
+  function makeAttrRoot() { const a = {}; return { attrs: a, style: { setProperty() {}, removeProperty() {} }, setAttribute(k, v) { a[k] = v; }, removeAttribute(k) { delete a[k]; } }; }
+  const sm = createSteamFor({ document: { documentElement: makeAttrRoot() }, getComputedStyle: () => ({ getPropertyValue: () => '' }), g_PopupManager: { GetPopups: () => popupsMenu } });
+  sm.markBackdrop('blur');
+  ok(popupsMenu[1].window.document.documentElement.attrs['data-arkada-backdrop'] === 'blur' && !('data-arkada-backdrop' in popupsMenu[0].window.document.documentElement.attrs),
+    'menus (title … Menu / … Supernav) are never marked: no backdrop under them, the theme draws them solid');
+
+  // The backend did something else than asked (an old backend took the arguments for "off"): the mark follows
+  // what it did, and the mode is asked for again
+  const fs4 = fakeSteam('mica');
+  let answers = 0;
+  fs4.callBackend = (m, a) => { fs4.calls.push(a.mode); answers++; return Promise.resolve(JSON.stringify({ ok: true, mode: answers === 1 ? 'off' : a.mode })); };
+  bd = createBackdrop({ steam: fs4, storage: memStore, everyMs: 1000 });
+  await until(() => answers >= 2, 'asked again');
+  await sleep(20);
+  ok(fs4.marks[0] === null && fs4.marks[fs4.marks.length - 1] === 'mica', 'answer "off" to a mica request → no mark; asked again, mica done → the mark comes back', fs4.marks);
+  bd.stop();
 }
 
 main().catch(e => { failed++; console.log('  FAIL  ' + (e && e.stack || e)); }).finally(async () => {

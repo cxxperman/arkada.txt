@@ -1,0 +1,75 @@
+/*
+ * Library Home, drawn by the theme: the hero stage over the board of panels (Favorites,
+ * Collections, Recently added, Friend activity).
+ *
+ * Scoped to `[data-se-hs]` (Steam's Home container, managed by `client/home/stage/`). Steam's
+ * own Home stays mounted underneath, out of sight and out of layout (display: none), so it
+ * costs no drawing; the panels read Steam's data, never its rows. The page never scrolls:
+ * the stage and the board share the window.
+ *
+ * This file: the grid and Steam's Home kept out of sight. Continued, in order
+ * (client/loader.js), by stage-hero.css (the stage: art, game, stats, buttons, strip),
+ * stage-settings.css (the stage's settings button and menu), stage-tray.css (the board's
+ * glass, cells and pages, a panel's heading), stage-shelves.css (Favorites, Collections,
+ * Recently added, the pickers), stage-panels.css (Friend activity) and stage-narrow.css
+ * (narrow windows).
+ */
+/* The grid: the stage, then the board */
+[data-se-hs]:not(#se-none) {
+  /* Soft text over the art, and the board's glass (no theme tokens for these yet) */
+  --se-hs-on-art: var(--se-on-art);
+  --se-hs-glass: var(--se-glass);
+  /* !important: beats the display and padding Steam's own CSS gives its Home container (the
+     .LibraryHome parent, a CSS module in steamui/sp.js) */
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-content: start;
+  position: relative;
+  isolation: isolate;
+  padding: 0 !important;
+  overflow: clip;
+}
+
+/* Steam's Home, all of it: mounted for its data, never drawn. !important: beats the display
+   Steam's own CSS modules (steamui/sp.js) give .LibraryHome and its siblings */
+[data-se-hs]:not([data-se-hs-event]) > :not(.se-hs-stage):not(.se-hs-board):not(#se-none) {
+  display: none !important;
+}
+
+/*
+ * A news post open (What's New, or a link to one): Steam shows it over its own Home, so the
+ * stage and the board step aside until it closes (stage/stage.js sets data-se-hs-event)
+ */
+[data-se-hs][data-se-hs-event] > :is(.se-hs-stage, .se-hs-board) {
+  display: none;
+}
+
+[data-se-hs] > .se-hs-stage {
+  grid-row: 1;
+}
+
+[data-se-hs] > .se-hs-board {
+  grid-row: 2;
+}
+
+/* The page doesn't scroll while the stage is up */
+[data-se-hs-scroll-lock]:not(#se-none) {
+  overflow-y: hidden !important;
+}
+
+html[data-se-hs-scroll-lock],
+html[data-se-hs-scroll-lock] > body[data-se-hs-scroll-lock] {
+  overflow: hidden !important;
+}
+
+/*
+ * Never Steam's Home under the stage: a Library Home Steam has just drawn stays out of sight
+ * until stage/stage.js has placed the stage (normally before the frame is painted, so this
+ * only covers a frame the script misses). [data-se-hs-on] is set on the window while the
+ * stage is in use; a new Home is caught from .LibraryHome and what follows it, which needs no
+ * document-wide :has().
+ */
+html[data-se-hs-on] :not([data-se-hs]) > :is(.LibraryHome, .LibraryHome ~ *) {
+  visibility: hidden !important;
+}

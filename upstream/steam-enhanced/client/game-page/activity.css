@@ -1,0 +1,528 @@
+/*
+ * Game page › activity feed: screenshots, the trading card badge, feed layout, ratings,
+ * comments and the scroll-to-top button.
+ * Game page styles load in order: layout, play-bar, overview, achievements, friends, cards, activity.
+ *
+ * Continued, by section, in activity-feed.css, activity-comments.css (same folder), listed
+ * after this file in client/loader.js: together they keep one file's order.
+ */
+
+/*
+ * Activity feed
+ * Day labels small and quiet with a 1px divider; each event a card of its own: the
+ * friend's rounded-square avatar and the line ("gxr shared 28 screenshots"), then its content.
+ * Screenshots: the large one beside three small ones, the last small one "+N".
+ */
+/* AppActivityDate: the date with a 1px divider (Rule) running to the right */
+[data-se-sec="activity"] :is(._19LfMT7PFWg2xHOqNjR99q, .AppActivityDate):not(#se-none) {
+  display: flex !important;
+  align-items: center;
+  gap: var(--se-space-3);
+  margin: 0 var(--se-space-half) var(--se-space-2) !important;
+  text-transform: uppercase;
+  white-space: nowrap;
+  font: var(--se-label-font) !important;
+  letter-spacing: var(--se-label-spacing) !important;
+  color: var(--se-label-color) !important;
+}
+
+[data-se-sec="activity"] ._3pcPRPvuGH7hEM33zLknZO:not(#se-none),
+[data-se-sec="activity"] .Rule:not(#se-none) {
+  flex: 1;
+  height: 1px !important;
+  margin: 0 !important;
+  border: 0 !important;
+  background: var(--se-hairline) !important;
+}
+
+/* Every event card is the full width and only as tall as its content */
+[data-se-sec="activity"] :is(.UVeN0kaD3zv1feMj_mMw5, .Event):not(#se-none) {
+  display: block !important;
+  box-sizing: border-box;
+  width: 100% !important;
+  max-width: none !important;
+  height: auto !important;
+  margin: 0 0 var(--se-space-3) !important;
+  padding: var(--se-space-3) !important;
+  border: 0 !important;
+  border-radius: var(--se-radius-lg) !important;
+  background: var(--se-surface) !important;
+  box-shadow: var(--se-edge) !important;
+}
+
+[data-se-sec="activity"] .QCKBqF2k_sRLcXJ5qQIEl:not(#se-none),
+[data-se-sec="activity"] .EventHeadline:not(#se-none) {
+  display: flex !important;
+  align-items: center;
+  gap: var(--se-space-3);
+  margin: 0 !important;
+  padding: 0 !important;
+  font: 500 var(--se-fs-md)/1.4 var(--se-font) !important;
+  color: var(--se-text-dim) !important;
+}
+
+[data-se-sec="activity"] ._1t1iyV4uBG9M9tTM7rCFNu:not(#se-none),
+[data-se-sec="activity"] .ActorName:not(#se-none) {
+  font-weight: 700 !important;
+}
+
+[data-se-sec="activity"] ._1gVy5n_zNp3tXpwU2aV9k8 img:not(#se-none),
+[data-se-sec="activity"] .EventActorAvatar img:not(#se-none) {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: var(--se-avatar-radius) !important;
+  object-fit: cover;
+}
+
+[data-se-sec="activity"] ._1gVy5n_zNp3tXpwU2aV9k8 .avatarStatus:not(#se-none),
+[data-se-sec="activity"] .EventActorAvatar .avatarStatus:not(#se-none),
+[data-se-sec="activity"] ._1gVy5n_zNp3tXpwU2aV9k8 ._3xUpb5DWXPFNcHHIcv-9pe:not(#se-none),
+[data-se-sec="activity"] .EventActorAvatar ._3xUpb5DWXPFNcHHIcv-9pe:not(#se-none),
+[data-se-sec="activity"] ._1gVy5n_zNp3tXpwU2aV9k8 ._3pbKzT087jaL2EeQO1qsaR:not(#se-none),
+[data-se-sec="activity"] .EventActorAvatar ._3pbKzT087jaL2EeQO1qsaR:not(#se-none),
+[data-se-sec="activity"] ._1gVy5n_zNp3tXpwU2aV9k8 .AvatarStatus:not(#se-none),
+[data-se-sec="activity"] .EventActorAvatar .AvatarStatus:not(#se-none) {
+  display: none !important;
+}
+
+[data-se-sec="activity"] ._1gVy5n_zNp3tXpwU2aV9k8 .avatarHolder:not(#se-none),
+[data-se-sec="activity"] .EventActorAvatar .avatarHolder:not(#se-none),
+[data-se-sec="activity"] ._1gVy5n_zNp3tXpwU2aV9k8 ._1_sHcxv9rQdANehiviVZR4:not(#se-none),
+[data-se-sec="activity"] .EventActorAvatar ._1_sHcxv9rQdANehiviVZR4:not(#se-none),
+[data-se-sec="activity"] ._1gVy5n_zNp3tXpwU2aV9k8 .AvatarHolder:not(#se-none),
+[data-se-sec="activity"] .EventActorAvatar .AvatarHolder:not(#se-none) {
+  width: 34px !important;
+  height: 34px !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  background: none !important;
+}
+
+[data-se-sec="activity"] .NEMXhMlqXOCJwfgWlHXhT:not(#se-none),
+[data-se-sec="activity"] .EventBody:not(#se-none) {
+  margin: var(--se-space-3) 0 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+[data-se-sec="activity"] .NaIUAhNNISCMZymTaSPtz:not(#se-none),
+[data-se-sec="activity"] .EventBodyDivider:not(#se-none) {
+  display: none !important;
+}
+
+[data-se-sec="activity"] .KIhNeYTo-ZKI-HNt72V8R:not(#se-none),
+[data-se-sec="activity"] .ActivityPublishedScreenshot:not(#se-none) {
+  padding: 0 !important;
+  margin: 0 !important;
+  background: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/*
+ * Screenshots. Every post: the image large at 16:9 on the left, the comments on the
+ * right. Several in a post: the theme's viewer (.se-shot-car), the selected one large
+ * with a counter and a strip of thumbnails under it, five across; Steam's big picture
+ * and thumbnails hidden (they are what a click goes through, so Steam's viewer opens).
+ * The upload time sits at the right end of the headline (.se-ev-time).
+ */
+[data-se-sec="activity"] ._1pdQdoLxwmuMZpXXNHI2Uo:not(#se-none),
+[data-se-sec="activity"] .ScreenshotCarousel:not(#se-none) {
+  display: block !important;
+  height: auto !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: none !important;
+  overflow: visible !important;
+}
+
+[data-se-sec="activity"] :is(._1pdQdoLxwmuMZpXXNHI2Uo, .ScreenshotCarousel)[data-se-shots="many"] > ._290DqV3rdr3Mjn-Nfyv4My:not(#se-none),
+[data-se-sec="activity"] :is(._1pdQdoLxwmuMZpXXNHI2Uo, .ScreenshotCarousel)[data-se-shots="many"] > .ActiveScreenshot:not(#se-none),
+[data-se-sec="activity"] :is(._1pdQdoLxwmuMZpXXNHI2Uo, .ScreenshotCarousel)[data-se-shots="many"] > ._1tRKRV0z9mHiZb76QCyqGO:not(#se-none),
+[data-se-sec="activity"] :is(._1pdQdoLxwmuMZpXXNHI2Uo, .ScreenshotCarousel)[data-se-shots="many"] > .CarouselThumbs:not(#se-none) {
+  display: none !important;
+}
+
+.se-ev-time {
+  margin-left: auto;
+  padding-left: var(--se-space-3);
+  white-space: nowrap;
+  font: 500 var(--se-fs-base) var(--se-font);
+  color: var(--se-text-faint);
+}
+
+.se-shot-car {
+  display: flex;
+  flex-direction: column;
+  gap: var(--se-space-2);
+}
+
+.se-shot-main {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--se-radius-md);
+  overflow: hidden;
+  background: var(--se-surface-2);
+  cursor: pointer;
+}
+
+.se-shot-main img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.se-shot-main img:not([src]) {
+  visibility: hidden;
+}
+
+.se-shot-count {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  height: 26px;
+  padding: 0 var(--se-space-2);
+  border-radius: var(--se-radius-pill);
+  display: inline-flex;
+  align-items: center;
+  background: color-mix(in srgb, var(--se-bg-ink) 75%, transparent);
+  font: 700 var(--se-fs-base) var(--se-font);
+  color: var(--se-text);
+}
+
+.se-shot-strip {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: calc((100% - 32px) / 5);
+  gap: var(--se-space-2);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  padding: var(--se-space-half);
+  margin: calc(-1 * var(--se-space-half));
+}
+
+.se-shot-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.se-shot {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--se-radius-sm);
+  overflow: hidden;
+  background: var(--se-surface-2);
+  cursor: pointer;
+  opacity: .55;
+  transition: opacity var(--se-dur) ease-out;
+}
+
+.se-shot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.se-shot img:not([src]) {
+  visibility: hidden;
+}
+
+.se-shot:hover {
+  opacity: .9;
+}
+
+.se-shot[data-on] {
+  opacity: 1;
+  outline: 2px solid var(--se-accent);
+  outline-offset: 2px;
+}
+
+/* Keyboard focus on the theme's own controls on this page: one ring everywhere */
+.se-shot:focus-visible,
+.se-shot-main:focus-visible,
+.se-shot-open:focus-visible,
+.se-fr-tab:focus-visible,
+.se-fr-stack:focus-visible,
+.se-fr-all:focus-visible,
+.se-dlc-tile:focus-visible,
+.se-assoc-more:focus-visible,
+.se-news-link:focus-visible,
+.se-cm-tabs button:focus-visible {
+  outline: var(--se-focus-outline);
+  outline-offset: var(--se-focus-offset);
+}
+
+/* One screenshot: picture (60%) and its details (40%) */
+[data-se-sec="activity"] :is(._1pdQdoLxwmuMZpXXNHI2Uo, .ScreenshotCarousel)[data-se-shots="1"] > ._290DqV3rdr3Mjn-Nfyv4My:not(#se-none),
+[data-se-sec="activity"] :is(._1pdQdoLxwmuMZpXXNHI2Uo, .ScreenshotCarousel)[data-se-shots="1"] > .ActiveScreenshot:not(#se-none) {
+  display: grid !important;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: var(--se-space-5);
+  align-items: stretch;
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  border-radius: 0 !important;
+}
+
+[data-se-sec="activity"] :is(._1pdQdoLxwmuMZpXXNHI2Uo, .ScreenshotCarousel)[data-se-shots="1"] > ._290DqV3rdr3Mjn-Nfyv4My > .rRIYiTtpDYzW3EQ2BH-Kw:not(#se-none),
+[data-se-sec="activity"] :is(._1pdQdoLxwmuMZpXXNHI2Uo, .ScreenshotCarousel)[data-se-shots="1"] > .ActiveScreenshot > .rRIYiTtpDYzW3EQ2BH-Kw:not(#se-none),
+[data-se-sec="activity"] :is(._1pdQdoLxwmuMZpXXNHI2Uo, .ScreenshotCarousel)[data-se-shots="1"] > ._290DqV3rdr3Mjn-Nfyv4My > .ImageWrapper:not(#se-none),
+[data-se-sec="activity"] :is(._1pdQdoLxwmuMZpXXNHI2Uo, .ScreenshotCarousel)[data-se-shots="1"] > .ActiveScreenshot > .ImageWrapper:not(#se-none) {
+  position: relative !important;
+  inset: auto !important;
+  aspect-ratio: 16 / 9;
+  width: 100% !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: var(--se-radius-md);
+  overflow: hidden;
+  background: var(--se-surface-2);
+  cursor: pointer;
+}
+
+[data-se-sec="activity"] ._1pdQdoLxwmuMZpXXNHI2Uo ._290DqV3rdr3Mjn-Nfyv4My img:not(#se-none),
+[data-se-sec="activity"] ._1pdQdoLxwmuMZpXXNHI2Uo .ActiveScreenshot img:not(#se-none),
+[data-se-sec="activity"] .ScreenshotCarousel ._290DqV3rdr3Mjn-Nfyv4My img:not(#se-none),
+[data-se-sec="activity"] .ScreenshotCarousel .ActiveScreenshot img:not(#se-none) {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+  object-fit: cover !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Whatever Steam nests the image in fills the frame too */
+[data-se-sec="activity"] :is(._1pdQdoLxwmuMZpXXNHI2Uo, .ScreenshotCarousel)[data-se-shots="1"] > ._290DqV3rdr3Mjn-Nfyv4My > .rRIYiTtpDYzW3EQ2BH-Kw > :not(img):not(#se-none),
+[data-se-sec="activity"] :is(._1pdQdoLxwmuMZpXXNHI2Uo, .ScreenshotCarousel)[data-se-shots="1"] > ._290DqV3rdr3Mjn-Nfyv4My > .ImageWrapper > :not(img):not(#se-none),
+[data-se-sec="activity"] :is(._1pdQdoLxwmuMZpXXNHI2Uo, .ScreenshotCarousel)[data-se-shots="1"] > .ActiveScreenshot > .rRIYiTtpDYzW3EQ2BH-Kw > :not(img):not(#se-none),
+[data-se-sec="activity"] :is(._1pdQdoLxwmuMZpXXNHI2Uo, .ScreenshotCarousel)[data-se-shots="1"] > .ActiveScreenshot > .ImageWrapper > :not(img):not(#se-none) {
+  position: absolute !important;
+  inset: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+}
+
+[data-se-sec="activity"] :is(._1pdQdoLxwmuMZpXXNHI2Uo, .ScreenshotCarousel)[data-se-shots="1"] > ._290DqV3rdr3Mjn-Nfyv4My ._3ljAdVsP0faRHBhKgvOybK:not(#se-none),
+[data-se-sec="activity"] :is(._1pdQdoLxwmuMZpXXNHI2Uo, .ScreenshotCarousel)[data-se-shots="1"] > .ActiveScreenshot ._3ljAdVsP0faRHBhKgvOybK:not(#se-none),
+[data-se-sec="activity"] :is(._1pdQdoLxwmuMZpXXNHI2Uo, .ScreenshotCarousel)[data-se-shots="1"] > ._290DqV3rdr3Mjn-Nfyv4My .TimeStamp:not(#se-none),
+[data-se-sec="activity"] :is(._1pdQdoLxwmuMZpXXNHI2Uo, .ScreenshotCarousel)[data-se-shots="1"] > .ActiveScreenshot .TimeStamp:not(#se-none),
+[data-se-sec="activity"] :is(._1pdQdoLxwmuMZpXXNHI2Uo, .ScreenshotCarousel)[data-se-shots="1"] > ._290DqV3rdr3Mjn-Nfyv4My ._23HTprMKEMzlqooblsDngK:not(#se-none),
+[data-se-sec="activity"] :is(._1pdQdoLxwmuMZpXXNHI2Uo, .ScreenshotCarousel)[data-se-shots="1"] > .ActiveScreenshot ._23HTprMKEMzlqooblsDngK:not(#se-none),
+[data-se-sec="activity"] :is(._1pdQdoLxwmuMZpXXNHI2Uo, .ScreenshotCarousel)[data-se-shots="1"] > ._290DqV3rdr3Mjn-Nfyv4My .ScreenshotCaption:not(#se-none),
+[data-se-sec="activity"] :is(._1pdQdoLxwmuMZpXXNHI2Uo, .ScreenshotCarousel)[data-se-shots="1"] > .ActiveScreenshot .ScreenshotCaption:not(#se-none) {
+  display: none !important;
+}
+
+.se-shot-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--se-space-2);
+  min-width: 0;
+  padding: var(--se-space-1) var(--se-space-half);
+}
+
+.se-shot-kicker {
+  text-transform: uppercase;
+  font: var(--se-label-font) !important;
+  letter-spacing: var(--se-label-spacing) !important;
+  color: var(--se-label-color) !important;
+}
+
+.se-shot-game {
+  font: 800 var(--se-fs-2xl)/1.25 var(--se-font);
+  color: var(--se-text);
+}
+
+.se-shot-when {
+  font: 500 var(--se-fs-md)/1.5 var(--se-font);
+  color: var(--se-text-muted);
+}
+
+.se-shot-cap {
+  font: 500 var(--se-fs-md)/1.5 var(--se-font);
+  color: var(--se-text-dim);
+  overflow-wrap: anywhere;
+}
+
+.se-shot-open {
+  align-self: flex-start;
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--se-space-2);
+  height: var(--se-control-h);
+  padding: 0 var(--se-space-3);
+  border: 1px solid var(--se-divider);
+  border-radius: var(--se-radius-pill);
+  background: none;
+  cursor: pointer;
+  font: 600 var(--se-fs-base) var(--se-font);
+  color: var(--se-text);
+}
+
+.se-shot-open:hover {
+  background: var(--se-hover);
+}
+
+/* Achievements in the feed: rounded icons, the theme's text */
+/* Always five columns, so two or three sit where five would; the theme's copies of Steam's tile look the same */
+[data-se-sec="activity"] :is(.yJLy7HDLJT44C1fcm6lPI, .ActivityAchievementUnlocked):not(#se-none) {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  column-gap: var(--se-space-4) !important;
+  row-gap: var(--se-space-3) !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+[data-se-sec="activity"] :is(.yJLy7HDLJT44C1fcm6lPI, .ActivityAchievementUnlocked) > *:not(#se-none) {
+  min-width: 0;
+  grid-column: auto !important;
+}
+
+[data-se-sec="activity"] :is(.yJLy7HDLJT44C1fcm6lPI, .ActivityAchievementUnlocked) img:not(#se-none) {
+  border-radius: var(--se-radius-md) !important;
+}
+
+/*
+ * The trading card badge as a small panel (cards.js tags BadgeSection with data-se-badge):
+ * the badge in a round frame (gold edge when crafted, a dashed ring with a card mark when not
+ * yet), a small label (Next badge / Your badge / Max level), then its name and level. Any other
+ * picture beside it stays small; the cards keep their grid under it.
+ */
+[data-se-sec="cards"] [data-se-badge]:not(#se-none) {
+  display: flex !important;
+  align-items: center !important;
+  gap: var(--se-space-3) !important;
+  margin: 0 0 var(--se-space-3) !important;
+  padding: var(--se-space-3) var(--se-space-3) !important;
+  border: 0 !important;
+  border-radius: var(--se-radius-md) !important;
+  background: var(--se-surface-2) !important;
+  box-shadow: none !important;
+  background-image: none !important;
+}
+
+[data-se-sec="cards"] [data-se-badge] img:not(#se-none) {
+  flex: 0 0 64px !important;
+  width: 64px !important;
+  max-width: 64px !important;
+  height: 64px !important;
+  object-fit: contain;
+}
+
+[data-se-sec="cards"] [data-se-badge] :is(.RPcyJMJC7chgPFkD4KWtO, ._1zopSLK5O_2X44s_Xy3IO-, .Badge):not(#se-none) {
+  flex: 0 0 52px !important;
+  width: 52px !important;
+  height: 52px !important;
+  max-width: 52px !important;
+  margin: 0 !important;
+  border-radius: 50% !important;
+  box-sizing: border-box;
+  object-fit: contain;
+}
+
+[data-se-sec="cards"] :is([data-se-badge="crafted"], [data-se-badge="maxed"]) :is(.RPcyJMJC7chgPFkD4KWtO, ._1zopSLK5O_2X44s_Xy3IO-, .Badge):not(#se-none) {
+  padding: var(--se-space-1) !important;
+  background: radial-gradient(circle, color-mix(in srgb, var(--se-gold) 18%, transparent), color-mix(in srgb, var(--se-gold) 4%, transparent) 70%) !important;
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--se-gold) 55%, transparent) !important;
+  border: 0 !important;
+}
+
+[data-se-sec="cards"] [data-se-badge="none"] :is(.RPcyJMJC7chgPFkD4KWtO, ._1zopSLK5O_2X44s_Xy3IO-, .Badge):not(#se-none) {
+  border: 2px dashed var(--se-white-18) !important;
+  position: relative;
+  background: none !important;
+}
+
+/* Its placeholder icon: a mask in the muted text tone */
+[data-se-sec="cards"] [data-se-badge="none"] :is(.RPcyJMJC7chgPFkD4KWtO, ._1zopSLK5O_2X44s_Xy3IO-, .Badge)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--se-text-muted);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='7' y='4' width='11' height='15' rx='2' fill='%23000' fill-opacity='.28' stroke='%23000' stroke-width='1.6'/%3E%3Cpath d='M5 7.5v10.5a2 2 0 0 0 2 2h8' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") center / 20px 20px no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='7' y='4' width='11' height='15' rx='2' fill='%23000' fill-opacity='.28' stroke='%23000' stroke-width='1.6'/%3E%3Cpath d='M5 7.5v10.5a2 2 0 0 0 2 2h8' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") center / 20px 20px no-repeat;
+  pointer-events: none;
+}
+
+[data-se-sec="cards"] [data-se-badge] :is(._3QrX3TTEetJIRvEW1x2Af2, ._36fG0uZyuCsYavuVvPrzst, .BadgeInfo):not(#se-none) {
+  display: flex !important;
+  flex-direction: column;
+  gap: var(--se-space-half);
+  min-width: 0;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+[data-se-sec="cards"] [data-se-badge] :is(._3QrX3TTEetJIRvEW1x2Af2, ._36fG0uZyuCsYavuVvPrzst, .BadgeInfo)::before {
+  content: 'Your badge';
+  text-transform: uppercase;
+  color: var(--se-gold-text);
+  font: var(--se-label-font) !important;
+  letter-spacing: var(--se-label-spacing) !important;
+}
+
+[data-se-sec="cards"] [data-se-badge="none"] :is(._3QrX3TTEetJIRvEW1x2Af2, ._36fG0uZyuCsYavuVvPrzst, .BadgeInfo)::before {
+  content: 'Next badge';
+  color: var(--se-text-faint);
+}
+
+[data-se-sec="cards"] [data-se-badge="maxed"] :is(._3QrX3TTEetJIRvEW1x2Af2, ._36fG0uZyuCsYavuVvPrzst, .BadgeInfo)::before {
+  content: 'Max level';
+}
+
+[data-se-sec="cards"] [data-se-badge] :is(._3ca2d1qaIzPNm79jqRbi0J, .rmU5gSpGCyzzdzzL66_h, .BadgeName):not(#se-none) {
+  margin: 0 !important;
+  font: 700 var(--se-fs-md)/1.3 var(--se-font) !important;
+  color: var(--se-text) !important;
+}
+
+[data-se-sec="cards"] [data-se-badge] :is(._2PMlMbFfEmv1xThuy6Vgqv, ._1p820T7Fx7HLM4wdPqJd3Z, .BadgeLevel):not(#se-none) {
+  margin: 0 !important;
+  font: 500 var(--se-fs-sm)/1.3 var(--se-font) !important;
+  color: var(--se-text-muted) !important;
+}
+
+/*
+ * Trading cards grow on hover (native animation): nothing around them clips it,
+ * and the hovered card sits above its neighbors.
+ */
+[data-se-sec="cards"]:not(#se-none),
+[data-se-sec="cards"] ._2r4TK4BAuU-J4FuF_O7v_5:not(#se-none),
+[data-se-sec="cards"] ._31ptFGGMZrSQc5BCX1e5lm:not(#se-none),
+[data-se-sec="cards"] ._5uvIN6jXDXzzck59F-nhv:not(#se-none),
+[data-se-sec="cards"] [data-se-cgrid]:not(#se-none) {
+  overflow: visible !important;
+}
+
+[data-se-sec="cards"] [data-se-cgrid] > :hover {
+  z-index: 10;
+}

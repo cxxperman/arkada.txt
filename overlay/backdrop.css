@@ -1,0 +1,160 @@
+/*
+ * The window backdrop: Mica or Acrylic of Windows 11 showing through the Steam windows.
+ *
+ * Every rule waits for <html data-arkada-backdrop="mica|acrylic">. The Arkada plugin puts it there
+ * only once its backend has asked Windows for the backdrop and Windows agreed (plugin/src/backdrop.js,
+ * plugin/backend/main.lua); which one comes from the setting «Подложка окна» (--arkada-backdrop,
+ * options/backdrop-*.css). Without the plugin, or with the setting «Выкл», nothing here applies and
+ * the windows stay as opaque as ever.
+ *
+ * The layers, so that the tint is laid once and never piles up (each tint over another one turns
+ * the window opaque again: three of them at 58 % let through less than 8 %):
+ *
+ *   the root      transparent: the material is under the whole window
+ *   the frame     body's first child, the whole window: the one dark tint (--arkada-tint), so that
+ *                 text stays readable over a light wallpaper
+ *   their ground  --se-bg (the page, the game list, the friends dock, downloads, dialogs) is clear
+ *                 in a window with Steam's frame: the frame under it already carries the tint. Everything they mix from it — surfaces,
+ *                 hover, fields, the accent and danger surfaces — becomes Fluent's layer, white or a
+ *                 colour over clear (overlay/tokens.css: --se-surface = --se-bg + white 3.5 % …)
+ *   covers        what has to hide what scrolls under it (sticky bars, the glass bar) keeps a tint of
+ *                 its own: it is small, and it is there to cover
+ *   art           the scrims that faded art into the ground fade the art itself (mask), into the material
+ *   pop-ups       menus, tooltips and dropdowns are small windows with Acrylic under them: their panel
+ *                 (--arkada-acrylic) gets thinner so the acrylic shows
+ *   Steam's own   grounds Steam paints itself (ForceOpaqueBackground, the game page's body…) are cleared
+ *
+ * :root:root[…] outranks their tokens, ours (html:root) and their settings (:root:root); rules on
+ * their elements add :not(#ark) as overlay/win11.css does, to beat their :not(#se-none).
+ * Checked with a scan of every element (alpha ≥ 0.85 over ≥ 4 % of the window, ::before and ::after
+ * and gradients too) and of the layers stacked at a grid of points: home, game pages, downloads,
+ * the friends list, menus.
+ */
+/*
+ * The tint is light: under it is Windows' dark acrylic (or dark Mica), which already darkens what is
+ * behind the window. Over it, by the tokens (--dt-label white, --dt-label-2 78.6 %, --dt-label-3 54.4 %
+ * on --dt-bg #202020 at 30 %): on dark acrylic over a white wallpaper (luminosity layer #2C2C2C at
+ * 0.8–0.96) the background comes to ~#2E–#46 and the text to 9–13.5 : 1, the second line 6.6–9 : 1,
+ * the third 5 : 1. Mica is wallpaper-coloured, so it keeps a little more (35 %).
+ * --arkada-cover is for what has to hide what scrolls under it.
+ */
+:root:root[data-arkada-backdrop] {
+  --arkada-tint: color-mix(in srgb, var(--dt-bg) 35%, transparent);
+  --arkada-cover: color-mix(in srgb, var(--dt-bg) 72%, transparent);
+  --se-bg: var(--arkada-tint);
+  --se-bg-ink: color-mix(in srgb, var(--dt-bg) 78%, transparent);
+  --se-glass: color-mix(in srgb, var(--dt-bg) 72%, transparent);
+  --se-glass-chip: color-mix(in srgb, var(--dt-bg) 70%, transparent);
+  --arkada-acrylic: color-mix(in srgb, var(--dt-raised) 50%, transparent);
+  --se-panel-bg: var(--arkada-acrylic);
+}
+
+/* A window with Steam's frame (SteamUIPopupWindow: the main window, friends, dialogs): the frame lays
+   the tint, so their ground is clear. Elsewhere (menus: ContextMenuPopup, whose window is bigger than
+   the menu, for its shadow) there is no frame, and their ground and surfaces keep the tint */
+:root:root[data-arkada-backdrop]:has(> body > :is(.SteamUIPopupWindow, ._1mfQu39T7gxcr0KSHso6_A):first-child) {
+  --se-bg: transparent;
+  --se-glass-bar: var(--arkada-cover);
+}
+
+/* Acrylic: Windows' own, which already darkens and grains what is behind the window */
+:root:root[data-arkada-backdrop='acrylic'] {
+  --arkada-tint: color-mix(in srgb, var(--dt-bg) 30%, transparent);
+}
+
+/* Blur (the default): the accent blur, no luminosity layer of its own, so what is behind the window
+   shows as it is, blurred (as in Discord). The lightest tint: 18 %. On a white wallpaper that is too
+   little for white text (≈1.6 : 1); on the usual dark or busy one it reads. Menus are not see-through
+   in any mode (no backdrop, no mark: their panel is solid). */
+:root:root[data-arkada-backdrop='blur'] {
+  --arkada-tint: color-mix(in srgb, var(--dt-bg) 18%, transparent);
+}
+
+:root:root[data-arkada-backdrop],
+:root:root[data-arkada-backdrop] body {
+  background: transparent !important;
+}
+
+/* The frame: the tint, once, under the whole window */
+:root:root[data-arkada-backdrop] body > div:first-child {
+  background: var(--arkada-tint);
+}
+
+/* ───────── Steam's own grounds ─────────
+ * Wrapper ForceOpaqueBackground (black under the whole main window), AppDetailsTransitionGroup
+ * (under every library page), the game page's Body ScrollContainer (a grey ground, or a radial
+ * gradient with Glassy) */
+:root:root[data-arkada-backdrop] ._1ENHEsrSLcTRtPQFl1F-wL._1DvwQt0JN-Ogp_4tVZdkzX:not(#ark),
+:root:root[data-arkada-backdrop] ._2Dd4T78PcCTUVgOtDGFY5j:not(#ark),
+:root:root[data-arkada-backdrop] ._3lDczhulqraStjCitLYJ1K._2l416KfEtI4CL0mCUEmOBw:not(#ark) {
+  background: transparent !important;
+}
+
+/* A card Steam paints with a gradient of its own (the Workshop highlight on a game page): a layer */
+:root:root[data-arkada-backdrop] ._38t1mljBjmJfqjpVzMT1CG:not(#ark) {
+  background: var(--arkada-layer-2) !important;
+}
+
+/* The game list's top: GameListHomeAndSearch (a dark strip of Steam's), its Home and collection
+   buttons (Bar: Fluent's control), the search field (Container) and a game page's comment field
+   (PostTextEntryArea): their fills were Steam's near-opaque greys */
+:root:root[data-arkada-backdrop] ._2TKEazUUS3TlniZfpc8OOe:not(#ark) {
+  background: transparent !important;
+}
+
+:root:root[data-arkada-backdrop] ._3pSPluBgf0NeR1kkCLWMhR:not(#ark) {
+  background-color: var(--arkada-control) !important;
+}
+
+:root:root[data-arkada-backdrop] ._3pSPluBgf0NeR1kkCLWMhR:not(#ark):hover {
+  background-color: var(--arkada-control-hover) !important;
+}
+
+:root:root[data-arkada-backdrop] ._20QAC4WMXm8qFE8waUT5oo:not(#ark),
+:root:root[data-arkada-backdrop] ._3x31AgESSlUqX3D4MTHv2m ._1JlC29Ic6L-QvL-39X_d-X:not(#ark) {
+  background: var(--se-field) !important;
+}
+
+/* ───────── Covers: a sticky bar hides what scrolls under it ─────────
+ * AppGridSectionHeader (the title bar of a collection's group) */
+:root:root[data-arkada-backdrop] ._3bWISeqP3H2j6YJnFwVEwu:not(#ark)::after {
+  background: var(--arkada-cover) !important;
+}
+
+/* ───────── Art fades into the material ─────────
+ * Their scrims ran from clear to their ground; with the ground clear they would vanish and the art
+ * end on a hard edge. The art itself fades instead, at the same stops. */
+
+/* The game page's hero (Header, HeaderBackgroundImage); this also cuts off Steam's blurred
+   reflection of the art under the page (ImgBlur), which would show through the clear page */
+:root:root[data-arkada-backdrop] ._2gZXhRmKUk68pA28-5ZmGQ:not(#ark)::after {
+  background: none !important;
+}
+
+:root:root[data-arkada-backdrop] ._2gZXhRmKUk68pA28-5ZmGQ ._1IX7FPSY9Jb82KhBVBSkZa:not(#ark) {
+  -webkit-mask-image: linear-gradient(180deg, black 38%, color-mix(in srgb, black 68%, transparent) 62%, color-mix(in srgb, black 22%, transparent) 83%, transparent 100%);
+  mask-image: linear-gradient(180deg, black 38%, color-mix(in srgb, black 68%, transparent) 62%, color-mix(in srgb, black 22%, transparent) 83%, transparent 100%);
+}
+
+/* Home's stage: the art settles into the material toward the tray (their grade's foot did it in a
+   near-opaque dark) */
+:root:root[data-arkada-backdrop] .se-hs-grade:not(#ark)::before {
+  background: none !important;
+}
+
+:root:root[data-arkada-backdrop] .se-hs-art:not(#ark) {
+  -webkit-mask-image: linear-gradient(180deg, black calc(var(--se-hs-h, 60%) - 260px), color-mix(in srgb, black 38%, transparent) calc(var(--se-hs-h, 60%) - 40px), color-mix(in srgb, black 10%, transparent) calc(var(--se-hs-h, 60%) + 90px), transparent 100%);
+  mask-image: linear-gradient(180deg, black calc(var(--se-hs-h, 60%) - 260px), color-mix(in srgb, black 38%, transparent) calc(var(--se-hs-h, 60%) - 40px), color-mix(in srgb, black 10%, transparent) calc(var(--se-hs-h, 60%) + 90px), transparent 100%);
+}
+
+/* Downloads: the art of the game being downloaded, behind the page */
+:root:root[data-arkada-backdrop] ._1bq4x9pa4-9RLY-dXWUZTp > .se-dl-backdrop:not(#ark) {
+  -webkit-mask-image: linear-gradient(180deg, color-mix(in srgb, black 90%, transparent) 0%, color-mix(in srgb, black 55%, transparent) 45%, transparent 100%);
+  mask-image: linear-gradient(180deg, color-mix(in srgb, black 90%, transparent) 0%, color-mix(in srgb, black 55%, transparent) 45%, transparent 100%);
+}
+
+/* A collection's banner */
+:root:root[data-arkada-backdrop] .se-cb-art:not(#ark) {
+  -webkit-mask-image: linear-gradient(180deg, color-mix(in srgb, black 85%, transparent) 0%, color-mix(in srgb, black 45%, transparent) 55%, transparent 100%);
+  mask-image: linear-gradient(180deg, color-mix(in srgb, black 85%, transparent) 0%, color-mix(in srgb, black 45%, transparent) 55%, transparent 100%);
+}

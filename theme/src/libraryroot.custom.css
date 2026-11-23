@@ -1,0 +1,979 @@
+/* arkada.txt — главное окно Steam: каркас окна, шапка, библиотека, страница игры, загрузки, нижняя панель.
+ * Основа (переменные, кнопки, диалоги, меню, подсказки) — в base.css.
+ *
+ * Классы вида .\@PlayBar — читаемые имена хешированных классов Steam; хеши подставляет tools/build.js
+ * из steam-classes.json. Где имя есть в нескольких модулях, после него названо ещё одно имя того же
+ * модуля: .\@TopBar\@URLBar — «TopBar из модуля, где есть URLBar».
+ * Специфичность селекторов повторяет специфичность правил самого Steam (их видно в <Steam>\steamui\css),
+ * поэтому !important здесь почти не нужен.
+ *
+ * Каркас как у приложения Windows 11 (WinUI 3): окно — фон Mica (спокойный тон с едва заметным оттенком
+ * акцента); список игр, основная область и нижняя панель — слои Fluent, чуть светлее фона, с тонкой
+ * обводкой 1px и зазором --arkada-gap от краёв окна и друг от друга. Тяжёлых теней и свечений нет;
+ * акриловое размытие — только у всплывающих элементов (меню, подсказки, выпадающие списки — base.css).
+ * Все крупные контейнеры внутри слоёв прозрачные. */
+
+@import url("./base.css");
+
+:root {
+  --arkada-gap: 8px;
+  /* Слой Fluent поверх Mica: белый 4% по фону окна и обводка ~8% */
+  --arkada-layer: color-mix(in srgb, white 4%, transparent);
+  --arkada-layer-solid: color-mix(in srgb, var(--dt-bg), white 6%);
+  --arkada-layer-edge: inset 0 0 0 1px var(--dt-separator);
+  /* Карточка на слое (раздел страницы игры, «Итоги игры», «Избранное») */
+  --arkada-card: color-mix(in srgb, white 3%, transparent);
+  /* Индикатор выбранного пункта (NavigationView / ListView): 3px, скругление */
+  --arkada-indicator: 3px;
+}
+
+/* ═════════ Каркас окна ═════════ */
+html.MillenniumWindow_MainSteamWindow body { background: var(--dt-bg); }
+.\@Wrapper\@ForceOpaqueBackground.\@ForceOpaqueBackground\@URLBar { background: var(--arkada-window-bg); }
+
+/* Полоска 12px между шапкой и библиотекой — прозрачный зазор */
+.\@LocalContentContainer .\@URLBarReplacement {
+  min-height: var(--arkada-gap);
+  height: var(--arkada-gap);
+  background: transparent;
+  box-shadow: none;
+}
+.\@LocalContentContainer.\@Library\@URLBar .\@URLBarReplacement,
+.\@LocalContentContainer.\@Library\@URLBar .\@URLBarReplacement.Maximized,
+.Maximized .\@LocalContentContainer.\@Library\@URLBar .\@URLBarReplacement { box-shadow: none; }
+
+/* Библиотека: список слева и основная область — две панели с зазором */
+.\@Container\@ExitGameDialog,
+.\@Container\@MainBrowser {
+  box-sizing: border-box;
+  padding: 0 var(--arkada-gap) var(--arkada-gap);
+}
+.\@LeftListSizableContainer\@ExitGameDialog > .\@Container\@GameListHomeAndSearch,
+.\@LeftListSizableContainer\@MainBrowser > .\@Container\@GameListHomeAndSearch {
+  border-radius: var(--arkada-r-block);
+  background: var(--arkada-layer);
+  background-image: none;
+  box-shadow: var(--arkada-layer-edge);
+}
+.\@MainPanel\@ExitGameDialog,
+.\@MainPanel\@MainBrowser {
+  border-radius: var(--arkada-r-block);
+  background: var(--arkada-layer);
+  box-shadow: var(--arkada-layer-edge);
+}
+/* Содержимое основной области обрезается по скруглению панели (overflow: hidden у Steam уже стоит) */
+.\@AppDetailsTransitionGroup\@ExitGameDialog,
+.\@AppDetailsTransitionGroup\@MainBrowser {
+  border-radius: var(--arkada-r-block);
+  background: transparent;
+}
+
+/* Перегородка между панелями: сам зазор, при наведении — тонкая линия посередине */
+.\@LibraryWindowDivider\@ExitGameDialog,
+.\@LibraryWindowDivider\@MainBrowser {
+  width: var(--arkada-gap);
+  min-width: var(--arkada-gap);
+  background: transparent;
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out);
+}
+.\@LibraryWindowDivider\@ExitGameDialog.\@Sizable\@ExitGameDialog:hover,
+.\@LibraryWindowDivider\@MainBrowser.\@Sizable\@MainBrowser:hover {
+  background: linear-gradient(to right, transparent 3px, var(--dt-fill-2) 3px, var(--dt-fill-2) 5px, transparent 5px);
+}
+.\@IsResizingLeftList\@ExitGameDialog .\@LibraryWindowDivider\@ExitGameDialog,
+.\@IsResizingLeftList\@MainBrowser .\@LibraryWindowDivider\@MainBrowser {
+  background: linear-gradient(to right, transparent 3px, var(--arkada-accent) 3px, var(--arkada-accent) 5px, transparent 5px);
+}
+
+/* ═════════ Шапка окна ═════════
+ * TopBar = TitleBar (меню Steam/Вид/…, место для перетаскивания, кнопки аккаунта, кнопки окна)
+ *        + SuperNavBar (назад/вперёд, вкладки Магазин/Библиотека/Сообщество/Профиль). */
+.\@TopBar\@URLBar,
+.\@TopBar\@URLBar.Maximized,
+.Maximized .\@TopBar\@URLBar {
+  background: transparent;
+  box-shadow: none;
+}
+/* Светящаяся линия под шапкой у активного окна */
+.\@FocusBar\@URLBar { display: none; }
+
+/* Меню Steam, Вид, Друзья, Игры, Справка */
+.\@RootMenuButton {
+  margin-block: 4px;
+  padding: 2px 8px;
+  border-radius: var(--arkada-r-tip);
+  color: var(--dt-label-2);
+  transition: background var(--dt-dur-fast) var(--dt-ease-out), color var(--dt-dur-fast) var(--dt-ease-out);
+}
+.\@RootMenuButton:hover:not(.\@Disabled\@RootMenuButton) {
+  background: var(--dt-fill);
+  color: var(--dt-label);
+}
+.\@RootMenuButton.\@Disabled\@RootMenuButton { color: var(--dt-label-3); }
+
+/* Кнопки справа в шапке: объявления, уведомления, аккаунт с кошельком — стекло, без синих плашек */
+.\@AnnouncementsButton,
+.\@NotificationsButton.\@NoNew\@NotificationsButton,
+.\@NotificationsButton.\@WasNew\@NotificationsButton,
+.\@AccountMenu\@NotificationsButton {
+  border-radius: var(--arkada-r-tip);
+  background-color: var(--dt-fill);
+  color: var(--dt-label-2);
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out), color var(--dt-dur-fast) var(--dt-ease-out);
+}
+.\@AnnouncementsButton:hover,
+.\@AccountMenu\@NotificationsButton:hover {
+  background-color: var(--dt-fill-2);
+  color: var(--dt-label);
+}
+.\@AnnouncementsButton.\@Active\@NotificationsButton,
+.\@NotificationsButton.\@HasNew\@NotificationsButton {
+  border-radius: var(--arkada-r-tip);
+  background-color: var(--arkada-accent-soft);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--arkada-accent) 45%, transparent);
+  color: var(--dt-label);
+}
+.\@AnnouncementsButton.\@Active\@NotificationsButton:hover,
+.\@NotificationsButton.\@HasNew\@NotificationsButton:not(.\@Disabled\@NotificationsButton):hover {
+  background-color: color-mix(in srgb, var(--arkada-accent) 36%, transparent);
+}
+.\@AccountMenu\@NotificationsButton .\@WalletBalance\@NotificationsButton { color: var(--dt-label-3); }
+.\@AccountMenu\@NotificationsButton.ingame { background-color: color-mix(in srgb, var(--dt-green) 24%, transparent); }
+.\@Button\@NotificationsButton:hover { color: var(--dt-label); }
+
+/* Вторая строка шапки — компактнее */
+.\@SuperNavBar\@URLBar {
+  height: 34px;
+  min-height: 34px;
+  padding: 0 0 0 var(--arkada-gap);
+}
+
+/* Назад / вперёд */
+.\@Arrow\@SuperNavMenu {
+  border-radius: var(--arkada-r-tip);
+  color: var(--dt-label-3);
+  transition: color var(--dt-dur-fast) var(--dt-ease-out), background-color var(--dt-dur-fast) var(--dt-ease-out);
+}
+.\@Arrow\@SuperNavMenu.\@Enabled\@SuperNavMenu:hover { color: var(--dt-label); background-color: var(--dt-fill); }
+.\@Arrow\@SuperNavMenu.\@Disabled\@SuperNavMenu { color: var(--dt-fill-2); }
+
+/* Вкладки Магазин / Библиотека / Сообщество / Профиль — как верхний NavigationView в WinUI:
+ * мягкая заливка при наведении и у выбранной, под выбранной — короткая акцентная полоска 3px. */
+.\@SuperNav\@SuperNavMenu .\@SuperNavMenu,
+.\@SuperNav\@SuperNavMenu .\@SuperNavMenu:first-child,
+.\@SuperNav\@SuperNavMenu .\@SuperNavMenu:last-child {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 2px;
+  box-sizing: border-box;
+  font-family: var(--dt-font-text);
+  font-size: var(--dt-size-body);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  -webkit-app-region: no-drag;
+}
+.\@SuperNav\@SuperNavMenu .\@SuperNavMenu:nth-child(1 of .\@SuperNavMenu) { margin-inline-start: 6px; }
+.\@SuperNav\@SuperNavMenu .\@SuperNavMenu .\@MenuButton\@SuperNavMenu {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 30px;
+  max-width: 200px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  border-radius: var(--arkada-r-control);
+  color: var(--dt-label-2);
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out), color var(--dt-dur-fast) var(--dt-ease-out);
+}
+.\@SuperNavMenu:hover:not(.\@Disabled\@SuperNavMenu) .\@MenuButton\@SuperNavMenu {
+  color: var(--dt-label);
+  text-shadow: none;
+  background-color: var(--dt-fill);
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out), color var(--dt-dur-fast) var(--dt-ease-out);
+}
+.\@SuperNavMenu:active:not(.\@Disabled\@SuperNavMenu) .\@MenuButton\@SuperNavMenu {
+  color: var(--dt-label-2);
+  background-color: var(--dt-fill-press);
+}
+.\@SuperNavMenu.\@Selected\@SuperNavMenu:not(.\@Disabled\@SuperNavMenu) .\@MenuButton\@SuperNavMenu {
+  color: var(--dt-label);
+  text-shadow: none;
+  font-weight: 400;
+  background-color: var(--dt-fill);
+}
+/* Индикатор выбранной вкладки: полоска Steam, сжатая до 16×3 по центру низа */
+.\@SuperNavMenu.\@Selected\@SuperNavMenu:not(.\@Disabled\@SuperNavMenu) .\@MenuButton\@SuperNavMenu::after {
+  position: absolute;
+  left: 50%;
+  bottom: 1px;
+  width: 16px;
+  height: var(--arkada-indicator);
+  margin: 0 0 0 -8px;
+  border-radius: 2px;
+  background: var(--arkada-accent);
+  animation: arkada-indicator-in var(--dt-dur-base) var(--dt-ease-out);
+}
+@keyframes arkada-indicator-in { from { transform: scaleX(0.3); opacity: 0; } }
+.\@SuperNavMenu.\@Disabled\@SuperNavMenu .\@MenuButton\@SuperNavMenu { color: var(--dt-label-3); }
+
+/* Строка адреса над страницами магазина и сообщества */
+.\@BrowserWrapper\@URLBar .\@URLBar\@TopBar {
+  background: transparent;
+  box-shadow: inset 0 -1px 0 var(--dt-separator);
+}
+.\@BrowserWrapper\@URLBar .\@URLBar\@TopBar .\@StatusIcon\@SuperNavBar { color: var(--dt-label-3); }
+.\@BrowserWrapper\@URLBar .\@URLBar\@TopBar .\@ReloadButton\@URLBar:hover {
+  background: var(--dt-fill);
+  border-radius: var(--arkada-r-tip);
+  color: var(--dt-label);
+}
+.\@URLBarText\@SuperNavBar { color: var(--dt-label-3); }
+
+/* ═════════ Левый список библиотеки ═════════ */
+.\@GameListHomeAndSearch,
+.\@GameListHomeAndSearch.Maximized,
+.Maximized .\@GameListHomeAndSearch {
+  padding: 8px 8px 2px;
+  background: none;
+  box-shadow: none;
+}
+
+/* Кнопка «Главная» и кнопка коллекций — нейтральное стекло, выбранная чуть светлее и с точкой акцента */
+.\@Bar\@CollectionBar {
+  border: 1px solid var(--dt-edge);
+  border-top-color: var(--dt-edge-top);
+  border-radius: var(--arkada-r-control);
+  background-color: var(--dt-fill);
+  background-image: none;
+  color: var(--dt-label);
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out), transform var(--dt-dur-fast) var(--dt-ease-out);
+}
+.\@Bar\@CollectionBar:hover { background-color: var(--dt-fill-2); }
+.\@Bar\@CollectionBar:active { transform: scale(0.98); transition-duration: var(--dt-dur-press); }
+.\@Bar\@CollectionBar.\@Selected\@CollectionBar {
+  background-color: var(--dt-fill-2);
+  border-color: var(--dt-edge-top);
+}
+.\@Bar\@CollectionBar .\@Icon\@CollectionBar { opacity: 0.5; }
+.\@Bar\@CollectionBar:hover .\@Label\@CollectionBar { color: var(--dt-label); }
+.\@Bar\@CollectionBar .\@CollectionIconBox\@CollectionBar { background-color: var(--dt-label-3); border-radius: 2px; }
+.\@Bar\@CollectionBar:hover .\@CollectionIconBox\@CollectionBar,
+.\@Bar\@CollectionBar.\@Selected\@CollectionBar .\@CollectionIconBox\@CollectionBar { background-color: var(--dt-label); }
+
+/* Выпадающий список вида: «Игры и программы» */
+.\@Bar\@ViewFiltersBar { padding-inline: 2px; }
+.\@Bar\@ViewFiltersBar .\@MenuHeader\@ViewFiltersBar {
+  border: 0;
+  border-radius: var(--arkada-r-control);
+  background-color: var(--dt-fill);
+  color: var(--dt-label-2);
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out), color var(--dt-dur-fast) var(--dt-ease-out);
+}
+.\@Bar\@ViewFiltersBar .\@MenuHeader\@ViewFiltersBar:hover {
+  background-color: var(--dt-fill-2);
+  color: var(--dt-label);
+}
+.\@Bar\@ViewFiltersBar .\@MenuHeader\@ViewFiltersBar .\@Arrow\@ViewFiltersBar polygon { fill: var(--dt-label-3); }
+
+/* Поиск */
+.\@Container\@SearchFilterInput {
+  margin-inline: 8px;
+  border-radius: var(--arkada-r-control);
+  background-color: var(--dt-fill);
+  box-shadow: inset 0 0 0 1px var(--dt-edge);
+  transition: box-shadow var(--dt-dur-fast) var(--dt-ease-out), background-color var(--dt-dur-fast) var(--dt-ease-out);
+}
+.\@Container\@SearchFilterInput:focus-within {
+  background-color: var(--dt-fill-2);
+  box-shadow: inset 0 0 0 1px var(--arkada-accent);
+}
+.\@Container\@SearchFilterInput .\@SearchInput\@SearchFilterInput { color: var(--dt-label); border-radius: var(--arkada-r-control); }
+.\@Container\@SearchFilterInput .\@SearchInput\@SearchFilterInput .DialogTextInputBase {
+  background-color: transparent !important; /* base.css красит все поля с !important; здесь поле внутри своей рамки */
+  box-shadow: none !important;
+}
+.\@Container\@SearchFilterInput .\@SearchInput\@SearchFilterInput .DialogTextInputBase:hover {
+  background-color: transparent;
+  box-shadow: none;
+}
+
+/* Полоса фильтров: «Недавние», вид, «Готовые к игре», «Загруженные» */
+.\@Bar\@ViewFiltersBar .\@Filters\@ViewFiltersBar .\@CheckboxWithImage\@ViewFiltersBar {
+  border-radius: var(--arkada-r-tip);
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out);
+}
+.\@Bar\@ViewFiltersBar .\@Filters\@ViewFiltersBar .\@CheckboxWithImage\@ViewFiltersBar:hover { background-color: var(--dt-fill); }
+
+/* Заголовки коллекций и групп в списке — Caption 12, полужирный, приглушённый (как группы в списках WinUI) */
+.\@Container\@SectionHeaderContent {
+  border-radius: var(--arkada-r-tip);
+  border-color: transparent;
+  background: none;
+  color: var(--dt-label-3);
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out);
+}
+.\@Container\@SectionHeaderContent.\@HoverOverlay\@SectionHeaderContent { background-color: var(--dt-fill); }
+.\@Container\@SectionHeaderContent.\@Selected\@SectionHeaderContent {
+  background: var(--dt-fill-2);
+  box-shadow: none;
+}
+.\@SectionHeaderContent { color: var(--dt-label-3); }
+.\@SectionHeaderContent svg { fill: var(--dt-label-3); }
+.\@SectionHeaderContent:hover .\@SectionName { color: var(--dt-label); }
+.\@SectionName {
+  font-size: var(--dt-size-caption);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--dt-label-3);
+}
+.\@SectionCount\@SectionHeaderContent { color: var(--dt-label-3); opacity: 0.7; }
+
+/* Строки игр — как ListView в WinUI: скругление, мягкая заливка при наведении, у выбранной — заливка
+ * и короткая вертикальная акцентная полоска слева.
+ * Цвета состояний — из токенов: запущенная зелёная, обновляется — акцент, не установлена — тусклая */
+.\@Container\@GameListEntryName {
+  position: relative;
+  margin-inline: 6px;
+  font-size: var(--dt-size-body);
+  border-radius: var(--arkada-r-tip);
+  border-color: transparent;
+  color: var(--dt-label-2);
+  transition: background-color var(--dt-dur-press) var(--dt-ease-out), color var(--dt-dur-press) var(--dt-ease-out);
+}
+.\@Container\@GameListEntryName:hover,
+.\@Container\@GameListEntryName.\@HoverOverlay\@GameListEntryName {
+  background-color: var(--dt-fill);
+  border-radius: var(--arkada-r-tip);
+  color: var(--dt-label);
+}
+.\@Selected\@GameListEntryName.\@Container\@GameListEntryName,
+.\@Selected\@GameListEntryName .\@Container\@GameListEntryName {
+  background-color: var(--dt-fill-2);
+  box-shadow: none;
+}
+.\@Selected\@GameListEntryName.\@Container\@GameListEntryName::before,
+.\@Selected\@GameListEntryName .\@Container\@GameListEntryName::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 50%;
+  width: var(--arkada-indicator);
+  height: 14px;
+  margin-top: -7px;
+  border-radius: 2px;
+  background: var(--arkada-accent);
+}
+.\@Selected\@GameListEntryName.\@Container\@GameListEntryName:hover,
+.\@Selected\@GameListEntryName.\@Container\@GameListEntryName.\@HoverOverlay\@GameListEntryName,
+.\@Selected\@GameListEntryName .\@Container\@GameListEntryName:hover,
+.\@Selected\@GameListEntryName .\@Container\@GameListEntryName.\@HoverOverlay\@GameListEntryName {
+  background-color: color-mix(in srgb, white 11%, transparent);
+}
+.\@Container\@GameListEntryName.\@Selected\@GameListEntryName.\@Installed\@GameListEntryName { color: var(--dt-label); }
+.\@HasContextMenuOpen\@GameListEntryName:hover,
+.\@HasContextMenuOpen\@GameListEntryName.\@Container\@GameListEntryName.\@HoverOverlay\@GameListEntryName { background-color: var(--dt-fill-2); }
+.\@Container\@GameListEntryName.\@Installed\@GameListEntryName { color: var(--dt-label-2); }
+.\@Container\@GameListEntryName.\@Installed\@GameListEntryName:hover { color: var(--dt-label); }
+.\@Container\@GameListEntryName.\@Uninstalled\@GameListEntryName { color: var(--dt-label-3); }
+.\@Container\@GameListEntryName.\@Uninstalled\@GameListEntryName:hover,
+.\@Container\@GameListEntryName.\@Uninstalled\@GameListEntryName.\@HoverOverlay\@GameListEntryName,
+.\@Container\@GameListEntryName.\@Selected\@GameListEntryName.\@Uninstalled\@GameListEntryName,
+.\@Selected\@GameListEntryName .\@Container\@GameListEntryName.\@Uninstalled\@GameListEntryName { color: var(--dt-label-2); }
+.\@Container\@GameListEntryName.\@Running\@GameListEntryName { color: var(--dt-green); }
+.\@Container\@GameListEntryName.\@Running\@GameListEntryName .\@DownloadProgress\@GameListEntryName { color: var(--dt-green); }
+.\@Container\@GameListEntryName.\@Updating\@GameListEntryName,
+.\@Container\@GameListEntryName.\@Selected\@GameListEntryName.\@Updating\@GameListEntryName,
+.\@Selected\@GameListEntryName .\@Container\@GameListEntryName.\@Updating\@GameListEntryName {
+  color: var(--arkada-accent-hi);
+  font-weight: 400;
+}
+/* Значок игры в строке — со скруглением */
+.\@GameListEntryContainer\@GameListEntryName .\@GameIcon\@GameListEntryName { border-radius: 5px; overflow: hidden; }
+
+/* ═════════ Главная библиотеки ═════════ */
+.\@Container\@LibraryHomeSection,
+.\@LibraryHome\@LibraryHomeSection {
+  background: transparent;
+  background-image: none;
+}
+/* Содержимое главной — карточки на слое (как режим Panel у Zehn, но в виде Windows 11):
+ * «Что нового» и каждая полка — отдельная карточка со скруглением 8 и обводкой 1px */
+.\@UpdatesContainer {
+  height: auto;
+  margin: 12px 12px 0;
+  padding: 14px 16px 12px;
+  border-radius: var(--arkada-r-block);
+  background: var(--arkada-card);
+  background-image: none;
+  box-shadow: var(--arkada-layer-edge);
+}
+.\@ShowcaseOuter {
+  margin-bottom: 12px;
+  padding: 10px 8px 4px;
+  border-radius: var(--arkada-r-block);
+  background: var(--arkada-card);
+  box-shadow: var(--arkada-layer-edge);
+}
+.\@UpdatesContainer .\@Name\@PageableContainer {
+  font-family: var(--dt-font-display);
+  font-size: var(--dt-size-title);
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--dt-label);
+}
+/* Заголовки полок: «Недавние игры», «Все игры», свои полки */
+.\@LibraryHomeSection .\@Header\@LibraryHomeSection { color: var(--dt-label); }
+.\@LibraryHomeSection .\@Header\@LibraryHomeSection .\@Name\@LibraryHomeSection {
+  font-family: var(--dt-font-display);
+  font-size: var(--dt-size-title);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.\@LibraryHomeSection .\@Header\@LibraryHomeSection .\@Rule\@LibraryHomeSection {
+  height: 1px;
+  background-color: var(--dt-separator);
+}
+.\@ShowcaseHeader { color: var(--dt-label); }
+.\@ShowcaseHeader .\@Rule\@ShowcaseHeader {
+  height: 1px;
+  border-radius: 1px;
+  background-color: var(--dt-separator);
+}
+.\@ShowcaseHeader .\@Count\@ShowcaseHeader {
+  font-family: var(--dt-font-display);
+  font-size: var(--dt-size-heading);
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--dt-label-3);
+}
+/* Название полки — выпадающий список Steam: крупный заголовок без рамки поля.
+ * base.css красит все .DialogDropDown с !important — здесь без рамки, поэтому тоже !important */
+.\@ShowcaseHeader .\@CollectionDropDown\@ShowcaseHeader .DialogDropDown {
+  height: auto;
+  padding: 2px 6px 2px 0;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.\@ShowcaseHeader .\@CollectionDropDown\@ShowcaseHeader .DialogDropDown:hover { background: var(--dt-fill) !important; }
+.\@ShowcaseHeader .\@CollectionDropDown\@ShowcaseHeader .DialogDropDown_CurrentDisplay {
+  font-family: var(--dt-font-display);
+  font-size: var(--dt-size-title);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--dt-label);
+}
+.\@ShowcaseHeader .\@CollectionDropDown\@ShowcaseHeader .DialogDropDown_Arrow { color: var(--dt-label-3); }
+.\@ShowcaseHeader .\@SortingDropDown\@ShowcaseHeader { color: var(--dt-label-3); }
+/* «Сортировка: по алфавиту» — подпись Caption, без капса и разрядки */
+.\@ShowcaseHeader .\@SortingDropDownLabel\@CollectionOptionsRightJustified {
+  font-size: var(--dt-size-caption);
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--dt-label-3);
+}
+.\@ShowcaseHeader ._DialogInputContainer {
+  font-size: var(--dt-size-caption);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+/* Карточки игр: скругление 8 и тонкая обводка; при наведении — едва заметный подъём, без свечения */
+.\@LibraryItemBox\@LibraryItemBoxShine {
+  border: 0;
+  border-radius: var(--arkada-r-block);
+  box-shadow: 0 0 0 1px var(--dt-edge);
+  transition-property: filter, box-shadow, transform;
+  transition-duration: var(--dt-dur-fast);
+  transition-timing-function: var(--dt-ease-out);
+}
+.\@HoversEnabled\@LibraryItemBoxShine .\@LibraryItemBox\@LibraryItemBoxShine:hover,
+.\@HoversEnabled\@LibraryItemBoxShine .\@LibraryItemBox\@LibraryItemBoxShine:has(~ .\@LibraryItemBoxSubscript\@LibraryItemBoxShine:hover),
+.\@HoversEnabled\@LibraryItemBoxShine .\@LibraryItemBox\@LibraryItemBoxShine.\@ShowAsHovered\@LibraryItemBoxShine {
+  transform: translateY(-2px);
+  filter: brightness(1.04);
+  box-shadow: 0 0 0 1px var(--dt-edge-top), 0 4px 12px color-mix(in srgb, black 26%, transparent);
+}
+.\@HoversEnabled\@LibraryItemBoxShine .\@LibraryItemBox\@LibraryItemBoxShine:hover:active,
+.\@HoversEnabled\@LibraryItemBoxShine .\@LibraryItemBox\@LibraryItemBoxShine.\@ShowAsHovered\@LibraryItemBoxShine:active {
+  transform: none;
+  transition-duration: var(--dt-dur-press);
+  filter: brightness(0.94);
+}
+/* Блик Steam поверх обложки — убираем */
+.\@LibraryItemBoxShine { display: none; }
+/* Обложки внутри карточки — тем же скруглением */
+.\@LibraryItemBox\@LibraryItemBoxShine > div:first-child,
+.\@LibraryItemBox\@LibraryItemBoxShine img { border-radius: inherit; }
+
+/* Недавняя игра: блок «Вы играли» — непрозрачный слой Fluent вместо синего, кнопка «Играть» — акцентом */
+.\@RecentGameFooter {
+  background-color: var(--arkada-layer-solid);
+  box-shadow: inset 0 1px 0 var(--dt-separator);
+  border-end-start-radius: var(--arkada-r-block);
+  border-end-end-radius: var(--arkada-r-block);
+}
+.\@RecentGameFooter .\@FooterBlurImageContainer { display: none; }
+.\@RecentGameFooter .\@PlaytimeDetails\@RecentGameFooter.\@Header\@RecentGameFooter {
+  color: var(--dt-label);
+  font-size: var(--dt-size-body);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.\@RecentGameFooter .\@PlaytimeDetails\@RecentGameFooter { color: var(--dt-label-2); font-size: var(--dt-size-caption); }
+/* Кнопки на обложках (играть, скачать): нейтральная кнопка; «Играть» — сплошной акцент (AccentButton), не зелёный */
+.\@LibraryItemActionButton\@FeaturedCapsule {
+  border-radius: var(--arkada-r-control);
+  background: var(--arkada-layer-solid);
+  box-shadow: var(--arkada-layer-edge);
+}
+.\@FeaturedCapsule .\@LibraryItemActionButton\@FeaturedCapsule,
+.\@LibraryItemActionButton\@FeaturedCapsule.\@Play\@FeaturedCapsule:not(.\@Disabled\@FeaturedCapsule) {
+  background: var(--arkada-accent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, white 8%, transparent);
+}
+.\@HoversEnabled\@FeaturedCapsule .\@LibraryItemActionButton\@FeaturedCapsule.\@Play\@FeaturedCapsule:not(.\@Disabled\@FeaturedCapsule):hover {
+  background: color-mix(in srgb, var(--arkada-accent) 90%, transparent);
+}
+.\@HoversEnabled\@FeaturedCapsule .\@LibraryItemBox\@FeaturedCapsule .\@LibraryItemActionButton\@FeaturedCapsule:hover:not(.\@Disabled\@FeaturedCapsule):not(.\@Play\@FeaturedCapsule) {
+  background: color-mix(in srgb, var(--dt-bg), white 10%);
+}
+.\@LibraryItemActionButton\@FeaturedCapsule.\@Play\@FeaturedCapsule:not(.\@Disabled\@FeaturedCapsule) .SVGIcon_Play,
+.\@LibraryItemActionButton\@FeaturedCapsule .SVGIcon_Play { fill: var(--dt-label); }
+
+/* «Что нового» — карточки событий */
+.\@PartnerEventRowCapsule_Container .\@PartnerEventRowCapsule_MainImageContainer {
+  border-radius: var(--arkada-r-block);
+  box-shadow: 0 0 0 1px var(--dt-edge);
+  transition: box-shadow var(--dt-dur-fast) var(--dt-ease-out);
+}
+.\@PartnerEventRowCapsule_Container.\@HoversEnabled\@PartnerEventRowCapsule_Container:hover .\@PartnerEventRowCapsule_MainImageContainer {
+  box-shadow: 0 0 0 1px var(--dt-edge-top), 0 4px 12px color-mix(in srgb, black 26%, transparent);
+}
+.\@PartnerEventRowCapsule_Container .\@EventSummaryContainer\@PartnerEventRowCapsule_Container { border-radius: var(--arkada-r-block); }
+.\@PartnerEventRowCapsule_Container .\@EventTimeSpan\@PartnerEventRowCapsule_Container {
+  border-top-left-radius: var(--arkada-r-tip);
+  background-color: var(--arkada-accent);
+  color: var(--dt-label);
+}
+.\@PartnerEventRowCapsule_Container.\@HoversEnabled\@PartnerEventRowCapsule_Container:hover .\@EventSummaryContainer\@PartnerEventRowCapsule_Container {
+  background-color: color-mix(in srgb, var(--dt-bg) 78%, transparent);
+}
+.\@PartnerEventRowCapsule .\@EventTime\@PartnerEventRowCapsule { color: var(--dt-label-3); }
+.\@PartnerEventRowCapsule .\@PartnerEventRowCapsule_TextTitle { color: var(--dt-label); }
+.\@PartnerEventRowCapsule .\@GameIconAndName\@PartnerEventRowCapsule {
+  border-radius: var(--arkada-r-tip);
+  background-color: var(--dt-fill);
+}
+
+/* «Добавить новый раздел» */
+.\@AddShowcaseRow { color: var(--dt-label-2); }
+.\@AddShowcaseRow .\@AddShowcase {
+  border: 1px solid var(--dt-edge);
+  border-top-color: var(--dt-edge-top);
+  border-radius: var(--arkada-r-control);
+  background: var(--dt-fill);
+  opacity: 1;
+  transition: background var(--dt-dur-fast) var(--dt-ease-out), transform var(--dt-dur-fast) var(--dt-ease-out);
+}
+.\@AddShowcaseRow.\@ButtonHovered\@AddShowcaseRow .\@AddShowcase {
+  background: var(--dt-fill-2);
+  color: var(--dt-label);
+}
+.\@AddShowcaseRow .\@AddShowcase:active { background: var(--dt-fill-press); color: var(--dt-label-2); transition-duration: var(--dt-dur-press); }
+.\@AddShowcaseRow .\@Rule\@AddShowcaseRow { background-color: var(--dt-separator); }
+.\@AddShowcaseRow svg line,
+.\@AddShowcaseRow svg circle { stroke: var(--dt-label-2); }
+.\@AddShowcaseRow.\@ButtonHovered\@AddShowcaseRow svg line,
+.\@AddShowcaseRow.\@ButtonHovered\@AddShowcaseRow svg circle { stroke: var(--dt-label); }
+
+/* ═════════ Страница игры ═════════ */
+.\@ScrollContainer\@ShowPlayBar,
+.\@Glassy\@ShowPlayBar.\@ScrollContainer\@ShowPlayBar {
+  background-color: transparent;
+  background-image: none;
+}
+.\@Container\@SpotlightLeftColumn .\@ColumnContainer\@SpotlightLeftColumn { background-color: transparent; }
+
+/* Шапка-герой на всю ширину, нижний край плавно уходит в слой панели */
+.\@TopCapsule\@HeaderBackgroundImage { background-color: transparent; }
+/* Маска с «мягким плечом»: до 30% картинка целиком, к 70% остаётся треть, к низу — ничего.
+ * Так даже белая картинка не обрывается краем над полосой запуска */
+.\@HeaderBackgroundImage {
+  --arkada-hero-fade: linear-gradient(to bottom,
+    black 30%,
+    color-mix(in srgb, black 72%, transparent) 50%,
+    color-mix(in srgb, black 32%, transparent) 70%,
+    color-mix(in srgb, black 8%, transparent) 86%,
+    transparent 100%);
+  -webkit-mask-image: var(--arkada-hero-fade);
+  mask-image: var(--arkada-hero-fade);
+}/* Подложка Steam под полосой запуска не нужна: полоса сама — слой */
+.\@Backdrop\@BackdropGlass .\@BackdropGlass,
+.\@BackdropGlass { background: none; backdrop-filter: none; }
+
+/* Полоса запуска — плавающий слой Fluent с отступом от краёв панели: непрозрачный, обводка 1px.
+ * Когда страница прокручена, та же полоса прилипает к верху (StickyHeader) */
+.\@PlayBar\@PlayBarGameName,
+.\@Glassy\@PlayBarGameName.\@PlayBar\@PlayBarGameName {
+  width: auto;
+  margin-inline: 16px;
+  border-radius: var(--arkada-r-block);
+  background: var(--arkada-layer-solid);
+  box-shadow: var(--arkada-layer-edge);
+  backdrop-filter: none;
+}
+.\@StickyHeader\@PlayBarGameName .\@PlayBar\@PlayBarGameName,
+.\@StickyHeader\@PlayBarGameName .\@Glassy\@PlayBarGameName {
+  margin-top: 8px;
+  padding-top: 0;
+  background: var(--arkada-layer-solid);
+  box-shadow: var(--arkada-layer-edge), 0 8px 16px color-mix(in srgb, black 26%, transparent);
+  backdrop-filter: none;
+}
+.\@StickyHeaderShadow\@PlayBarGameName { display: none; }
+
+/* Большая кнопка: Играть, Установить, Обновить, Остановить — сплошной акцент, как AccentButton в WinUI.
+ * Наведение — чуть прозрачнее, нажатие — ещё прозрачнее и текст приглушается */
+.\@PlayButtonContainer {
+  border-radius: var(--arkada-r-control);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, white 8%, transparent);
+}
+.\@ButtonChild\@PlayButtonContainer,
+.\@Green\@PlayButtonContainer > .\@ButtonChild\@PlayButtonContainer,
+.\@Green\@PlayButtonContainer > .\@ButtonChild\@PlayButtonContainer.\@StreamingSelector\@PlayButtonContainer {
+  background: var(--arkada-accent);
+  background-size: 100% 100%;
+  color: var(--dt-label);
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out), color var(--dt-dur-fast) var(--dt-ease-out);
+}
+.\@Green\@PlayButtonContainer > .\@ButtonChild\@PlayButtonContainer.\@StreamingSelector\@PlayButtonContainer {
+  box-shadow: inset 1px 0 0 color-mix(in srgb, black 18%, transparent);
+}
+:not(.\@Disabled\@PlayButtonContainer) > .\@ButtonChild\@PlayButtonContainer:hover,
+:not(.\@Disabled\@PlayButtonContainer) > .\@Green\@PlayButtonContainer > .\@ButtonChild\@PlayButtonContainer:hover {
+  background: color-mix(in srgb, var(--arkada-accent) 90%, transparent);
+  background-size: 100% 100%;
+  color: var(--dt-label);
+}
+:not(.\@Disabled\@PlayButtonContainer) > .\@ButtonChild\@PlayButtonContainer:active,
+:not(.\@Disabled\@PlayButtonContainer) > .\@Green\@PlayButtonContainer > .\@ButtonChild\@PlayButtonContainer:active {
+  background: color-mix(in srgb, var(--arkada-accent) 80%, transparent);
+  color: var(--dt-label-2);
+  transition-duration: var(--dt-dur-press);
+}
+.\@Green\@PlayButtonContainer > .\@ButtonChild\@PlayButtonContainer svg,
+:not(.\@Disabled\@PlayButtonContainer) > .\@Green\@PlayButtonContainer > .\@ButtonChild\@PlayButtonContainer:hover svg { fill: currentColor; }
+.\@PlayButton\@PlayButtonContainer .\@ButtonText\@PlayButtonContainer {
+  font-family: var(--dt-font-text);
+  font-size: var(--dt-size-body);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Время в игре, последний запуск, достижения */
+.\@GameStat\@PlayBarGameName {
+  border-radius: var(--arkada-r-control);
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out);
+}
+.\@ClickablePlayBarItem.\@GameStat\@PlayBarGameName:hover { background-color: var(--dt-fill); }
+.\@GameStat\@PlayBarGameName .\@CloudIconSVG,
+.\@GameStat\@PlayBarGameName .\@AchievementSVG { color: var(--dt-label-3); }
+.\@PlayBarLabel {
+  color: var(--dt-label-3);
+  font-size: var(--dt-size-caption);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.\@PlayBarDetailLabel,
+.\@LastPlayed .\@LastPlayedInfo { color: var(--dt-label); font-size: var(--dt-size-body); }
+
+/* Кнопки справа: настройки, сведения, избранное — обычные кнопки WinUI: нейтральная заливка с обводкой */
+.\@MenuButton\@PlayBarGameName {
+  border: 1px solid var(--dt-edge);
+  border-top-color: var(--dt-edge-top);
+  border-radius: var(--arkada-r-control);
+  background: var(--dt-fill);
+  color: var(--dt-label-2);
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out), color var(--dt-dur-fast) var(--dt-ease-out);
+}
+.\@MenuButton\@PlayBarGameName:hover { background: var(--dt-fill-2); color: var(--dt-label); }
+.\@MenuButton\@PlayBarGameName:active { background: var(--dt-fill-press); color: var(--dt-label-2); transition-duration: var(--dt-dur-press); }
+.\@MenuButton\@PlayBarGameName.\@MenuActive\@PlayBarGameName { background: var(--dt-fill-2); color: var(--dt-label); }
+
+/* Разделы страницы: лента активности слева, колонки справа (друзья, достижения, карточки, заметки).
+ * Заголовок раздела — Body Strong (14, полужирный), как подписи групп в «Параметрах» Windows */
+.\@AppDetailsSection { font-family: inherit; color: var(--dt-label-2); }
+.\@AppDetailsSection .\@SectionHeader\@PadLeft {
+  font-family: var(--dt-font-text);
+  font-size: var(--dt-size-body);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--dt-label);
+}
+.\@AppDetailsSectionContainer { border-radius: var(--arkada-r-block); }
+/* Карточки правой колонки */
+.\@AppDetailsSectionContainer.\@RightColumnSection\@AppDetailsSectionContainer {
+  border: 0;
+  border-image: none;
+  background: var(--arkada-card);
+  box-shadow: var(--arkada-layer-edge);
+  overflow: hidden;
+}
+/* Ссылки «Страница в магазине», «Центр сообщества»… — карточка, а не серый градиент Steam */
+.\@LinksSection > div {
+  background: var(--arkada-card) !important; /* у Steam здесь фон с !important */
+  box-shadow: var(--arkada-layer-edge) !important;
+}
+.\@LinksSection .\@Link\@LinksSection {
+  border-radius: var(--arkada-r-control);
+  color: var(--dt-label-2);
+  transition: color var(--dt-dur-fast) var(--dt-ease-out), background-color var(--dt-dur-fast) var(--dt-ease-out);
+}
+.\@LinksSection .\@Link\@LinksSection:hover { color: var(--dt-label); background-color: var(--dt-fill); }
+/* Мастерская: серый фон под кнопкой */
+.\@WorkshopContainer { background: transparent; background-image: none; }
+
+/* «Итоги игры» — карточка */
+.\@SummaryCarouselContainer {
+  border-radius: var(--arkada-r-block);
+  background: var(--arkada-card);
+  background-image: none;
+  box-shadow: var(--arkada-layer-edge);
+}
+/* Заголовок «Итоги игры» — как остальные заголовки разделов: Body Strong, без капса */
+.\@GamePlaySummaryHeader {
+  font-family: var(--dt-font-text);
+  font-size: var(--dt-size-body);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--dt-label);
+}
+
+/* Лента активности: поле «Расскажите…» и дни ленты — карточки на слое */
+.\@PostTextEntry\@AddToFeed.\@AddToFeed,
+.\@AppActivityDay\@PartnerEventLargeImage_Container {
+  border: 0;
+  border-radius: var(--arkada-r-block);
+  background: var(--arkada-card);
+  box-shadow: var(--arkada-layer-edge);
+}
+.\@AppActivityDay\@PartnerEventLargeImage_Container {
+  margin-bottom: 8px;
+  padding: 12px 16px;
+  color: var(--dt-label-3);
+}
+.\@PartnerEventLargeImage_Container,
+.\@PartnerEventMediumImage_Container,
+.\@PartnerEventSmallImageAndTextOnly_Container,
+.\@PartnerEventTextOnly_Container {
+  border-radius: var(--arkada-r-block);
+  /* clip-path, а не overflow: hidden — overflow сделал бы блок шириной 100% новым контекстом,
+   * и он ушёл бы под плавающую правую колонку страницы игры */
+  clip-path: inset(0 round var(--arkada-r-block));
+}
+
+/* «Избранное» — крупное обновление: карточка с тонкой обводкой вместо синей рамки и синего заголовка */
+.\@Event\@PartnerEventFeatured.\@PartnerEventFeatured {
+  border: 0;
+  border-image: none;
+  border-radius: var(--arkada-r-block);
+  background: var(--arkada-card);
+  box-shadow: var(--arkada-layer-edge);
+  clip-path: inset(0 round var(--arkada-r-block));
+}
+.\@Event\@PartnerEventFeatured .\@PartnerEventFeaturedHeader {
+  padding: 6px 16px;
+  background: var(--dt-fill);
+  color: var(--dt-label);
+  font-size: var(--dt-size-caption);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Друзья, которые играют */
+.\@FriendsSection\@FriendsPlayingNowGrid .\@SubsectionHeader\@FriendsPlayingNowGrid { color: var(--dt-label-3); }
+
+/* ═════════ Нижняя панель: загрузки, друзья и чат — плавающая стеклянная полоса ═════════ */
+.\@BottomBar\@FriendsButton,
+.\@BottomBar\@FriendsButton.Maximized,
+.Maximized .\@BottomBar\@FriendsButton {
+  flex: 0 0 40px;
+  margin: 0 var(--arkada-gap) var(--arkada-gap);
+  padding: 0 8px;
+  border-radius: var(--arkada-r-block);
+  background: var(--arkada-layer);
+  box-shadow: var(--arkada-layer-edge);
+}
+.\@AddGameButton,
+.\@FriendsButton {
+  padding-inline: 6px;
+  border-radius: var(--arkada-r-tip);
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out), transform var(--dt-dur-fast) var(--dt-ease-out);
+}
+.\@AddGameButton:hover,
+.\@FriendsButton:hover:not(.\@Disabled\@FriendsButton) { background-color: var(--dt-fill); }
+.\@AddGameButton:active,
+.\@FriendsButton:active:not(.\@Disabled\@FriendsButton) { transform: scale(0.97); transition-duration: var(--dt-dur-press); }
+.\@AddGameButton .\@Icon\@FriendsButton,
+.\@FriendsButton .\@Icon\@FriendsButton { color: var(--dt-label-3); }
+.\@AddGameButton .\@Text\@FriendsButton,
+.\@FriendsButton .\@Text\@FriendsButton { color: var(--dt-label-2); }
+.\@AddGameButton:hover .\@Icon\@FriendsButton,
+.\@FriendsButton:hover:not(.\@Disabled\@FriendsButton) .\@Icon\@FriendsButton,
+.\@AddGameButton:hover .\@Text\@FriendsButton,
+.\@FriendsButton:hover:not(.\@Disabled\@FriendsButton) .\@Text\@FriendsButton { color: var(--dt-label); }
+.\@ProgressBarWrapper\@FriendsButton .\@ProgressBar\@FriendsButton {
+  --color-progress-bar-foreground: var(--arkada-accent);
+  --color-progress-bar-background: var(--dt-fill);
+}
+
+/* ═════════ Страница загрузок ═════════
+ * Здесь списка игр нет: основная область лежит прямо в LocalContentContainer — тот же слой с зазором.
+ * Текущая загрузка и каждая секция очереди — карточки на слое. */
+.\@LocalContentContainer > .\@MainPanel\@ExitGameDialog,
+.\@LocalContentContainer > .\@MainPanel\@MainBrowser { margin: 0 var(--arkada-gap) var(--arkada-gap); }
+.\@DownloadsPage { padding: 12px; background: transparent; }
+.\@TopSection\@DownloadsPage .\@Section\@DownloadsPage.\@Active\@DownloadsPage,
+.\@ItemLists\@DownloadsPage .\@Section\@DownloadsPage {
+  margin-top: 0;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-radius: var(--arkada-r-block);
+  background: var(--arkada-card);
+  box-shadow: var(--arkada-layer-edge);
+  overflow: hidden;
+}
+.\@TopSection\@DownloadsPage .\@Section\@DownloadsPage.\@Active\@DownloadsPage { padding-bottom: 0; }
+.\@DownloadsPage .\@TopSection\@DownloadsPage { margin-bottom: 12px; }
+/* Синий градиент-подложка Steam слева от графика, когда загрузок нет */
+.\@HeroAndLogo\@DownloadGraphStatsWrapper.\@Empty\@DownloadGraphStatsWrapper { display: none; }
+.\@SectionTitle\@DownloadsPage {
+  font-family: var(--dt-font-display);
+  font-size: var(--dt-size-title);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.\@SectionTitle\@DownloadsPage .\@Count\@DownloadsPage {
+  color: var(--dt-label-3);
+  font-size: var(--dt-size-body);
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.\@SectionTitle\@DownloadsPage .\@Rule\@DownloadsPage { height: 1px; background-color: var(--dt-separator); }
+
+/* Текущая загрузка: кромка при наведении — стеклянная, не синяя */
+.\@DownloadSectionActiveItem\@DownloadsPage .\@HoverRing\@DownloadsPage {
+  border-width: 1px;
+  border-radius: var(--arkada-r-block);
+}
+.\@DownloadSectionActiveItem\@DownloadsPage:hover .\@HoverRing\@DownloadsPage { border-color: var(--dt-edge-top); }
+.\@DropOption\@DownloadsPage .\@DownloadSectionActiveItem\@DownloadsPage .\@HoverRing\@DownloadsPage { border-color: var(--arkada-accent); }
+.\@DownloadSectionActiveItem\@DownloadsPage .\@Bottom\@DownloadsPage .\@DownloadTimeRemaining\@DownloadsPage { color: var(--dt-label-2); }
+
+/* График скорости */
+.\@DownloadGraph\@DownloadGraphWrapper .\@GraphBarWrapper\@DownloadGraphWrapper,
+.\@DownloadGraph\@DownloadGraphWrapper .\@GraphBarDownload { color: color-mix(in srgb, var(--arkada-accent) 55%, transparent); }
+.\@DownloadGraph\@DownloadGraphWrapper .\@GraphBarWrapper\@DownloadGraphWrapper:hover .\@GraphBar\@DownloadGraphWrapper { color: var(--arkada-accent-hi); }
+.\@DownloadGraph\@DownloadGraphWrapper .\@GraphBarWrapper\@DownloadGraphWrapper:hover .\@DiskPoint\@DownloadGraphWrapper { color: var(--dt-label); }
+.\@StatsPanel\@DownloadGraphWrapper .\@Status\@DownloadGraphWrapper { font-family: var(--dt-font-display); color: var(--dt-label); }
+
+/* Очередь */
+.\@SectionItem\@DownloadsPage {
+  border-radius: var(--arkada-r-row);
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out);
+}
+.\@SectionItem\@DownloadsPage:hover { background-color: var(--dt-fill); }
+.\@SectionItemStatus\@DownloadsPage .\@ProgressBar\@DownloadsPage {
+  border-radius: 2px;
+  background-color: var(--dt-fill);
+  overflow: hidden;
+}
+.\@SectionItemStatus\@DownloadsPage .\@ProgressBar\@DownloadsPage div { background-color: var(--arkada-accent); }
+.\@SectionItemStatus\@DownloadsPage .\@ProgressBar\@DownloadsPage.\@Network\@DownloadsPage div { background-color: color-mix(in srgb, var(--arkada-accent) 50%, transparent); }
+.\@SectionItemStatus\@DownloadsPage .\@ProgressBar\@DownloadsPage.\@Disk\@DownloadsPage div { background-color: var(--dt-green); }
+
+/* ═════════ Сведения об игре при наведении на обложку ═════════
+ * Всплывающая карточка — как всплывающие элементы WinUI: акрил, скругление 8, обводка, мягкая тень.
+ * Размытая обложка на фоне у Steam даёт грязный бурый тон — приглушаем её под акрил */
+.\@AppPortraitHover {
+  border: 1px solid var(--dt-edge);
+  border-top-color: var(--dt-edge-top);
+  border-radius: var(--arkada-r-block);
+  background-color: var(--dt-menu);
+  box-shadow: 0 8px 16px color-mix(in srgb, black 26%, transparent);
+  backdrop-filter: blur(30px) saturate(1.25);
+}
+.\@AppPortraitHover .\@CapsuleBackground\@AppPortraitHover { filter: blur(24px) opacity(18%) saturate(0.6); }
+.\@AppPortraitHover .\@AppTitleContainer\@AppPortraitHover {
+  font-family: var(--dt-font-text);
+  font-size: var(--dt-size-body);
+  font-weight: 600;
+  color: var(--dt-label);
+}
+.\@AppPortraitHover .\@PlaytimeDetails\@AppPortraitHover { color: var(--dt-label-2); font-size: var(--dt-size-caption); }
+.\@AppPortraitHover .\@PlaytimeDetails\@AppPortraitHover .\@Header\@AppPortraitHover {
+  color: var(--dt-label);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* ═════════ Регистр: как в Windows 11, без капса и разрядки ═════════
+ * Steam пишет многие подписи капсом через text-transform; строки в локализации уже в нужном регистре. */
+.\@PartnerEventType,
+.\@PartnerEventType .\@DayPosted,
+.\@AppActivityDay .\@AppActivityDate,
+.\@ScrollToTopButton,
+.\@ScrollToTopButton *,
+.\@HeaderFeatures .\@InCollection\@HeaderFeatures,
+.\@FilterBucket .\@FilterBucketLabel,
+.\@DownloadGraphStatsWrapper .\@Label\@DownloadGraphStatsWrapper,
+.\@LegendRow .\@LegendText,
+.\@DownloadGraphLegend .\@LegendText {
+  text-transform: none;
+  letter-spacing: 0;
+}
+.\@LegendRow .\@LegendText,
+.\@DownloadGraphLegend .\@LegendText { font-family: var(--dt-font-text); font-size: var(--dt-size-caption); }
+.\@PartnerEventType { font-size: var(--dt-size-body); font-weight: 600; }
+.\@AppActivityDay .\@AppActivityDate {
+  font-size: var(--dt-size-body);
+  font-weight: 600;
+  color: var(--dt-label);
+}
+
+/* Подложки-«блики» в карточках правой колонки (значок, Мастерская, обзоры) — ровная заливка слоя */
+.\@AppDetailsSectionContainer .\@Highlight\@AppDetailsSectionContainer {
+  border-radius: 0;
+  border-bottom: 1px solid var(--dt-separator);
+  box-shadow: none;
+  color: var(--dt-label-2);
+  background: var(--dt-fill);
+  background-image: none;
+}
+
+/* ═════════ Меньше движения ═════════
+ * Длительности уже нулевые (tokens.css и base.css); здесь убираются сами сдвиги, чтобы ничего не прыгало. */
+:root[data-arkada-motion='reduced'] .\@HoversEnabled\@LibraryItemBoxShine .\@LibraryItemBox\@LibraryItemBoxShine:hover,
+:root[data-arkada-motion='reduced'] .\@HoversEnabled\@LibraryItemBoxShine .\@LibraryItemBox\@LibraryItemBoxShine.\@ShowAsHovered\@LibraryItemBoxShine { transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .\@HoversEnabled\@LibraryItemBoxShine .\@LibraryItemBox\@LibraryItemBoxShine:hover,
+  .\@HoversEnabled\@LibraryItemBoxShine .\@LibraryItemBox\@LibraryItemBoxShine.\@ShowAsHovered\@LibraryItemBoxShine { transform: none; }
+}

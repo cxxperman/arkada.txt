@@ -1,0 +1,26 @@
+/*
+ * Continues stage-panels.css (in order, see client/loader.js): a narrow stage (1100 px wide or
+ * less, its own width, so the game list and the Friends dock count), set by
+ * client/home/stage/stage.js each pass (watched by a ResizeObserver), applied only while the
+ * window is usable (a minimized window's tiny size never flips the layout). The board takes
+ * fewer columns by itself (stage/board.js); the stage tightens here.
+ */
+[data-se-hs][data-se-hs-narrow] .se-hs-stage {
+  padding: var(--se-space-4) var(--se-space-5) var(--se-space-5); /* sides on the board's */
+}
+
+[data-se-hs][data-se-hs-narrow] .se-hs-body {
+  gap: var(--se-space-4);
+  max-width: 620px;
+}
+
+[data-se-hs][data-se-hs-narrow] .se-hs-name {
+  font-size: 46px;
+}
+
+[data-se-hs][data-se-hs-narrow] .se-hs-logo {
+  min-height: 80px;
+  max-height: 130px;
+  max-width: 100%;
+}
+

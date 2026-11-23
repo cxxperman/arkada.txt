@@ -1,15 +1,17 @@
+/* Сгенерировано tools/build.js из theme/src/base.css и steam-classes.json (клиент 1794536281, 2026-11-13). Руками не править. */
 /* arkada.txt — основа темы: всё, что одинаково в любом окне клиента Steam.
  * Здесь нет ни одного своего цвета, радиуса или длительности: только переменные --dt-… из tokens.css
  * (его пишет tools/build.js из токенов kit.txt) и их смеси.
  *
- * Как тема держится за Steam, по убыванию надёжности:
+ * Как тема держится за Steam:
  *   1. Собственные переменные Steam (--color-greyneutral-…, --color-blue-…, --radius-…, --font-family):
- *      Steam объявляет их в :root, тема только даёт им другие значения. Классы тут не участвуют.
+ *      Steam объявляет их в :root, тема только даёт им другие значения.
  *   2. Старые читаемые классы Steam без хеша (.DialogButton, .DialogContent, .title-area-icon, .friend…)
- *      и классы, которые ставит сам Millennium (html.MillenniumWindow_…). Живут годами.
- *   3. Хешированные классы (._3x1Hk…). Их мало, все собраны в помеченных блоках «ХРУПКОЕ»
- *      в конце файлов; после обновления клиента ломаться может только это.
- *      Проверка: node tools/check.js --steam-css <файлы css клиента>. */
+ *      и классы, которые ставит сам Millennium (html.MillenniumWindow_…).
+ *   3. Хешированные классы. В этих исходниках они записаны именами, которые им дал Valve:
+ *      .\@contextMenu\@ContextMenuPopup — класс contextMenu из того модуля, где есть и ContextMenuPopup.
+ *      Хеши подставляет tools/build.js из снимка steam-classes.json; после обновления Steam:
+ *      node tools/steam-classes.js && node tools/build.js. */
 
 @import url("./tokens.css");
 
@@ -29,6 +31,18 @@
   /* Непрозрачные ступени между фоном и «приподнятой» поверхностью — для мест, где стекло не к чему приложить */
   --arkada-step-1: color-mix(in srgb, var(--dt-bg), var(--dt-surface) 50%);
   --arkada-step-2: color-mix(in srgb, var(--dt-surface), var(--dt-raised) 40%);
+
+  /* Тени: только смеси чёрного с прозрачным */
+  --arkada-shadow-1: 0 1px 2px color-mix(in srgb, black 30%, transparent), 0 4px 12px color-mix(in srgb, black 22%, transparent);
+  --arkada-shadow-2: 0 2px 6px color-mix(in srgb, black 34%, transparent), 0 14px 32px color-mix(in srgb, black 38%, transparent);
+  /* Фон окна — Mica: спокойный тон с очень лёгким оттенком акцента сверху.
+   * Настройка «Прозрачность окна» с плагином Window Styler (DWMX) делает его полупрозрачным (options/transparency.css) */
+  --arkada-window-tint: var(--dt-bg);
+  --arkada-window-bg:
+    linear-gradient(180deg, color-mix(in srgb, var(--arkada-accent) 5%, transparent), transparent 60%),
+    var(--arkada-window-tint);
+  /* Кольцо фокуса с клавиатуры */
+  --arkada-ring: 0 0 0 2px var(--dt-bg), 0 0 0 4px var(--arkada-accent);
 
   /* ───────── 1. Переменные самого Steam ─────────
    * Серая шкала Steam (1 — самый тёмный, 12 — самый светлый) пересажена на фон и поверхности dev.txt.
@@ -76,37 +90,49 @@
 /* ───────── Мелочи, общие для всех окон ───────── */
 ::selection { background: color-mix(in srgb, var(--arkada-accent) 45%, transparent); }
 
-::-webkit-scrollbar { width: 12px; height: 12px; }
+/* Тонкая полоса прокрутки, как свёрнутый ScrollBar в WinUI: 3px, при наведении — шире */
+::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track, ::-webkit-scrollbar-corner { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  border: 3px solid transparent;
-  border-radius: var(--arkada-r-tip);
-  background-color: var(--dt-fill-2);
+  border: 3.5px solid transparent;
+  border-radius: 999px;
+  background-color: var(--dt-label-3);
   background-clip: content-box;
 }
-::-webkit-scrollbar-thumb:hover { background-color: var(--dt-fill-press); }
+::-webkit-scrollbar-thumb:hover { border-width: 2px; background-color: var(--dt-label-2); }
+
+/* Фокус с клавиатуры — как в WinUI: белое кольцо 2px. Мышью (:focus без -visible) ничего не появляется */
+:focus-visible {
+  outline: 2px solid var(--dt-label);
+  outline-offset: 1px;
+}
 
 /* ───────── 2. Кнопки и поля диалогов (читаемые классы Steam) ─────────
  * !important здесь не от жадности: Steam задаёт эти свойства цепочкой
  * button.<хеш>.DialogButton:enabled:active:hover — перебить её весом нельзя, не назвав хеш. */
+/* Кнопки как в WinUI: обычная — нейтральная заливка с обводкой, акцентная — сплошной акцент.
+ * Наведение и нажатие меняют только заливку; при нажатии текст приглушается */
 .DialogButton {
-  border-radius: calc(var(--arkada-r-block) - 2px) !important;
+  border-radius: var(--arkada-r-control) !important;
   border: 1px solid var(--dt-edge) !important;
   border-top-color: var(--dt-edge-top) !important;
-  background: var(--dt-glass) !important;
+  background: var(--dt-fill) !important;
   color: var(--dt-label) !important;
-  transition: transform var(--dt-dur-fast) var(--dt-ease-out) !important;
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out), color var(--dt-dur-fast) var(--dt-ease-out) !important;
 }
-.DialogButton:enabled:hover { background: var(--dt-glass-hover) !important; }
-.DialogButton:enabled:active { transform: scale(0.965); transition-duration: var(--dt-dur-press) !important; }
+.DialogButton:enabled:hover { background: var(--dt-fill-2) !important; }
+.DialogButton:enabled:active {
+  background: var(--dt-fill-press) !important;
+  color: var(--dt-label-2) !important;
+  transition-duration: var(--dt-dur-press) !important;
+}
 .DialogButton:disabled { opacity: 0.45; }
 .DialogButton.Primary {
-  background: linear-gradient(180deg, var(--arkada-accent-hi), var(--arkada-accent)) !important;
-  border-color: var(--dt-fill-press) !important;
+  background: var(--arkada-accent) !important;
+  border-color: color-mix(in srgb, white 8%, transparent) !important;
 }
-.DialogButton.Primary:enabled:hover {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--arkada-accent), white 18%), color-mix(in srgb, var(--arkada-accent), white 6%)) !important;
-}
+.DialogButton.Primary:enabled:hover { background: color-mix(in srgb, var(--arkada-accent) 90%, transparent) !important; }
+.DialogButton.Primary:enabled:active { background: color-mix(in srgb, var(--arkada-accent) 80%, transparent) !important; }
 
 .DialogInput,
 .DialogTextInputBase,
@@ -150,27 +176,168 @@ html.MillenniumWindow_GameProperties body { background: var(--dt-bg); }
 .title-area-icon:hover { background: var(--dt-fill-2) !important; }
 .title-area-icon.closeButton:hover { background: var(--dt-red) !important; }
 
-/* ═════════ ХРУПКОЕ: контекстные меню ═════════
- * У меню Steam нет ни читаемых классов, ни своих переменных. Три хеша ниже (само меню, его содержимое,
- * строка) не менялись несколько лет и есть в клиенте на день сборки темы, но гарантии нет.
- * Если пропадут — меню просто останутся такими, какими их рисует Steam. */
-.PP7LM0Ow1K5qkR8WElLpt {
-  padding: 5px;
+/* ───────── Контекстные и выпадающие меню ─────────
+ * Как MenuFlyout в WinUI: акриловая подложка, скругление 8, обводка 1px, пункты со скруглением 4
+ * и нейтральной заливкой при наведении. Модуль меню рабочего стола — тот, где есть ContextMenuPopup
+ * (этот класс Steam ставит на <html> окна меню). Тем же меню рисуются выпадающие списки шапки:
+ * Steam, Вид, Друзья, Игры, Справка, вкладки, аккаунт, уведомления. */
+.PP7LM0Ow1K5qkR8WElLpt,
+.DesktopUI .PP7LM0Ow1K5qkR8WElLpt {
+  padding: 4px;
   border: 1px solid var(--dt-edge);
   border-top-color: var(--dt-edge-top);
-  border-radius: var(--arkada-r-row);
+  border-radius: var(--arkada-r-block);
   background: var(--dt-menu);
-  backdrop-filter: blur(24px);
+  box-shadow: 0 8px 16px color-mix(in srgb, black 26%, transparent);
+  backdrop-filter: blur(30px) saturate(1.25);
+  transform-origin: top left;
+  transition: opacity var(--dt-dur-fast) var(--dt-ease-out), transform var(--dt-dur-fast) var(--dt-ease-out);
+}
+.PP7LM0Ow1K5qkR8WElLpt:not(.visible) { transform: translateY(-4px); }
+/* В отдельном окне меню Steam прижимает меню к краям окна и сам задаёт отступ — повторяем его селектор.
+ * Тени в своём окне нет места, поэтому без неё */
+html._14wqdluDeDnnEcg3OSLEmd .PP7LM0Ow1K5qkR8WElLpt,
+html._14wqdluDeDnnEcg3OSLEmd.DesktopUI .PP7LM0Ow1K5qkR8WElLpt,
+html._14wqdluDeDnnEcg3OSLEmd .DesktopUI .PP7LM0Ow1K5qkR8WElLpt {
+  padding: 4px;
+  box-shadow: none;
+}
+html._14wqdluDeDnnEcg3OSLEmd ._2EstNjFIIZm_WUSKm5Wt7n {
+  padding: 0;
+  background: none;
 }
 ._2EstNjFIIZm_WUSKm5Wt7n { background: none; }
-._1n7Wloe5jZ6fSuvV18NNWI {
-  border-radius: var(--arkada-r-tip);
-  color: var(--dt-label-2);
-  transition: background var(--dt-dur-press) var(--dt-ease-out);
+
+._1n7Wloe5jZ6fSuvV18NNWI,
+._2jXHP0742MyApMUVUM8IFn._2uiDecKkKjAq7nimy3uLhG {
+  min-height: 28px;
+  padding: 4px 12px;
+  border: 0;
+  border-radius: var(--arkada-r-control);
+  color: var(--dt-label);
+  font-size: var(--dt-size-body);
+  transition: background-color var(--dt-dur-press) var(--dt-ease-out), color var(--dt-dur-press) var(--dt-ease-out);
 }
-._1n7Wloe5jZ6fSuvV18NNWI:hover {
-  background: var(--arkada-accent-soft);
+._1n7Wloe5jZ6fSuvV18NNWI:first-child { border: 0; }
+._1n7Wloe5jZ6fSuvV18NNWI:hover,
+._1n7Wloe5jZ6fSuvV18NNWI._18z-3vkWndCBO5WJgFldRK,
+._2jXHP0742MyApMUVUM8IFn._2uiDecKkKjAq7nimy3uLhG:hover {
+  background-color: var(--dt-fill-2); /* как MenuFlyoutItem в WinUI: нейтральная заливка, не акцент */
   color: var(--dt-label);
 }
+._1n7Wloe5jZ6fSuvV18NNWI:active,
+._2jXHP0742MyApMUVUM8IFn._2uiDecKkKjAq7nimy3uLhG:active {
+  background-color: var(--dt-fill-press);
+  color: var(--dt-label-2);
+}
+._2jXHP0742MyApMUVUM8IFn.d8GPmAyQdRQwoHiPbc8Js { color: var(--dt-label-3); }
+._1n7Wloe5jZ6fSuvV18NNWI._2Bb4JC5n6anf32WgmTfeMP {
+  color: var(--dt-label-3);
+  font-size: var(--dt-size-caption);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.WUOrULWKkGLl3ZUQdDXg8.WUOrULWKkGLl3ZUQdDXg8 + ._1n7Wloe5jZ6fSuvV18NNWI {
+  margin-top: 4px;
+  border-top: 0;
+  box-shadow: 0 -3px 0 -2px var(--dt-separator);
+}
+/* Разделитель меню шапки: тонкая линия с отступами, как MenuFlyoutSeparator */
+._2jXHP0742MyApMUVUM8IFn._21GPYlKBCLsHQpTsHw_RL_ {
+  margin: 4px -4px;
+  width: auto;
+  border: 0;
+  border-top: 1px solid var(--dt-separator);
+}
 /* Окно меню прозрачное: фон даёт только само меню */
-html.MillenniumWindow_ContextMenu body { background: transparent; }
+html.MillenniumWindow_ContextMenu body,
+html._14wqdluDeDnnEcg3OSLEmd body { background: transparent; }
+
+/* ───────── Меню уведомлений ─────────
+ * Заголовок «Уведомления» — Subtitle, «Показать все» — обычная кнопка, записи — пункты со скруглением.
+ * Шаблоны записей Steam повторяет в нескольких одинаковых модулях (уведомления, тосты, оверлей),
+ * поэтому у записи берётся читаемое имя, которое в DOM стоит рядом с хешем. */
+.MCa4RMSvWJwwWjcZP2wTT ._3zQLPuC3M-NPNa1tVda9Dz {
+  font-family: var(--dt-font-display);
+  font-size: var(--dt-size-title);
+  font-weight: 600;
+  color: var(--dt-label);
+}
+.MCa4RMSvWJwwWjcZP2wTT ._1oERP7bVictkby2hP4BBva {
+  border: 1px solid var(--dt-edge);
+  border-top-color: var(--dt-edge-top);
+  border-radius: var(--arkada-r-control);
+  background-color: var(--dt-fill);
+  color: var(--dt-label);
+}
+.MCa4RMSvWJwwWjcZP2wTT ._1oERP7bVictkby2hP4BBva:hover { background-color: var(--dt-fill-2); }
+.PinnedTemplateDesktop,
+.StandardTemplateDesktop,
+.AllNotificationsTemplate {
+  margin-bottom: 2px;
+  border-radius: var(--arkada-r-control);
+  background: transparent !important;
+  transition: background-color var(--dt-dur-press) var(--dt-ease-out);
+}
+.PinnedTemplateDesktop:hover,
+.StandardTemplateDesktop:hover,
+.AllNotificationsTemplate:hover { background-color: var(--dt-fill-2) !important; }
+/* Непрочитанное — заливка слоя и акцентная полоска слева, как индикатор в ListView */
+.StandardTemplateDesktop.Unread {
+  position: relative;
+  background-color: var(--dt-fill) !important;
+}
+.StandardTemplateDesktop.Unread::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 50%;
+  width: 3px;
+  height: 16px;
+  margin-top: -8px;
+  border-radius: 2px;
+  background: var(--arkada-accent);
+}
+
+/* ───────── Тосты уведомлений (окна notificationtoasts_…) ─────────
+ * Как уведомление Windows 11: слой с обводкой, скругление 8, лёгкая тень */
+html[class*='notificationtoasts'] body,
+._1OOQPJx0nCNP9ME9toCmV7 { background: transparent; }
+.DesktopToastTemplate {
+  border: 1px solid var(--dt-edge);
+  border-top-color: var(--dt-edge-top);
+  border-radius: var(--arkada-r-block);
+  background: var(--dt-menu) !important;
+  box-shadow: 0 8px 16px color-mix(in srgb, black 26%, transparent);
+  color: var(--dt-label);
+}
+._3RkGkNRNheAkoRA3migph5 { background: none; }
+
+/* ───────── Подсказки ───────── */
+._2FxbHJzYoH024ko7zqcJOf,
+._3XGRklQrZMakU2xaYB0cLD {
+  padding: 6px 8px;
+  border: 1px solid var(--dt-edge);
+  border-top-color: var(--dt-edge-top);
+  border-radius: var(--arkada-r-tip);
+  background: var(--dt-tooltip);
+  box-shadow: 0 4px 8px color-mix(in srgb, black 22%, transparent);
+  color: var(--dt-label);
+  text-shadow: none;
+  font-size: var(--dt-size-caption);
+  letter-spacing: 0;
+  text-transform: none;
+}
+._3XGRklQrZMakU2xaYB0cLD ._1LhVfNukndDa_XWzq0vdg1 { color: var(--dt-label); font-weight: 600; text-transform: none; letter-spacing: 0; }
+._3XGRklQrZMakU2xaYB0cLD .i4LuYcvtfPgYKx3qqvKUq { color: var(--dt-label-2); }
+
+/* ───────── Мини-профиль при наведении на друга (окно .HoverPopup) ─────────
+ * Содержимое — страница сообщества со своими стилями; тема даёт окну скругление и обводку */
+html.HoverPopup body { background: transparent; }
+.miniprofile_hover,
+.miniprofile_container {
+  border-radius: var(--arkada-r-block);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px var(--dt-edge);
+}

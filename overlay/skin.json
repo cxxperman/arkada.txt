@@ -1,0 +1,239 @@
+{
+  "name": "Arkada",
+  "description": "arkada.txt™ — клиент Steam на токенах dev.txt: цвета, скругления, шрифт Segoe UI Variable и движение, что в Kapsula, Aura и core.txt. Основано на Steam Enhanced by NVHT (MIT).",
+  "author": "dev.txt",
+  "version": "0.1.0",
+  "tags": [
+    "Dark",
+    "Fluent",
+    "Windows 11",
+    "dev.txt"
+  ],
+  "header_image": null,
+  "splash_image": null,
+  "github": null,
+  "RootColors": null,
+  "Patches": [
+    {
+      "MatchRegexString": ".*",
+      "TargetCss": "arkada/tokens.css"
+    },
+    {
+      "MatchRegexString": ".*",
+      "TargetCss": "arkada/brand.css"
+    },
+    {
+      "MatchRegexString": ".*",
+      "TargetCss": "arkada/win11.css"
+    },
+    {
+      "MatchRegexString": ".*",
+      "TargetCss": "arkada/backdrop.css"
+    },
+    {
+      "MatchRegexString": ".*",
+      "TargetCss": "arkada/i18n.css"
+    },
+    {
+      "MatchRegexString": ".*",
+      "TargetJs": "arkada/nav.js"
+    },
+    {
+      "MatchRegexString": ".*",
+      "TargetJs": "arkada/i18n.js"
+    }
+  ],
+  "Conditions": {
+    "Акцент": {
+      "tab": "Appearance",
+      "description": "Цвет главных кнопок, выделения и подсветки. Если стоит плагин Arkada и в core.txt выбран общий цвет экосистемы, в окнах клиента действует он.",
+      "default": "Как в dev.txt",
+      "values": {
+        "Как в dev.txt": {},
+        "Фирменный оранжевый": {
+          "TargetCss": {
+            "affects": [
+              ".*"
+            ],
+            "src": "arkada/options/accent-brand.css"
+          }
+        },
+        "Синий": {
+          "TargetCss": {
+            "affects": [
+              ".*"
+            ],
+            "src": "arkada/options/accent-blue.css"
+          }
+        },
+        "Зелёный": {
+          "TargetCss": {
+            "affects": [
+              ".*"
+            ],
+            "src": "arkada/options/accent-green.css"
+          }
+        },
+        "Красный": {
+          "TargetCss": {
+            "affects": [
+              ".*"
+            ],
+            "src": "arkada/options/accent-red.css"
+          }
+        },
+        "Янтарный": {
+          "TargetCss": {
+            "affects": [
+              ".*"
+            ],
+            "src": "arkada/options/accent-orange.css"
+          }
+        },
+        "Жёлтый": {
+          "TargetCss": {
+            "affects": [
+              ".*"
+            ],
+            "src": "arkada/options/accent-yellow.css"
+          }
+        },
+        "Фиолетовый": {
+          "TargetCss": {
+            "affects": [
+              ".*"
+            ],
+            "src": "arkada/options/accent-purple.css"
+          }
+        },
+        "Розовый": {
+          "TargetCss": {
+            "affects": [
+              ".*"
+            ],
+            "src": "arkada/options/accent-pink.css"
+          }
+        }
+      }
+    },
+    "Подложка окна": {
+      "tab": "Appearance",
+      "description": "Что видно сквозь окна Steam. Размытие — то, что за окном, размыто и почти не затемнено, как в Discord (и в неактивном окне тоже); Акрил — системный акрил Windows 11, светлее и с зерном, в неактивном окне становится сплошным; Mica — тонированные обои под главными окнами. Меню во всех режимах непрозрачные. Нужен плагин Arkada (включить в Millennium → Плагины, затем перезапустить Steam) и включённые эффекты прозрачности Windows (Параметры → Персонализация → Цвета). Без плагина окна остаются непрозрачными.",
+      "default": "Размытие",
+      "values": {
+        "Размытие": {
+          "TargetCss": {
+            "affects": [
+              ".*"
+            ],
+            "src": "arkada/options/backdrop-blur.css"
+          }
+        },
+        "Mica": {
+          "TargetCss": {
+            "affects": [
+              ".*"
+            ],
+            "src": "arkada/options/backdrop-mica.css"
+          }
+        },
+        "Акрил": {
+          "TargetCss": {
+            "affects": [
+              ".*"
+            ],
+            "src": "arkada/options/backdrop-acrylic.css"
+          }
+        },
+        "Выкл": {}
+      }
+    },
+    "Начальная страница": {
+      "tab": "Arkada",
+      "description": "С какой страницы открывается главное окно Steam при запуске. Библиотека — с главной библиотеки, даже если Steam открыл бы магазин (переход делает плагин Arkada один раз при запуске, настройка Steam «Начальное окно» не меняется). Как в Steam — так, как настроено в самом Steam. Нужен плагин Arkada.",
+      "default": "Библиотека",
+      "values": {
+        "Библиотека": {},
+        "Как в Steam": {
+          "TargetCss": {
+            "affects": [
+              ".*"
+            ],
+            "src": "arkada/options/start-library-off.css"
+          }
+        }
+      }
+    },
+    "Уведомления в Kapsula": {
+      "tab": "Arkada",
+      "description": "Уведомления Steam (сообщения, приглашения, достижения, загрузки) приходят в остров Kapsula на этом компьютере — так же, как с плагином Kapsula, который после этого можно выключить в Millennium. Нужен плагин Arkada и запущенная Kapsula с включёнными «Уведомлениями Steam». Пока сам плагин Kapsula включён, Arkada молчит, чтобы уведомление не пришло дважды.",
+      "default": "Вкл",
+      "values": {
+        "Вкл": {},
+        "Выкл": {
+          "TargetCss": {
+            "affects": [
+              ".*"
+            ],
+            "src": "arkada/options/feature-kapsula-off.css"
+          }
+        }
+      }
+    },
+    "Размер на диске": {
+      "tab": "Arkada",
+      "description": "На странице игры в библиотеке, рядом с «Последний запуск», — сколько игра занимает на диске; в подсказке — DLC, мастерская и кэш шейдеров, по нажатию — «Установленные файлы» в свойствах. Данные берутся у самого Steam, без сети. Нужен плагин Arkada.",
+      "default": "Вкл",
+      "values": {
+        "Вкл": {},
+        "Выкл": {
+          "TargetCss": {
+            "affects": [
+              ".*"
+            ],
+            "src": "arkada/options/feature-disk-size-off.css"
+          }
+        }
+      }
+    },
+    "Кнопка «Поделиться»": {
+      "tab": "Arkada",
+      "description": "На странице игры в магазине, рядом с «В желаемое» и «Подписаться», — кнопка «Поделиться»: скопировать ссылку на игру или отправить её друзьям в чат Steam. Нужен плагин Arkada.",
+      "default": "Вкл",
+      "values": {
+        "Вкл": {},
+        "Выкл": {
+          "TargetCss": {
+            "affects": [
+              ".*"
+            ],
+            "src": "arkada/options/feature-share-off.css"
+          }
+        }
+      }
+    },
+    "Font": {
+      "description": "The typeface, everywhere: client windows, Store, Community, Support and Checkout. Segoe UI Variable is dev.txt's.",
+      "default": "Segoe UI Variable",
+      "values": {
+        "Segoe UI Variable": {},
+        "SN Pro": {
+          "TargetCss": {
+            "affects": [
+              ".*"
+            ],
+            "src": "arkada/options/font-sn-pro.css"
+          }
+        }
+      }
+    },
+    "Window entrance": {
+      "description": "How a window appears once it has loaded: at once, or with a short fade.",
+      "default": "None",
+      "values": {
+        "Splash": null,
+        "Logo": null
+      }
+    }
+  }
+}

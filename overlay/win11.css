@@ -1,0 +1,342 @@
+/*
+ * Arkada over Steam Enhanced: the Windows 11 look (WinUI 3 / Fluent 2) where their CSS draws
+ * with values of its own rather than their tokens (overlay/tokens.css does the rest).
+ * Loaded into every window by a Patch (overlay/skin.json); their files stay untouched.
+ *
+ * Their selectors are copied where a rule has to beat one of theirs (hashed Steam classes,
+ * their [data-se-…] marks); :not(#ark) adds an id's weight, as their own :not(#se-none) does.
+ * No colour is written here: dev.txt tokens (--dt-…), our --arkada-… and their --se-… only.
+ */
+
+/* ───────── Type: sentence case, Windows' tracking ─────────
+ * Their labels are tracked capitals (118 rules with text-transform: uppercase, as many with
+ * letter-spacing). Windows writes every label in sentence case with no tracking. */
+html *:not(#ark),
+html *:not(#ark)::before,
+html *:not(#ark)::after {
+  text-transform: none !important;
+  letter-spacing: normal !important;
+}
+
+/* ───────── The main button: AccentButton ─────────
+ * Flat accent; hover a step lighter, pressed a step darker with the text dimmed. Their faces add
+ * a light top edge, a coloured glow and a brightness filter on hover: all off. */
+:is(._1U7LKpx70kEsz3jJwAFOi-, ._39RheXihcN6H2k2muQTjkI) ._1FnJ6dPuknQFQ2RTpKTI16 ._3ydigb6zZAjJ0JCDgHwSYA:not(._1WVYDQv_srgKP95rVG1cX-):not(#ark):not(#ark),
+.se-hs-play:not(#ark),
+._1bq4x9pa4-9RLY-dXWUZTp [data-se-dl-action]:is([data-se-dl-action="play"], [data-se-dl-action="download"]):not(#ark) {
+  box-shadow: none !important;
+  filter: none !important;
+  border-radius: var(--se-radius-md) !important;
+  font-weight: 600 !important;
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out), color var(--dt-dur-fast) var(--dt-ease-out) !important;
+}
+
+:is(._1U7LKpx70kEsz3jJwAFOi-, ._39RheXihcN6H2k2muQTjkI) ._1FnJ6dPuknQFQ2RTpKTI16:not(._1Pb6PMh_3L5p5NzuUz0Pp9, [data-se-action="stop"]) ._3ydigb6zZAjJ0JCDgHwSYA:not(._1WVYDQv_srgKP95rVG1cX-):not(#ark):not(#ark),
+.se-hs-play:not(#ark) {
+  background: var(--arkada-accent) !important;
+  color: var(--arkada-on-accent) !important;
+}
+
+:is(._1U7LKpx70kEsz3jJwAFOi-, ._39RheXihcN6H2k2muQTjkI) ._1FnJ6dPuknQFQ2RTpKTI16:not(._1Pb6PMh_3L5p5NzuUz0Pp9, [data-se-action="stop"]) ._3ydigb6zZAjJ0JCDgHwSYA:not(._1WVYDQv_srgKP95rVG1cX-):not(#ark):not(#ark):is(:hover, .gpfocus),
+.se-hs-play:not(#ark):hover {
+  background: var(--arkada-accent-hover) !important;
+}
+
+:is(._1U7LKpx70kEsz3jJwAFOi-, ._39RheXihcN6H2k2muQTjkI) ._1FnJ6dPuknQFQ2RTpKTI16:not(._1Pb6PMh_3L5p5NzuUz0Pp9, [data-se-action="stop"]) ._3ydigb6zZAjJ0JCDgHwSYA:not(._1WVYDQv_srgKP95rVG1cX-):not(#ark):not(#ark):active,
+.se-hs-play:not(#ark):active {
+  background: var(--arkada-accent-press) !important;
+  color: var(--arkada-on-accent-press) !important;
+  transition-duration: var(--dt-dur-press) !important;
+}
+
+/* The face's text and triangle follow the face's colour (pressed dims them too) */
+:is(._1U7LKpx70kEsz3jJwAFOi-, ._39RheXihcN6H2k2muQTjkI) ._1FnJ6dPuknQFQ2RTpKTI16:not(._1Pb6PMh_3L5p5NzuUz0Pp9) ._3ydigb6zZAjJ0JCDgHwSYA:not(._1WVYDQv_srgKP95rVG1cX-):not(#ark) :is(div, span, svg, path) {
+  color: inherit !important;
+  fill: currentColor !important;
+}
+
+/* Stop, while the game runs: Windows' critical fill */
+:is(._1U7LKpx70kEsz3jJwAFOi-, ._39RheXihcN6H2k2muQTjkI) ._1FnJ6dPuknQFQ2RTpKTI16[data-se-action="stop"] ._3ydigb6zZAjJ0JCDgHwSYA:not(._1WVYDQv_srgKP95rVG1cX-):not(#ark):not(#ark) {
+  background: var(--arkada-critical) !important;
+  color: var(--dt-label) !important;
+}
+
+:is(._1U7LKpx70kEsz3jJwAFOi-, ._39RheXihcN6H2k2muQTjkI) ._1FnJ6dPuknQFQ2RTpKTI16[data-se-action="stop"] ._3ydigb6zZAjJ0JCDgHwSYA:not(._1WVYDQv_srgKP95rVG1cX-):not(#ark):not(#ark):hover {
+  background: color-mix(in srgb, var(--arkada-critical), white 8%) !important;
+}
+
+/* Downloads: Play and Download are the accent face too (theirs: a green and a blue gradient) */
+._1bq4x9pa4-9RLY-dXWUZTp:not(.fqntpaymdveMMSFkyHYNz) [data-se-dl-action]:is([data-se-dl-action="play"], [data-se-dl-action="download"]):not(#ark) {
+  --dl-btn-bg: var(--arkada-accent);
+  --dl-btn-hover: var(--arkada-accent-hover);
+  --dl-btn-ring: transparent;
+  color: var(--arkada-on-accent) !important;
+}
+
+/* The Home stage's PLAY: Windows' large button, sentence case */
+.se-hs-play:not(#ark) {
+  font-size: var(--se-fs-lg) !important;
+}
+
+/* ───────── Selection: NavigationView ─────────
+ * The left rail's current page: a neutral fill, the icon stays in the text colour, the accent
+ * only in the 3 px pill on the left (theirs: an accent tint and an accent icon). */
+html body.se-header-actions-ready ._7AlhCx3XGzBeIrQaCneUD._1gqEjB5QsKT_NftD1dEsdZ:not(._2cO0HdvLEGAdhosLekWsmo) ._19axKcqYRuaJ8vdYKYmtTQ:not(#se-none):not(#ark) {
+  background: var(--arkada-select) !important;
+  color: var(--dt-label) !important;
+}
+
+html body.se-header-actions-ready ._7AlhCx3XGzBeIrQaCneUD._1gqEjB5QsKT_NftD1dEsdZ:not(._2cO0HdvLEGAdhosLekWsmo) ._19axKcqYRuaJ8vdYKYmtTQ.se-menu-icon:not(#se-none):not(#ark)::after {
+  top: 50%;
+  bottom: auto;
+  height: 16px;
+  margin-top: -8px;
+  border-radius: 2px;
+  background: var(--arkada-accent);
+}
+
+/* The game list's selected row: the pill sits inside the row, 16 px tall, as ListView's */
+._1UBpAXP408Ez_L_mXhW5Q9._2-O4ZG0KrnSrzISHBKctFQ:not(#ark)::before,
+._1UBpAXP408Ez_L_mXhW5Q9 ._2-O4ZG0KrnSrzISHBKctFQ:not(#ark)::before {
+  inset-inline-start: 0;
+  top: 50%;
+  bottom: auto;
+  height: 16px;
+  margin-top: -8px;
+  border-radius: 2px;
+  background: var(--arkada-accent);
+}
+
+._1UBpAXP408Ez_L_mXhW5Q9._2-O4ZG0KrnSrzISHBKctFQ:not(#se-none):not(#ark),
+._1UBpAXP408Ez_L_mXhW5Q9 ._2-O4ZG0KrnSrzISHBKctFQ:not(#se-none):not(#ark) {
+  border-radius: var(--se-radius-md);
+}
+
+/* Collection headers: an open group is not a selection, no accent tint */
+._2sYIghGVXJr6tsQVvcryy8:is(.sXMOsx8OIRalBMxO9yFY5, ._1dcGFHhye9BeEOg7CkFNQG):not(#se-none):not(#ark) {
+  background: var(--arkada-select);
+}
+
+/* ───────── Tabs on the game page: SelectorBar ─────────
+ * "Overview" (the page you are on) and Steam's links: text tabs, no pills; the current one has
+ * a 3 px accent pill under its text, the others a soft fill on hover. */
+._3-V8vjmrwuJM6Ws3tsjFJj .DgVQapkBmhAW6oPY5rPZo:not(#ark)::before {
+  border-radius: var(--se-radius-md);
+  background: linear-gradient(var(--arkada-accent), var(--arkada-accent)) center bottom 2px / 16px 3px no-repeat;
+  color: var(--dt-label);
+  font-weight: 600;
+}
+
+.DY4_wSF8h9T5o46hO5I9V ._1b6LYWVijW-9E4YV0keDWZ:not(#ark) {
+  border-radius: var(--se-radius-md) !important;
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out) !important;
+}
+
+.DY4_wSF8h9T5o46hO5I9V ._1b6LYWVijW-9E4YV0keDWZ:not(#ark):hover {
+  background: var(--arkada-control-hover) !important;
+}
+
+.DY4_wSF8h9T5o46hO5I9V ._1b6LYWVijW-9E4YV0keDWZ ._2sNDjgK9EWiPLdNGkjun-w:not(#ark) {
+  color: var(--dt-label-2) !important;
+}
+
+/* The segmented controls (their only one, client/shared/segmented.css): the chosen segment is a
+   raised neutral layer, as Windows' SegmentedControl, not an accent fill */
+.se-seg button:is([data-on], [aria-checked="true"], [aria-pressed="true"], [aria-selected="true"]):not(#ark) {
+  background: var(--arkada-control-hover);
+  box-shadow: inset 0 0 0 1px var(--arkada-edge);
+  color: var(--dt-label);
+}
+
+/* ───────── The page: content on a layer over Mica ─────────
+ * As in Microsoft Store and Settings: the pane (game list, rail) sits on the window's Mica, the
+ * page on a layer with a 1 px edge and an 8 px corner where it meets the pane. */
+html.MillenniumWindow_MainSteamWindow .MainPanel:not(#ark) {
+  background-color: var(--arkada-layer);
+  border-top-left-radius: var(--se-radius-xl);
+  box-shadow: inset 1px 1px 0 var(--arkada-edge);
+}
+
+/* ───────── Page change (overlay/nav.js) ─────────
+ * The new page comes in the frame Steam draws it: Windows' page entrance, a short fade and rise
+ * on the decelerate curve. Nothing waits for it. On a game page the blocks are shown at once and
+ * move to their places smoothly as Steam fills them (overlay/nav.js: transform and clip-path only). */
+html[data-arkada-nav="in"] .MainPanel:not(#ark) {
+  animation: arkada-page-in var(--dt-dur-fast) var(--dt-ease-out) both;
+}
+
+@keyframes arkada-page-in {
+  from {
+    opacity: 0;
+    translate: 0 6px;
+  }
+}
+
+/* A game page block their layout has not measured yet (no --se-span: client/game-page/layout.js
+   writes it, with its row, in the frame its size is first known) has no place in its column yet.
+   It is not drawn until it has one; overlay/nav.js fades it in there. */
+._27RcNu8aXKBpYkHcNNrt-X :is(.OhSdLYuggDtBcWjYP0j_9, ._2aor4XVOYzN1PBSREk0UbO, ._1sZgBDTw5NH-yuVDZK1SUU, ._37mmOlZM_8n5yJAG5CHiW7) > :not(._2aor4XVOYzN1PBSREk0UbO, ._1sZgBDTw5NH-yuVDZK1SUU, [style*="--se-span"]):not(#ark) {
+  opacity: 0;
+}
+
+/* A game page, from the route change (overlay/nav.js): a skeleton of plates where its parts
+   will be (a game opened before: where they were), the page Steam builds not drawn under it, then
+   the page in one crossfade (~200 ms) when its hero is drawn and its columns are still. WinUI's
+   placeholder: plain plates, no shimmer. */
+.arkada-skel {
+  position: fixed;
+  z-index: 50;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+
+.arkada-skel > i {
+  position: absolute;
+  box-sizing: border-box;
+  border-radius: var(--se-radius-lg);
+  background: var(--se-surface-2);
+}
+
+.arkada-skel > i.hero {
+  border-radius: 0;
+  border-top-left-radius: var(--se-radius-xl);
+  -webkit-mask-image: linear-gradient(to bottom, black 55%, transparent);
+  mask-image: linear-gradient(to bottom, black 55%, transparent);
+}
+
+.arkada-skel > i.bar {
+  background: var(--se-surface-2);
+}
+
+.arkada-skel > i.links {
+  background: none;
+  border-bottom: 1px solid var(--arkada-edge);
+  border-radius: 0;
+}
+
+html[data-arkada-gp="hold"] .MainPanel > *:not(#ark) {
+  opacity: 0 !important;
+}
+
+html[data-arkada-gp="show"] .MainPanel > *:not(#ark) {
+  animation: arkada-gp-show calc(var(--dt-dur-fast) + 33ms) var(--dt-ease-out) both;
+}
+
+@keyframes arkada-gp-show {
+  from {
+    opacity: 0;
+  }
+}
+
+/* The cover keeps its 2:3 box before its picture comes: the left column does not grow under it */
+._27RcNu8aXKBpYkHcNNrt-X ._1Id6ZFEUVa5PKEMIvSg4nE img._3JzkHhrsBKThuVrwsu3Q7T:not(#ark) {
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+}
+
+/* The play bar's stats (play time, achievements, size on disk) come one by one: each fades in */
+html.MillenniumWindow_MainSteamWindow ._1mDAVT4sTzFRwJtlKCw2Ws > *:not(#ark) {
+  animation: arkada-late-in var(--dt-dur-fast) var(--dt-ease-out) both;
+}
+
+/* Blocks Steam adds later from the network (the game page's overview rows and activity, Home's
+   event rows): a short fade when they arrive, not a jump */
+html.MillenniumWindow_MainSteamWindow .MainPanel :is(.AppActivityDay, .PartnerEventRowCapsule, .se-dlc-grid):not(#ark) {
+  animation: arkada-late-in var(--dt-dur-base) var(--dt-ease-out) both;
+}
+
+@keyframes arkada-late-in {
+  from {
+    opacity: 0;
+  }
+}
+
+html[data-arkada-motion='reduced'] :is(.MainPanel, .AppActivityDay, .PartnerEventRowCapsule, .se-dlc-grid, ._1mDAVT4sTzFRwJtlKCw2Ws > *):not(#ark) {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* ───────── Menus show as Windows 11's: at once ─────────
+ * Their menus fade in from transparent and are held open for a fade out (animateClose in
+ * client/header/menu/shared.js waits for the animation; with animation-name none it closes at once).
+ * A native menu is simply there, drawn: no animation either way. The panels: the right-click menus
+ * ([data-se-lib-menu]), the Steam and account menus (contextMenuContents in html.Steam_Root_Menu /
+ * html.Account_Menu), a friend's menu, their own menus (.se-mn, .se-menu). */
+:is([data-se-lib-menu], html.Steam_Root_Menu ._2EstNjFIIZm_WUSKm5Wt7n, html.Account_Menu ._2EstNjFIIZm_WUSKm5Wt7n,
+  [data-se-lib-menu^='friend'][data-se-fm-shown] > .contextMenuContents, .se-mn, .se-menu):not(#ark):not(#ark) {
+  animation: none !important;
+}
+
+/* ───────── Caption buttons: Windows 11's ─────────
+ * Their caption buttons are 30px rounded squares with 16px mask glyphs of their own, which came out
+ * distorted (a tall Maximize, a clipped Close). Windows 11: 46×32 at the top edge, no rounding, the
+ * Segoe Fluent Icons glyphs at 10px (E921 minimize, E922 maximize, E923 restore, E8BB close), a light
+ * fill on hover, and Close turns red (--dt-red, #C42B1C) with a white glyph. */
+.title-area:not(.OSX) .title-bar-actions:not(#ark) {
+  gap: 0 !important;
+  padding-inline-end: 0 !important;
+  align-self: flex-start !important;
+  align-items: flex-start !important;
+}
+
+.title-area:not(.OSX) .title-bar-actions .title-area-icon:is(.minimizeButton, .maximizeButton, .restoreButton, .closeButton):not(#ark) {
+  width: 46px !important;
+  height: 32px !important;
+  border-radius: 0 !important;
+  color: var(--dt-label) !important;
+  background: transparent !important;
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out) !important;
+}
+
+.title-area:not(.OSX) .title-bar-actions .title-area-icon:is(.minimizeButton, .maximizeButton, .restoreButton):not(#ark):hover {
+  background: var(--arkada-control) !important;
+}
+
+.title-area:not(.OSX) .title-bar-actions .title-area-icon:is(.minimizeButton, .maximizeButton, .restoreButton):not(#ark):active {
+  background: var(--arkada-control-press) !important;
+  color: var(--dt-label-2) !important;
+}
+
+.title-area:not(.OSX) .title-bar-actions .title-area-icon.closeButton:not(#ark):hover {
+  background: var(--dt-red) !important;
+  color: white !important;
+}
+
+.title-area:not(.OSX) .title-bar-actions .title-area-icon.closeButton:not(#ark):active {
+  background: color-mix(in srgb, var(--dt-red) 90%, transparent) !important;
+  color: color-mix(in srgb, white 70%, transparent) !important;
+}
+
+.title-area:not(.OSX) .title-bar-actions .title-area-icon:is(.minimizeButton, .maximizeButton, .restoreButton, .closeButton) .title-area-icon-inner:not(#ark)::before {
+  content: '\E921';
+  width: auto !important;
+  height: auto !important;
+  background: none !important;
+  -webkit-mask: none !important;
+  mask: none !important;
+  color: inherit;
+  font: 10px/1 'Segoe Fluent Icons', 'Segoe MDL2 Assets' !important;
+  text-transform: none !important;
+  -webkit-font-smoothing: antialiased;
+}
+
+.title-area:not(.OSX) .title-bar-actions .title-area-icon.maximizeButton .title-area-icon-inner:not(#ark)::before {
+  content: '\E922';
+}
+
+.title-area:not(.OSX) .title-bar-actions .title-area-icon.restoreButton .title-area-icon-inner:not(#ark)::before {
+  content: '\E923';
+}
+
+.title-area:not(.OSX) .title-bar-actions .title-area-icon.closeButton .title-area-icon-inner:not(#ark)::before {
+  content: '\E8BB';
+}
+/* ───────── Game page: pictures that are still coming ─────────
+ * The page's late blocks (game recap and recordings, news, DLC, achievements, friends) draw their
+ * pictures as they arrive; until then a box of the picture's size was a hole and then popped in.
+ * A picture in a section (AppDetailsSection) now stands on a plain plate, WinUI's placeholder, of its
+ * own size, so the picture appears over it instead of out of nothing. */
+._2r4TK4BAuU-J4FuF_O7v_5 img:not(#ark) {
+  background-color: var(--arkada-layer-2);
+}

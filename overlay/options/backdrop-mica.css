@@ -1,0 +1,11 @@
+/*
+ * Theme setting (skin.json Conditions): «Подложка окна», Mica (the default). Tells the Arkada plugin
+ * which backdrop to ask Windows for: it reads --arkada-backdrop on <html> (plugin/src/backdrop.js).
+ * Mica under the main windows, Acrylic under menus, pop-ups and small windows.
+ * Nothing is drawn here: the see-through rules are in arkada/backdrop.css and wait for the plugin's
+ * mark, <html data-arkada-backdrop>. Without the plugin this file changes nothing.
+ * :root:root beats the "off" of arkada/tokens.css (html:root).
+ */
+:root:root {
+  --arkada-backdrop: mica;
+}

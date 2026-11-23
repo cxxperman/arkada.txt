@@ -3,3 +3,8 @@ plugin/node_modules/
 # its cache of typings and the short-named copy it is run from when the folder path is too long for Windows
 plugin/.millennium/
 plugin/sl.exe
+# the theme assembled from upstream/steam-enhanced + overlay/ by tools/build-se.js
+/dist/
+
+# the release archive made by npm run package
+/release/

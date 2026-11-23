@@ -1,0 +1,33 @@
+/*
+ * Theme setting (skin.json Conditions): Animations, Reduced. What prefers-reduced-motion does
+ * (core/motion.css, web/shared/base.css), on demand: transitions end at once, so hovers, presses
+ * and panels change state without moving. Animations keep running (spinners and the entrance
+ * carry meaning, toasts wait on animationend), except the decorative ones listed below.
+ * !important: beats every transition, Steam's and the theme's.
+ */
+*,
+*::before,
+*::after {
+  transition-duration: .01ms !important;
+  transition-delay: 0s !important;
+  scroll-behavior: auto !important;
+}
+
+/* The column resize grip's dots pop in on hover (client/shared/column-resize.css) */
+.se-col-resize > .se-col-grip > i {
+  animation: none !important;
+}
+
+/* Menus open without their fade and drop (core/motion.css; the library's right-click menus,
+   client/library/game-menu.css; Brew Hub's, compat/brew-hub/brew-hub.css) */
+html:is(.Steam_Root_Menu, .Account_Menu) ._2EstNjFIIZm_WUSKm5Wt7n,
+[data-se-lib-menu],
+.MillenniumSettings .bh-root .bh-menu,
+.se-menu {
+  animation: none !important;
+}
+
+/* The overlay's views change without their rise (client/overlay/overlay-views.css) */
+html[data-se-ov] .se-ov-overview[data-se-ov-view] > [data-view] {
+  animation: none !important;
+}

@@ -1,0 +1,414 @@
+/*
+ * Popup layer windows (client/shared/popup-layer.js): a borderless, transparent window that is only
+ * its content. The !important rules beat the sizes and surface Steam's context-menu styles
+ * and inline styles give a menu window.
+ */
+html.se-layer-document,
+html.se-layer-document body {
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background: transparent !important;
+}
+
+/*
+ * A window copies the main window's page classes, and with them its page-level chrome drawn
+ * on html/body pseudo-elements (the rail's backdrop: client/navigation/nav-rail.css). That
+ * chrome belongs to the main window, not to a popup.
+ */
+html.se-layer-document::before,
+html.se-layer-document::after,
+html.se-layer-document body::before,
+html.se-layer-document body::after {
+  content: none !important;
+}
+
+/* Sized from --se-layer-width/height (set per window), not from Steam's first layout */
+html.se-layer-document .se-layer-popup {
+  box-sizing: border-box !important;
+  width: var(--se-layer-width) !important;
+  height: var(--se-layer-height) !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: none !important;
+  max-height: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+}
+
+/* The anchor Steam measures a layer window from: never drawn */
+.se-layer-anchor {
+  position: fixed;
+  width: 0;
+  height: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/*
+ * A window's content box: the main window's viewport, shifted so the content lands at the
+ * window's origin. The transform makes it the containing block of the content's fixed boxes.
+ */
+.se-layer-wrap {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--se-wrap-w);
+  height: var(--se-wrap-h);
+  transform: translate(var(--se-wrap-x), var(--se-wrap-y));
+  pointer-events: none;
+}
+
+/*
+ * The shift is measured against the box's current place (fit() in popup-layer.js), so it must
+ * land at once. Reduced motion (core/motion.css, options/appearance/motion-reduced.css) gives
+ * every element a .01ms transition of `all`: the transform would lag a frame, the next fit()
+ * would read the old place and shift again, and the panel would land twice as far off.
+ */
+.se-layer-wrap,
+.se-layer-page {
+  transition-property: none;
+}
+
+/*
+ * Content sizes to itself, as it does in the page (a fixed box shrinks to fit): here it sits
+ * in a box as wide as the main window, where it would stretch.
+ */
+.se-layer-wrap > * {
+  width: fit-content;
+  pointer-events: auto;
+}
+
+/*
+ * No drop shadow in a window, as Steam does for its own popup windows (HoverPositionPopup): the
+ * window is only as big as the card, so a shadow is cut square at its edges and darkens the
+ * corners outside the card's rounded ones. !important, and the cards' own weight plus one: the
+ * "Playing now" card's shadow carries !important (client/friends/friend-hover.css).
+ */
+html.se-layer-document .se-layer-wrap > *:not(#se-none) {
+  box-shadow: none !important;
+}
+
+/* A panel drawn in the main window (no browser view in the way): moved to its spot */
+.se-layer-page {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: var(--se-z-popover);
+  transform: translate(var(--se-page-x), var(--se-page-y));
+  pointer-events: none;
+}
+
+.se-layer-page > * {
+  pointer-events: auto;
+}
+
+/*
+ * The theme's action menu (menu() in client/shared/popup-layer.js): rows that run and close it,
+ * over a Store page too (the dock's menus, the rail's, Settings). One of the theme's two menus:
+ * controls that stay open (segments, toggles, a list to reorder) go in the settings menu
+ * (client/shared/menu.css), which needs focus a popup window can't take. Both share the panel
+ * and row recipe (--se-menu-row-h). Here, not with a feature, so a popup window always has it
+ * (a base sheet).
+ */
+.se-menu {
+  position: fixed;
+  z-index: calc(var(--se-z-popover) + 1000);
+  font-family: var(--se-font);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 150px;
+  padding: var(--se-space-1);
+  border-radius: var(--se-radius-menu);
+  background: var(--se-surface);
+  box-shadow: var(--se-shadow-pop);
+  /* Opens and closes as every menu does (core/motion.css) */
+  animation: se-menu-in var(--se-dur) var(--se-ease);
+}
+
+.se-menu[data-se-closing] {
+  animation: se-menu-out var(--se-dur-fast) ease-in forwards;
+  pointer-events: none;
+}
+
+/* !important: Steam's own button styles reach the rows, in its windows and in popup windows */
+.se-menu button {
+  /* Heights below are the whole row, padding included */
+  box-sizing: border-box;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--se-space-2);
+  height: var(--se-menu-row-h);
+  padding: 0 var(--se-space-2) !important;
+  border-radius: var(--se-radius-sm);
+  font: 600 var(--se-fs-base) var(--se-font), sans-serif !important;
+  color: var(--se-text-dim) !important;
+  text-align: left;
+}
+
+.se-menu button:is(:hover, :focus-visible, [data-se-active]) {
+  background: var(--se-selected) !important;
+  color: var(--se-text-strong) !important;
+}
+
+/* The row for the page you're on, in the accent as the rail's current page icon is (lit too).
+   !important: the row's own colour above is, against Steam's button styles */
+.se-menu button[aria-current="page"] {
+  color: var(--se-accent) !important;
+}
+
+/* A row that destroys something (Delete), in red. !important: the row's own colours above. */
+.se-menu button[data-danger] {
+  color: var(--se-danger) !important;
+}
+
+.se-menu button[data-danger]:is(:hover, :focus-visible, [data-se-active]) {
+  background: var(--se-danger-surface) !important;
+  color: var(--se-danger-text) !important;
+}
+
+/* Keyboard focus is the row's highlight, as in the account menu (client/header/account-menu.css):
+   no ring around a row. */
+.se-menu button:is(:focus, :focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Rich rows (the Settings menu): a group heading, a divider, an icon, a hint, a shortcut */
+.se-menu:has([data-hint]) {
+  min-width: 260px;
+}
+
+.se-menu-heading {
+  padding: var(--se-space-2) var(--se-space-2) var(--se-space-1);
+  font: var(--se-label-font);
+  letter-spacing: var(--se-label-spacing);
+  text-transform: uppercase;
+  color: var(--se-label-color);
+}
+
+.se-menu-sep {
+  height: 1px;
+  margin: var(--se-space-1) var(--se-space-1);
+  background: var(--se-divider);
+}
+
+.se-menu button[data-hint] {
+  height: auto;
+  min-height: var(--se-menu-row-h);
+  /* !important: the row's own padding is, against Steam's button styles */
+  padding: var(--se-space-1) var(--se-space-2) !important;
+}
+
+.se-menu-icon {
+  flex: none;
+  width: var(--se-icon-glyph);
+  height: var(--se-icon-glyph);
+  background: currentColor;
+  -webkit-mask: var(--se-menu-mask) center / contain no-repeat;
+  mask: var(--se-menu-mask) center / contain no-repeat;
+}
+
+.se-menu-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+/* A rich row's two lines sit close: the row stays near a plain one's height */
+.se-menu-label {
+  line-height: 1.2;
+}
+
+.se-menu-hint {
+  font: 500 var(--se-fs-xs) / 1.2 var(--se-font);
+  color: var(--se-text-faint);
+}
+
+/* A row keeps to one line: the menu grows to fit its longest label or hint */
+:is(.se-menu-label, .se-menu-hint) {
+  white-space: nowrap;
+}
+
+.se-menu-keys {
+  margin-left: auto;
+  padding-left: var(--se-space-4);
+  font: 600 var(--se-fs-xs) / 1 var(--se-font);
+  color: var(--se-text-faint);
+}
+
+.se-menu button:is(:hover, :focus-visible, [data-se-active]) :is(.se-menu-hint, .se-menu-keys) {
+  color: var(--se-text-muted);
+}
+
+/*
+ * An on/off row (a menu item's checked): the client's switch (client/settings/controls.css) at
+ * the row's end, its track on the field fill so it still reads on a lit row
+ */
+.se-menu-switch {
+  position: relative;
+  flex: none;
+  width: var(--se-switch-w);
+  height: var(--se-switch-h);
+  margin-left: auto;
+  border-radius: var(--se-radius-pill);
+  background: var(--se-field);
+  box-shadow: var(--se-edge);
+  transition: background-color var(--se-dur) ease-out;
+}
+
+.se-menu button:has(.se-menu-switch) .se-menu-text {
+  margin-right: var(--se-space-4);
+}
+
+.se-menu-switch::after {
+  content: "";
+  position: absolute;
+  top: calc((var(--se-switch-h) - var(--se-switch-knob)) / 2);
+  left: calc((var(--se-switch-h) - var(--se-switch-knob)) / 2);
+  width: var(--se-switch-knob);
+  height: var(--se-switch-knob);
+  border-radius: 50%;
+  background: var(--se-text-muted);
+  transition: transform var(--se-dur) ease-out, background-color var(--se-dur) ease-out;
+}
+
+.se-menu [aria-checked="true"] .se-menu-switch {
+  background: var(--se-accent);
+  box-shadow: none;
+}
+
+.se-menu [aria-checked="true"] .se-menu-switch::after {
+  background: var(--se-bg-ink);
+  transform: translateX(calc(var(--se-switch-w) - var(--se-switch-h)));
+}
+
+/* Redrawn in place (update()): no second opening animation */
+.se-menu[data-se-redraw] {
+  animation: none;
+}
+
+/*
+ * Feed rows (the Announcements menu): the art as a 32px tile at the start, as the notifications
+ * panel draws it (client/header/notifications.css), the time and an unread dot at the end. The
+ * menu keeps one width; long names and hints end in an ellipsis.
+ */
+.se-menu:has(.se-menu-art) {
+  width: 360px;
+}
+
+.se-menu button:has(.se-menu-art) {
+  height: auto;
+  min-height: 44px;
+  gap: var(--se-space-3);
+  /* !important: the row's own padding is, against Steam's button styles */
+  padding: var(--se-space-1) var(--se-space-2) !important;
+}
+
+.se-menu button:has(.se-menu-art) .se-menu-text {
+  flex: 1 1 auto;
+}
+
+.se-menu button:has(.se-menu-art) :is(.se-menu-label, .se-menu-hint) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.se-menu-art {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--se-radius-sm);
+  background: var(--se-surface-2);
+  color: var(--se-text-muted);
+  overflow: hidden;
+}
+
+.se-menu-art > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.se-menu-time {
+  flex: none;
+  margin-left: auto;
+  padding-left: var(--se-space-2);
+  font: 600 var(--se-fs-xs) / 1 var(--se-font);
+  color: var(--se-text-faint);
+}
+
+/* The dot keeps its place on read rows, so every time lines up */
+.se-menu-dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--se-accent);
+  visibility: hidden;
+}
+
+.se-menu button[data-unread] .se-menu-dot {
+  visibility: visible;
+}
+
+.se-menu button[data-unread] .se-menu-label {
+  color: var(--se-text-strong);
+}
+
+.se-menu-external {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  margin-left: auto;
+  background: var(--se-text-faint);
+  -webkit-mask: var(--se-icon-external) center / contain no-repeat;
+  mask: var(--se-icon-external) center / contain no-repeat;
+}
+
+/* A heading's action at its end (Mark all read) */
+.se-menu-heading:has(.se-menu-heading-action) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: var(--se-space-1);
+}
+
+/* !important: the menu rows' button styles above are, against Steam's */
+.se-menu .se-menu-heading-action {
+  position: relative;
+  height: 24px;
+  padding: 0 var(--se-space-1) !important;
+  font: 600 var(--se-fs-xs) / 24px var(--se-font) !important;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--se-text-faint) !important;
+}
+
+/* The hit area up to --se-hit tall: a taller box would grow the heading */
+.se-menu .se-menu-heading-action::after {
+  content: "";
+  position: absolute;
+  inset: calc(-1 * var(--se-space-1)) 0;
+}
+
+/* An empty state: plain text, not a row */
+.se-menu-note {
+  padding: var(--se-space-3) var(--se-space-2);
+  font: 500 var(--se-fs-sm) / 1.3 var(--se-font);
+  color: var(--se-text-faint);
+}

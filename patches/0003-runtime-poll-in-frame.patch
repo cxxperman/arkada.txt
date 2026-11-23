@@ -1,0 +1,71 @@
+Steam Enhanced, core/runtime.js: SE.poll checks run at the start of a frame.
+
+Why. SE.poll's timer calls `active` first, and most polls answer it with SE.visible() →
+checkVisibility(), which needs up-to-date styles. From a timer task, while the page is changing,
+that forces a style recalculation of the whole window on top of the one the next frame does
+anyway (up to ~145 ms in the main window). Measured on one game page change (570 → 730):
+checkVisibility via hasBox/visible 171 ms of forced style work, called from the polls of
+client/game-page/player-count.js, downloads, the friends list and collections.
+
+What. The poll's timer no longer calls tick() itself: it asks for the next animation frame
+(tickInFrame), and tick() runs there, where the style pass is the frame's own. One frame request
+at a time; disconnect() cancels it; a window without requestAnimationFrame ticks at once as
+before. Hidden documents: the frame comes when the document is shown, and tick() checks the
+visibility first as before. wake() (resize, focus) is unchanged.
+
+--- a/core/runtime.js
++++ b/core/runtime.js
+@@ -863,6 +863,26 @@
+ 
+     const isDocumentVisible = () => !win?.closed && doc.visibilityState !== 'hidden';
+ 
++    /*
++     * The poll's turn comes at the start of a frame, not from the timer itself. Its `active` check
++     * is mostly SE.visible(), and checkVisibility() needs the styles up to date: from a timer, while
++     * the page is changing (a game page builds itself for 1-2 s), that forced a style pass of the
++     * whole window on top of the frame's own (up to ~145 ms each, 171 ms in all on one page change).
++     * At the start of a frame it is the frame's one pass, done a little earlier.
++     */
++    let frame = 0;
++    const tickInFrame = () => {
++      if (frame) return;
++      if (!win?.requestAnimationFrame) {
++        tick();
++        return;
++      }
++      frame = win.requestAnimationFrame(() => {
++        frame = 0;
++        tick();
++      });
++    };
++
+     const tick = () => {
+       if (timer !== null) {
+         clearTimeout(timer);
+@@ -881,7 +901,7 @@
+         }
+       }
+       if (!stopped && timer === null) {
+-        timer = setTimeout(tick, isActive ? delay : idleInterval);
++        timer = setTimeout(tickInFrame, isActive ? delay : idleInterval);
+       }
+     };
+ 
+@@ -899,7 +919,7 @@
+ 
+     if (isDocumentVisible()) {
+       isActive = !opts.active || !!run(opts.active);
+-      timer = setTimeout(tick, isActive ? delay : idleInterval);
++      timer = setTimeout(tickInFrame, isActive ? delay : idleInterval);
+     }
+ 
+     return {
+@@ -908,6 +928,8 @@
+         stopped = true;
+         if (timer !== null) clearTimeout(timer);
+         timer = null;
++        if (frame) win?.cancelAnimationFrame?.(frame);
++        frame = 0;
+         doc.removeEventListener('visibilitychange', wake);
+         for (const type of wakeEvents) win?.removeEventListener?.(type, wake);
+       },

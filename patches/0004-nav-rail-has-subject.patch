@@ -1,0 +1,92 @@
+Steam Enhanced, client/navigation/nav-rail.css: the title bar's button wrappers picked by their class.
+
+Why. The rail places Steam's title bar buttons (Gamepad toggle, Announcements, Notifications,
+account) by the wrapper Steam puts around each one, `TitleBarControls > :has(<button class>)`. That
+compound is only a :has(): Blink files such a rule with the universal ones and evaluates the :has()
+on the elements it is tried on, marking them as :has() anchors, and every DOM change under the
+title bar then re-checks them. With the five wrappers position: fixed, each relayout of the main
+window cost about twice as much. Measured in the main window, window occluded, so its frames driven over CDP
+(a forced style and layout every 16 ms, ResizeObserver delivered after it), Home -> CS2's game page, 3 s after the
+route change (Performance.getMetrics, mean of 2-3 runs): layout 560 ms in 27 passes (~21 ms each)
+-> 297 ms (~11 ms each); the same 27 passes, the same dirty objects. Removing these selectors
+outright gave the same 281 ms.
+
+What. Each of those :has() gets the wrapper's class: `:where(.tool-tip-source):has(...)` (Steam's
+tooltip source; every wrapper there is one). :where() keeps every selector's weight as it was: the
+offsets below rely on it (one :is() per button for that reason). Computed styles of every element
+on the game page and on Home are identical before and after (DOMSnapshot, all properties).
+
+--- a/client/navigation/nav-rail.css
++++ b/client/navigation/nav-rail.css
+@@ -198,16 +198,16 @@
+ }
+ 
+ html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > ._3LKQ3S_yqrebeNLF6aeiog,
+-html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > :has(._3LKQ3S_yqrebeNLF6aeiog) {
++html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > :where(.tool-tip-source):has(._3LKQ3S_yqrebeNLF6aeiog) {
+   order: 1;
+ }
+ 
+-html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > :is(._5wILZhsLODVwGfcJ0hKmJ, :has(._5wILZhsLODVwGfcJ0hKmJ:not(.se-header-action))):not(.se-header-actions):not(.se-header-action):not(._3LKQ3S_yqrebeNLF6aeiog):not(:has(._3LKQ3S_yqrebeNLF6aeiog)) {
++html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > :is(._5wILZhsLODVwGfcJ0hKmJ, :where(.tool-tip-source):has(._5wILZhsLODVwGfcJ0hKmJ:not(.se-header-action))):not(.se-header-actions):not(.se-header-action):not(._3LKQ3S_yqrebeNLF6aeiog):not(:has(._3LKQ3S_yqrebeNLF6aeiog)) {
+   order: 2;
+ }
+ 
+ html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > ._3mGEzzp18imtSzGPkduedi,
+-html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > :has(.RtSv39ZoBOySnb8XQ5hJf) {
++html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > :where(.tool-tip-source):has(.RtSv39ZoBOySnb8XQ5hJf) {
+   order: 3;
+ }
+ 
+@@ -220,7 +220,7 @@
+ }
+ 
+ html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > ._3yD46y5pd3zOGR7CzKs0mC,
+-html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > :has(._3yD46y5pd3zOGR7CzKs0mC) {
++html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > :where(.tool-tip-source):has(._3yD46y5pd3zOGR7CzKs0mC) {
+   order: 5;
+ }
+ 
+@@ -554,7 +554,7 @@
+ 
+ /* Not kept. Hidden, never removed: Steam's own buttons stay mounted. */
+ html body.se-header-actions-ready .se-header-actions > [data-se-action="add"],
+-html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > :is(._3LKQ3S_yqrebeNLF6aeiog, :has(._3LKQ3S_yqrebeNLF6aeiog)) {
++html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > :is(._3LKQ3S_yqrebeNLF6aeiog, :where(.tool-tip-source):has(._3LKQ3S_yqrebeNLF6aeiog)) {
+   display: none;
+ }
+ 
+@@ -568,9 +568,9 @@
+  * menus open beside it (client/header/menu/placement.js, client/header/header-actions.js);
+  * hovering the avatar shows your card (client/friends/dock/friend-card.js).
+  */
+-html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > :is(.se-header-action:is([data-se-action="settings"], [data-se-action="games"]), ._3mGEzzp18imtSzGPkduedi, :has(.RtSv39ZoBOySnb8XQ5hJf), ._3yD46y5pd3zOGR7CzKs0mC, :has(._3yD46y5pd3zOGR7CzKs0mC)),
++html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > :is(.se-header-action:is([data-se-action="settings"], [data-se-action="games"]), ._3mGEzzp18imtSzGPkduedi, :where(.tool-tip-source):has(.RtSv39ZoBOySnb8XQ5hJf), ._3yD46y5pd3zOGR7CzKs0mC, :where(.tool-tip-source):has(._3yD46y5pd3zOGR7CzKs0mC)),
+ html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > .se-header-actions > .se-header-action[data-se-action="downloads"],
+-html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > :is(._5wILZhsLODVwGfcJ0hKmJ, :has(._5wILZhsLODVwGfcJ0hKmJ:not(.se-header-action))):not(.se-header-actions, .se-header-action, ._3LKQ3S_yqrebeNLF6aeiog, :has(._3LKQ3S_yqrebeNLF6aeiog)) {
++html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > :is(._5wILZhsLODVwGfcJ0hKmJ, :where(.tool-tip-source):has(._5wILZhsLODVwGfcJ0hKmJ:not(.se-header-action))):not(.se-header-actions, .se-header-action, ._3LKQ3S_yqrebeNLF6aeiog, :where(.tool-tip-source):has(._3LKQ3S_yqrebeNLF6aeiog)) {
+   position: fixed;
+   left: calc((var(--se-rail-width) - var(--se-rail-btn)) / 2);
+   z-index: calc(var(--se-z-sticky) + 2);
+@@ -604,7 +604,7 @@
+ 
+ /* Each its own rule: in one :is() the settings selector's weight would win every offset,
+    stacking the three on one spot. */
+-html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > :is(._3yD46y5pd3zOGR7CzKs0mC, :has(._3yD46y5pd3zOGR7CzKs0mC)) {
++html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > :is(._3yD46y5pd3zOGR7CzKs0mC, :where(.tool-tip-source):has(._3yD46y5pd3zOGR7CzKs0mC)) {
+   bottom: calc(var(--se-space-3) + var(--se-rail-name-h));
+ }
+ 
+@@ -620,10 +620,10 @@
+   bottom: calc(var(--se-space-3) + var(--se-rail-name-h) + 3 * (var(--se-rail-btn) + var(--se-rail-gap)));
+ }
+ 
+-html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > :is(._5wILZhsLODVwGfcJ0hKmJ, :has(._5wILZhsLODVwGfcJ0hKmJ:not(.se-header-action))):not(.se-header-actions, .se-header-action, ._3LKQ3S_yqrebeNLF6aeiog, :has(._3LKQ3S_yqrebeNLF6aeiog)) {
++html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > :is(._5wILZhsLODVwGfcJ0hKmJ, :where(.tool-tip-source):has(._5wILZhsLODVwGfcJ0hKmJ:not(.se-header-action))):not(.se-header-actions, .se-header-action, ._3LKQ3S_yqrebeNLF6aeiog, :where(.tool-tip-source):has(._3LKQ3S_yqrebeNLF6aeiog)) {
+   bottom: calc(var(--se-space-3) + var(--se-rail-name-h) + 4 * (var(--se-rail-btn) + var(--se-rail-gap)));
+ }
+ 
+-html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > :is(._3mGEzzp18imtSzGPkduedi, :has(.RtSv39ZoBOySnb8XQ5hJf)) {
++html body.se-header-actions-ready ._3cykd-VfN_xBxf3Qxriccm > :is(._3mGEzzp18imtSzGPkduedi, :where(.tool-tip-source):has(.RtSv39ZoBOySnb8XQ5hJf)) {
+   bottom: calc(var(--se-space-3) + var(--se-rail-name-h) + 5 * (var(--se-rail-btn) + var(--se-rail-gap)));
+ }

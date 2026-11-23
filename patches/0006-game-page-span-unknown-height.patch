@@ -1,0 +1,31 @@
+Steam Enhanced, client/game-page/layout.js: fit() keeps a piece's span while its height is unknown.
+
+Why. fit() wrote every piece's span from the height its ResizeObserver last reported, and 1 for a
+piece it has no height for yet. A piece that already had a span (one this pass just observed, a node
+Steam made anew, or a span set ahead of the pass) was put back on a single 1px row: it stood over
+the pieces under it, and they moved up and back down when its size came. Measured on Dota 2's page in
+the main window (visible), with the place each block had on the last visit given to it at once
+(overlay/nav.js): the cover and the description fell to span 1 at ~620 ms and got their span back at
+~1.8 s; every block of both columns moved 514 / 736 px up and back down in that time. With this
+patch: no piece loses its span, no block moves (0 of 15).
+
+What. A piece with no reported height and a span of its own keeps that span; one with no span gets 1
+as before (the grid's default, nothing changes for a first pass); a measured height (0 included)
+sets the span as before.
+
+--- a/client/game-page/layout.js
++++ b/client/game-page/layout.js
+@@ -96,8 +96,11 @@
+     live.fitQueued = 0;
+     const c = document.querySelector(CONTAINER);
+     if (!c) return;
+-    const spans = pieces(c).map((el) => [el, heights.get(el) || 0]);
+-    for (const [el, h] of spans) {
++    for (const el of pieces(c)) {
++      const h = heights.get(el);
++      // Not measured yet (observed this frame, or a node Steam made anew): a span it already has
++      // stays; writing 1 stood the piece on one row, over the pieces under it, until its size came
++      if (h === undefined && el.style.getPropertyValue('--se-span')) continue;
+       setVar(el, '--se-span', String(h > 0 ? Math.ceil((h + GAP) / ROW) : 1));
+     }
+   }

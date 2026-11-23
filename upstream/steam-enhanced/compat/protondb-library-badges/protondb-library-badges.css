@@ -1,0 +1,77 @@
+/*
+ * ProtonDB Library Badges (github.com/Yohlo/protondb-library-badges)
+ *
+ *   1. Play bar stat: "ProtonDB" with the game's tier. Built like Size on Disk's (a Last Played
+ *      with a GameStatIcon + PlaytimeIcon), told apart by its icon's .pdb-stat-icon class
+ *      (client/game-page/play-bar.css and compat/steam-size-on-disk leave it out). It gets the
+ *      theme's stat icon (--se-icon-protondb, the atom from ProtonDB's site) and sits after the other plugins' stats, before
+ *      Achievements (play-bar.css keeps that last). The tier keeps the plugin's colour.
+ *   2. Library sidebar dots: the tier dot moves from before the game's icon (where the theme's
+ *      row has no room for it) to the row's end, ahead of the status icons.
+ *   3. Filter panel swatches: the dots' size.
+ *   4. The plugin's dots toggle beside Recent / Ready to play: one more tile in their group, with
+ *      the duotone ProtonDB atom (--se-icon-protondb) in both the classic sidebar and the title-bar list.
+ *      client/navigation/sidebar-icons.js counts the group's tiles, so the toolbars make room.
+ */
+
+/* ---------- 1. Play bar stat ---------- */
+
+._1U7LKpx70kEsz3jJwAFOi- ._1kiZKVbDe-9Ikootk57kpA:has(> .pdb-stat-icon):not(#se-none) {
+  --se-stat-icon: var(--se-icon-protondb);
+}
+
+/*
+ * The plugin mounts it in a display: contents host at the row's end, inside Steam's tooltip
+ * wrapper, so the flex item is the wrapper (or the stat, without one). Order 3: after Size on
+ * Disk (1) and Player Count (2), before Achievements (9).
+ */
+._1mDAVT4sTzFRwJtlKCw2Ws > * > :is(
+  ._1kiZKVbDe-9Ikootk57kpA:has(> .pdb-stat-icon),
+  :has(> ._1kiZKVbDe-9Ikootk57kpA > .pdb-stat-icon)
+):not(#se-none) {
+  order: 3;
+}
+
+/* ---------- 2. Library sidebar dots ---------- */
+
+._2-O4ZG0KrnSrzISHBKctFQ ._1vO6BoiVslZgs1kqDGdUs8[data-pdb-tier]:not(#se-none)::before {
+  order: 2;
+  width: 7px;
+  height: 7px;
+  margin: 0 0 0 auto;
+}
+
+/* The dot takes the free space; the status icons follow it */
+._2-O4ZG0KrnSrzISHBKctFQ ._1vO6BoiVslZgs1kqDGdUs8[data-pdb-tier] ._2-J2nMJ1zmDok8-jqXlf1e:not(#se-none):not(#se-pdb) {
+  margin-left: 0;
+}
+
+/* Filled tiers lose the plugin's dark ring; Pending stays a ring; No data a faint dot */
+._2-O4ZG0KrnSrzISHBKctFQ ._1vO6BoiVslZgs1kqDGdUs8[data-pdb-tier]:not([data-pdb-tier="pending"], [data-pdb-tier="unknown"]):not(#se-none)::before {
+  box-shadow: none;
+}
+
+._2-O4ZG0KrnSrzISHBKctFQ ._1vO6BoiVslZgs1kqDGdUs8[data-pdb-tier="unknown"]:not(#se-none)::before {
+  background: var(--se-white-14);
+  box-shadow: none;
+}
+
+/* ---------- 3. Filter panel ---------- */
+
+.pdb-bucket .pdb-swatch:not(#se-none) {
+  width: 7px;
+  height: 7px;
+}
+
+.pdb-bucket .pdb-swatch[data-tier="unknown"]:not(#se-none) {
+  background: var(--se-white-14);
+  box-shadow: none;
+}
+
+/* ---------- 4. Dots toggle ---------- */
+
+/* Both toolbars (classic sidebar and title-bar list) read the same icon. */
+.se-sidebar-icons .pdb-dots-toggle > ._3mzKdQXht__YHo6PX1LmB6 {
+  --se-sidebar-icon: var(--se-icon-protondb);
+}
+

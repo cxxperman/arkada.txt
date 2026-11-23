@@ -1,0 +1,26 @@
+/* Настройка темы «Прозрачность окна». Нужен плагин Millennium «Window Styler (DWMX)» и включённые
+ * эффекты прозрачности Windows: плагин просит у Windows размытие рабочего стола под окном (акрил / Mica),
+ * а тема делает фон окна полупрозрачным, чтобы это размытие было видно.
+ *
+ * Все правила ниже срабатывают, только когда плагин действительно включён: Millennium перечисляет
+ * включённые плагины в атрибуте data-millennium-plugin на <html>, у DWMX это «dwmx». Без плагина
+ * настройка ничего не меняет — остаётся обычный фон Mica, поэтому по умолчанию она включена.
+ *
+ * Читаемость на светлых обоях держит затемняющий тинт: фон окна — --dt-bg на 62%, слои над ним — как были
+ * (белый 4% и обводка), непрозрачные слои (полоса запуска, «Вы играли») становятся полупрозрачными. */
+
+:root[data-millennium-plugin~='dwmx'] {
+  --arkada-window-tint: color-mix(in srgb, var(--dt-bg) 62%, transparent);
+  --arkada-layer-solid: color-mix(in srgb, var(--dt-bg) 78%, transparent);
+  --dt-menu: color-mix(in srgb, var(--dt-raised) 72%, transparent);
+  --dt-tooltip: color-mix(in srgb, var(--dt-raised) 88%, transparent);
+}
+
+/* Корни окон прозрачные. Тинт кладёт один слой: в главном окне — рамка Steam (Wrapper),
+ * в окнах друзей и чата — body (friends.custom.css берёт --arkada-window-bg, он уже полупрозрачный) */
+:root[data-millennium-plugin~='dwmx'],
+:root[data-millennium-plugin~='dwmx'].MillenniumWindow_MainSteamWindow body { background: transparent; }
+:root[data-millennium-plugin~='dwmx'] .\@Wrapper\@ForceOpaqueBackground.\@ForceOpaqueBackground\@URLBar { background: var(--arkada-window-bg); }
+
+/* Диалоги и настройки: тело диалога — непрозрачная поверхность в обычном режиме, здесь — тинт поверхности */
+:root[data-millennium-plugin~='dwmx'] .DialogContent { background: color-mix(in srgb, var(--dt-surface) 80%, transparent) !important; }

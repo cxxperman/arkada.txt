@@ -1,4 +1,6 @@
-// Builds theme/tokens.css from the design tokens of kit.txt. No dependencies.
+// Builds the theme. No dependencies.
+//   theme/tokens.css and theme/options/accent-*.css from the design tokens of kit.txt;
+//   theme/*.css (and theme/options/*.css) from theme/src, with Steam's hashed classes taken from steam-classes.json.
 //   node tools/build.js                    read ./tokens.json (the copy kept in this folder), write theme/tokens.css
 //   node tools/build.js <tokens.json>      read the tokens of kit.txt itself, refresh ./tokens.json, write theme/tokens.css
 //   node tools/build.js [...] --check      write nothing; fail if a file on disk differs from what would be written
@@ -72,7 +74,34 @@ function buildAccents() {
   return out;
 }
 
-const files = Object.assign({ 'theme/tokens.css': buildCss() }, buildAccents());
+// theme/src/**/*.css → theme/**/*.css: readable names of Steam's classes become the hashes of steam-classes.json
+// (tools/classes.js says how they are written). These are the files Millennium loads.
+function buildTheme() {
+  const classes = require('./classes');
+  const idx = classes.load();
+  const src = path.join(root, 'theme', 'src');
+  const out = {}, errors = [];
+  const client = idx.client ? 'клиент ' + idx.client.version + ', ' + idx.client.date : 'клиент неизвестен';
+  (function walk(dir) {
+    for (const f of fs.readdirSync(dir).sort()) {
+      const p = path.join(dir, f);
+      if (fs.statSync(p).isDirectory()) { walk(p); continue; }
+      if (!f.endsWith('.css')) continue;
+      const rel = path.relative(src, p).replace(/\\/g, '/');
+      const r = classes.compile(fs.readFileSync(p, 'utf8'), idx, 'theme/src/' + rel);
+      errors.push(...r.errors);
+      out['theme/' + rel] = `/* Сгенерировано tools/build.js из theme/src/${rel} и steam-classes.json (${client}). Руками не править. */\n` + r.css;
+    }
+  })(src);
+  if (errors.length) {
+    for (const e of errors) console.error('Error: ' + e);
+    console.error(errors.length + ' Steam class name(s) do not resolve. Names come from steam-classes.json (refresh it: node tools/steam-classes.js).');
+    process.exit(1);
+  }
+  return out;
+}
+
+const files = Object.assign({ 'theme/tokens.css': buildCss() }, buildAccents(), buildTheme());
 if (given) files['tokens.json'] = sourceText;
 
 let stale = false;

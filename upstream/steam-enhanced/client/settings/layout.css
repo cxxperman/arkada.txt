@@ -1,0 +1,547 @@
+/*
+ * Steam Settings and Game Properties window styles (`PagedSettingsDialog`).
+ *
+ * Styles the 248px navigation sidebar, live cross-page search results, grouped
+ * option cards (`[data-se-c]`), compact segmented radio controls, custom
+ * switches and sliders, keyboard shortcut badges, Storage drive usage cards,
+ * and Game Properties tabs (`html[data-se-props]`). Paired with
+ * `client/settings/dialog/`.
+ *
+ * This file: the sidebar, the page frame, titles, cards and rows. Settings styles load in
+ * order: layout, controls, pages, storage, search, game-properties, spacing.
+ */
+/* Sidebar */
+._2kwFFHckg8jvnwJfg9-la8 {
+  /* PageListColumn */
+  width: 248px !important;
+  min-width: 248px !important;
+  max-width: 248px !important;
+  flex: 0 0 248px !important;
+  box-sizing: border-box !important;
+  padding: var(--se-space-5) var(--se-space-3) !important;
+  background: var(--se-sidebar) !important;
+  box-shadow: inset -1px 0 0 var(--se-hairline) !important;
+}
+
+._2rjVTGz8aLvqOdz5v2gq5C {
+  /* Title */
+  margin: 0 0 var(--se-space-3) !important;
+  padding: 0 var(--se-space-2) !important;
+  height: auto !important;
+  min-height: 0 !important;
+  font: 700 var(--se-fs-xl)/24px var(--se-font) !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  color: var(--se-text) !important;
+}
+
+._2rjVTGz8aLvqOdz5v2gq5C[data-se-title] {
+  font-size: 0 !important;
+  height: 24px !important;
+  line-height: 24px !important;
+  overflow: hidden;
+}
+
+._2rjVTGz8aLvqOdz5v2gq5C[data-se-title]::before {
+  content: attr(data-se-title);
+  font: 700 var(--se-fs-xl)/24px var(--se-font);
+}
+
+.se-settings-search {
+  /* Added by client/settings/dialog/ under the title */
+  display: flex;
+  align-items: center;
+  gap: var(--se-search-gap);
+  height: var(--se-search-h);
+  margin: 0 0 var(--se-space-3);
+  padding: 0 var(--se-search-pad);
+  box-sizing: border-box;
+  border-radius: var(--se-search-radius);
+  background: var(--se-search-bg);
+  box-shadow: var(--se-search-edge);
+  color: var(--se-search-icon-color);
+  transition: box-shadow var(--se-dur) var(--se-ease);
+}
+
+.se-settings-search:hover:not(:focus-within) {
+  box-shadow: var(--se-search-edge-hover);
+}
+
+.se-settings-search:focus-within {
+  box-shadow: var(--se-search-edge-focus);
+}
+
+.se-settings-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--se-search-text);
+  font: var(--se-search-font);
+  padding: 0;
+}
+
+.se-settings-search input::placeholder {
+  color: var(--se-search-placeholder) !important;
+  font-style: normal !important;
+}
+
+._18QCu-7MTzd51UpVbYysDy {
+  /* PageList: padded so the accent bar at the column edge is not clipped */
+  margin: 0 calc(-1 * var(--se-space-3)) !important;
+  padding: 0 var(--se-space-3) var(--se-space-3) !important;
+}
+
+/* The uppercase label: sidebar groups, section labels and the search results' head */
+._18QCu-7MTzd51UpVbYysDy[data-se-label]::before,
+._1Hye7o1wYIfc9TE9QKRW4T[data-se-label]::before,
+.CFTLX2wIKOK3hNV-fS7_V [data-se-sec]:not(#se-none),
+.se-settings-results-head {
+  font: var(--se-label-font) !important;
+  letter-spacing: var(--se-label-spacing) !important;
+  text-transform: uppercase !important;
+  color: var(--se-label-color) !important;
+}
+
+._18QCu-7MTzd51UpVbYysDy[data-se-label]::before,
+._1Hye7o1wYIfc9TE9QKRW4T[data-se-label]::before {
+  /* Group labels */
+  content: attr(data-se-label);
+  display: block;
+  padding: 0 var(--se-space-2) var(--se-space-1);
+}
+
+._1Hye7o1wYIfc9TE9QKRW4T {
+  /* PageListSeparator */
+  height: auto !important;
+  margin: var(--se-space-2) 0 0 !important;
+  padding: 0 !important;
+  background: none !important;
+  border: 0 !important;
+}
+
+._1Hye7o1wYIfc9TE9QKRW4T:not([data-se-label])::before {
+  content: '';
+  display: block;
+  height: 1px;
+  margin: 0 var(--se-space-2) var(--se-space-1);
+  background: var(--se-hairline);
+}
+
+._1-vlriAtKYDViAEunue4VO {
+  /* PageListItem */
+  position: relative;
+  box-sizing: border-box !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  margin: 0 0 var(--se-space-half) !important;
+  padding: 0 var(--se-space-2) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: var(--se-space-3);
+  border-radius: var(--se-radius-sm) !important;
+  background: transparent !important;
+  color: var(--se-text-dim) !important;
+  font: 500 var(--se-fs-md) var(--se-font) !important;
+  transition: background-color var(--se-dur) ease-out, color var(--se-dur) ease-out;
+}
+
+._1-vlriAtKYDViAEunue4VO:hover:not(._2DpXjzK3WWsOtUWUrcuOG7) {
+  background: var(--se-hover) !important;
+  color: var(--se-text-strong) !important;
+}
+
+._1-vlriAtKYDViAEunue4VO._2DpXjzK3WWsOtUWUrcuOG7 {
+  background: var(--se-accent-tint) !important;
+  color: var(--se-text) !important;
+  font-weight: 600 !important;
+}
+
+._1-vlriAtKYDViAEunue4VO::before {
+  display: none !important;
+}
+
+._1rD8X96FdnksZLvRRlEiCR {
+  /* PageListItem_Icon */
+  position: relative;
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  margin: 0 !important;
+  flex: 0 0 18px;
+  color: var(--se-text-muted) !important;
+}
+
+._1rD8X96FdnksZLvRRlEiCR svg {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+._1-vlriAtKYDViAEunue4VO:hover ._1rD8X96FdnksZLvRRlEiCR {
+  color: var(--se-text-strong) !important;
+}
+
+._1-vlriAtKYDViAEunue4VO._2DpXjzK3WWsOtUWUrcuOG7 ._1rD8X96FdnksZLvRRlEiCR {
+  color: var(--se-accent) !important;
+}
+
+/* Our duotone icon replaces Steam's (client/settings/dialog/ sets data-se-icon on the item). */
+._1-vlriAtKYDViAEunue4VO[data-se-icon] ._1rD8X96FdnksZLvRRlEiCR > * {
+  visibility: hidden !important;
+}
+
+._1-vlriAtKYDViAEunue4VO[data-se-icon] ._1rD8X96FdnksZLvRRlEiCR::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  -webkit-mask: var(--se-ic) center / 18px 18px no-repeat;
+  mask: var(--se-ic) center / 18px 18px no-repeat;
+}
+
+._2PPbMrzl8PKBwpkjYs9b0i {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* PageListItem_Title */
+._1-vlriAtKYDViAEunue4VO._2DpXjzK3WWsOtUWUrcuOG7 ._2PPbMrzl8PKBwpkjYs9b0i {
+  color: var(--se-text) !important;
+}
+
+[data-se-filtering] ._1Hye7o1wYIfc9TE9QKRW4T,
+._18QCu-7MTzd51UpVbYysDy[data-se-filtering]::before {
+  display: none !important;
+}
+
+._1-vlriAtKYDViAEunue4VO[data-se-miss] {
+  display: none !important;
+}
+
+/* Page */
+.CFTLX2wIKOK3hNV-fS7_V {
+  /* PageContent: vertical scrolling only */
+  overflow-x: hidden !important;
+  background: var(--se-bg) !important;
+  padding: var(--se-space-6) var(--se-space-6) var(--se-space-6) !important;
+  box-sizing: border-box !important;
+}
+
+.CFTLX2wIKOK3hNV-fS7_V > .DialogContent_InnerWidth {
+  max-width: 100% !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.OX7USkJ5dDP_icD00Gal6 {
+  overflow-x: hidden !important;
+  min-width: 0 !important;
+}
+
+/* The page fills its window (the in-game overlay's Settings; client/settings/dialog/window.js) */
+[data-se-fill] {
+  flex: 1 1 auto !important;
+  align-self: stretch !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  margin-inline: 0 !important;
+}
+
+[data-se-fill-spare] {
+  display: none !important;
+}
+
+/*
+ * No sideways scrolling anywhere in a page: inner scrollers client/settings/dialog/ finds overflowing
+ * sideways lose that axis, and no horizontal scrollbar is drawn.
+ */
+.CFTLX2wIKOK3hNV-fS7_V [data-se-noxs] {
+  overflow-x: hidden !important;
+}
+
+.CFTLX2wIKOK3hNV-fS7_V::-webkit-scrollbar:horizontal,
+.CFTLX2wIKOK3hNV-fS7_V *::-webkit-scrollbar:horizontal,
+.OX7USkJ5dDP_icD00Gal6::-webkit-scrollbar:horizontal {
+  height: 0 !important;
+  display: none !important;
+}
+
+.CFTLX2wIKOK3hNV-fS7_V .DialogHeader:not(#se-none) {
+  /* Page title */
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  font: 700 var(--se-fs-3xl)/30px var(--se-font) !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  color: var(--se-text) !important;
+  background: none !important;
+}
+
+/*
+ * A sub-page title (Controller › Advanced Settings): the back button as a 34px control,
+ * the title beside it at the same size and position as every page title.
+ */
+.CFTLX2wIKOK3hNV-fS7_V .DialogHeader:has(> button):not(#se-none) {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: var(--se-space-3) !important;
+}
+
+.CFTLX2wIKOK3hNV-fS7_V .DialogHeader > button.DialogButton:not(#se-none):not(#se-p2) {
+  flex: none;
+  width: var(--se-control-h) !important;
+  min-width: 0 !important;
+  height: var(--se-control-h) !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: var(--se-radius-sm) !important;
+  background: var(--se-surface-2) !important;
+  color: var(--se-text-muted) !important;
+}
+
+.CFTLX2wIKOK3hNV-fS7_V .DialogHeader > button.DialogButton:not(#se-none):not(#se-p2):hover {
+  background: var(--se-hover) !important;
+  color: var(--se-text-strong) !important;
+}
+
+.CFTLX2wIKOK3hNV-fS7_V .DialogHeader > button.DialogButton > * {
+  display: flex !important;
+  padding: 0 !important;
+}
+
+.CFTLX2wIKOK3hNV-fS7_V .DialogHeader > button.DialogButton svg {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+.CFTLX2wIKOK3hNV-fS7_V .DialogHeader[data-se-sub]::after {
+  /* One-line description under it */
+  content: attr(data-se-sub);
+  display: block;
+  margin-top: var(--se-space-1);
+  font: 500 var(--se-fs-md)/18px var(--se-font);
+  color: var(--se-text-muted);
+}
+
+/* Native wrappers and spacers: no padding, fades or extra gaps. */
+.CFTLX2wIKOK3hNV-fS7_V .DialogBody,
+.CFTLX2wIKOK3hNV-fS7_V .DialogInnerBody,
+.CFTLX2wIKOK3hNV-fS7_V .DialogControlsSection,
+.CFTLX2wIKOK3hNV-fS7_V .SettingsGroup,
+.CFTLX2wIKOK3hNV-fS7_V ._2nsOY93EAdTBmNbFplfuTi,
+.CFTLX2wIKOK3hNV-fS7_V ._3ieNQBmzS7FqrMOF-wJCSp {
+  padding: 0 !important;
+  margin: 0 !important;
+  background: none !important;
+  border: 0 !important;
+}
+
+.CFTLX2wIKOK3hNV-fS7_V .aFxOaYcllWYkCfVYQJFs0,
+.CFTLX2wIKOK3hNV-fS7_V .SettingsDialogBodyFade {
+  -webkit-mask: none !important;
+  mask: none !important;
+}
+
+.CFTLX2wIKOK3hNV-fS7_V ._3pM_dXquibd9REIjArfe7m,
+.CFTLX2wIKOK3hNV-fS7_V ._1CKqeionAAvKdDW0HUi_H5,
+.CFTLX2wIKOK3hNV-fS7_V ._25reh3iVTlhf0RJj3E7Q_z,
+.CFTLX2wIKOK3hNV-fS7_V ._2hHn-hNYrwsojBDweiCguk {
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Section labels: uppercase label above a card (client/settings/dialog/ marks them [data-se-sec]). */
+.CFTLX2wIKOK3hNV-fS7_V [data-se-sec]:not(#se-none) {
+  display: block !important;
+  margin: var(--se-space-5) 0 var(--se-space-2) !important;
+  padding: 0 var(--se-space-1) !important;
+  height: auto !important;
+  min-height: 0 !important;
+  background: none !important;
+  border: 0 !important;
+}
+
+/* A paragraph right under a section label is its sub-line. */
+.CFTLX2wIKOK3hNV-fS7_V [data-se-secsub]:not(#se-none) {
+  margin: calc(-1 * var(--se-space-1)) 0 var(--se-space-2) !important;
+  padding: 0 var(--se-space-1) !important;
+  font: 500 var(--se-fs-base)/1.45 var(--se-font) !important;
+  color: var(--se-text-muted) !important;
+}
+
+.CFTLX2wIKOK3hNV-fS7_V [data-se-secsub] a {
+  color: var(--se-accent) !important;
+}
+
+/*
+ * Cards and rows
+ * [data-se-c] = a card row; [data-se-c~="f"] = first in its card; [data-se-c~="l"] = last.
+ */
+.CFTLX2wIKOK3hNV-fS7_V [data-se-c]:not(#se-none) {
+  position: relative;
+  box-sizing: border-box !important;
+  min-height: 64px !important;
+  margin: 0 !important;
+  padding: var(--se-space-3) var(--se-space-4) !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background-color: var(--se-surface) !important;
+  background-image: linear-gradient(var(--se-hairline), var(--se-hairline)) !important;
+  background-size: calc(100% - 36px) 1px !important;
+  background-position: 18px 0 !important;
+  background-repeat: no-repeat !important;
+  box-shadow: inset 1px 0 0 var(--se-hairline), inset -1px 0 0 var(--se-hairline) !important;
+}
+
+.CFTLX2wIKOK3hNV-fS7_V [data-se-c][data-se-c~="f"]:not(#se-none) {
+  margin-top: var(--se-space-5) !important;
+  background-image: none !important;
+  border-top-left-radius: var(--se-radius-lg) !important;
+  border-top-right-radius: var(--se-radius-lg) !important;
+  box-shadow: inset 0 1px 0 var(--se-hairline), inset 1px 0 0 var(--se-hairline), inset -1px 0 0 var(--se-hairline) !important;
+}
+
+.CFTLX2wIKOK3hNV-fS7_V [data-se-c][data-se-c~="f"][data-se-c~="s"]:not(#se-none) {
+  margin-top: 0 !important;
+}
+
+.CFTLX2wIKOK3hNV-fS7_V [data-se-c][data-se-c~="l"]:not(#se-none) {
+  border-bottom-left-radius: var(--se-radius-lg) !important;
+  border-bottom-right-radius: var(--se-radius-lg) !important;
+  box-shadow: inset 0 -1px 0 var(--se-hairline), inset 1px 0 0 var(--se-hairline), inset -1px 0 0 var(--se-hairline) !important;
+}
+
+.CFTLX2wIKOK3hNV-fS7_V [data-se-c][data-se-c~="f"][data-se-c~="l"]:not(#se-none) {
+  box-shadow: var(--se-edge) !important;
+}
+
+.CFTLX2wIKOK3hNV-fS7_V .eKmEXJCm_lgme24Fp_HWt[data-se-c] {
+  /* Field as a row */
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: var(--se-space-3) !important;
+}
+
+.CFTLX2wIKOK3hNV-fS7_V .eKmEXJCm_lgme24Fp_HWt::after {
+  display: none !important;
+}
+
+/* Steam's separators */
+.CFTLX2wIKOK3hNV-fS7_V .eKmEXJCm_lgme24Fp_HWt._2HuzvKQ2QMUJ-JJOeApaF1:hover {
+  background-color: var(--se-hover) !important;
+}
+
+.CFTLX2wIKOK3hNV-fS7_V ._2tALpM7z8naXJ35Pp5fNAG {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* FieldLeftColumn */
+.CFTLX2wIKOK3hNV-fS7_V .PSZtxj2h3MlyYv-c9dgke {
+  /* FieldRightColumn */
+  flex: 0 0 auto !important;
+  margin: 0 0 0 auto !important;
+  padding: 0 !important;
+  max-width: 60% !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.CFTLX2wIKOK3hNV-fS7_V ._2VcTlXFC64Jtg9gvtT6cmY {
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+}
+
+/* FieldLabelRow */
+.CFTLX2wIKOK3hNV-fS7_V ._3jMlJm4PQCA8SfNlUR99Fo {
+  /* FieldLabel */
+  font: 600 var(--se-fs-md)/19px var(--se-font) !important;
+  color: var(--se-text) !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  padding: 0 !important;
+}
+
+.CFTLX2wIKOK3hNV-fS7_V ._1W1to_azoBRG95oNAFpf9Q {
+  /* FieldDescription */
+  margin: var(--se-space-half) 0 0 !important;
+  padding: 0 !important;
+  font: 500 var(--se-fs-base)/1.4 var(--se-font) !important;
+  color: var(--se-text-muted) !important;
+}
+
+.CFTLX2wIKOK3hNV-fS7_V ._1W1to_azoBRG95oNAFpf9Q a {
+  color: var(--se-accent) !important;
+}
+
+.CFTLX2wIKOK3hNV-fS7_V .eKmEXJCm_lgme24Fp_HWt.aIeh3X5T2M074RLW1qn6_ ._3jMlJm4PQCA8SfNlUR99Fo,
+.CFTLX2wIKOK3hNV-fS7_V .eKmEXJCm_lgme24Fp_HWt.aIeh3X5T2M074RLW1qn6_ ._1W1to_azoBRG95oNAFpf9Q {
+  color: var(--se-text-faint) !important;
+}
+
+.CFTLX2wIKOK3hNV-fS7_V ._1aw7cA3mAZfWt8idAlVJWi {
+  display: flex;
+  align-items: center;
+  gap: var(--se-space-2);
+}
+
+/* FieldChildrenWithIcon */
+.CFTLX2wIKOK3hNV-fS7_V ._2o2fXzn99OddeqZMjbDuxQ {
+  display: flex;
+  align-items: center;
+  gap: var(--se-space-2);
+}
+
+/* FieldChildrenInner */
+/*
+ * Children shown below the label (sliders, pickers): label and description on the
+ * left, the control on the right, like every other row.
+ */
+.CFTLX2wIKOK3hNV-fS7_V [data-se-c] ._2tALpM7z8naXJ35Pp5fNAG:has(> ._1aw7cA3mAZfWt8idAlVJWi) {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: var(--se-space-4);
+  align-items: center;
+}
+
+.CFTLX2wIKOK3hNV-fS7_V [data-se-c] ._2tALpM7z8naXJ35Pp5fNAG:has(> ._1aw7cA3mAZfWt8idAlVJWi) > ._2VcTlXFC64Jtg9gvtT6cmY {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.CFTLX2wIKOK3hNV-fS7_V [data-se-c] ._2tALpM7z8naXJ35Pp5fNAG:has(> ._1aw7cA3mAZfWt8idAlVJWi) > ._1W1to_azoBRG95oNAFpf9Q {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+/*
+ * No description: the label takes both rows, centred on a control taller than it. A control
+ * with text before it (game-properties.css moves that text under the label) has one.
+ */
+.CFTLX2wIKOK3hNV-fS7_V [data-se-c] ._2tALpM7z8naXJ35Pp5fNAG:has(> ._1aw7cA3mAZfWt8idAlVJWi):not(:has(> ._1W1to_azoBRG95oNAFpf9Q, > ._1aw7cA3mAZfWt8idAlVJWi > ._2o2fXzn99OddeqZMjbDuxQ > :nth-child(2))) > ._2VcTlXFC64Jtg9gvtT6cmY {
+  grid-row: 1 / span 2;
+}
+
+.CFTLX2wIKOK3hNV-fS7_V [data-se-c] ._2tALpM7z8naXJ35Pp5fNAG > ._1aw7cA3mAZfWt8idAlVJWi {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  margin: 0 !important;
+  padding: 0 !important;
+  justify-content: flex-end;
+}

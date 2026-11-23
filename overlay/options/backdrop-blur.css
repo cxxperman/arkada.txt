@@ -1,0 +1,9 @@
+/*
+ * Theme setting (skin.json Conditions): «Подложка окна», Размытие (the default). Tells the Arkada plugin
+ * to blur what is behind every Steam window but the menus (the accent blur of Windows, as Discord and
+ * DWMX do; plugin/backend/main.lua), with the lightest tint of ours over it (arkada/backdrop.css).
+ * See options/backdrop-mica.css.
+ */
+:root:root {
+  --arkada-backdrop: blur;
+}

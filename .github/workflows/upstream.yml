@@ -1,0 +1,100 @@
+# Steam Enhanced (github.com/NVHT/Steam-Enhanced) → upstream/steam-enhanced, once a week or by hand.
+# tools/upstream.js takes their latest release (or the version named below); when it differs from the one
+# recorded in upstream/steam-enhanced.json, the theme is built over it (tools/build-se.js), checked, and a pull
+# request with the new upstream/ opens. Nothing is merged by itself.
+name: Steam Enhanced upstream
+
+on:
+  schedule:
+    - cron: '17 6 * * 1' # Mondays, 06:17 UTC
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Tag or commit of Steam Enhanced (empty: the latest release)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: upstream-steam-enhanced
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Fetch Steam Enhanced
+        id: up
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          REF: ${{ inputs.ref }}
+        run: |
+          if [ -n "$REF" ]; then node tools/upstream.js --ref "$REF"; else node tools/upstream.js; fi
+
+      # Applies our patches/ to their new code too: a patch that no longer applies fails the build. The pull
+      # request still opens, saying so (below), so that the patch gets updated for their new code.
+      - name: Build dist/arkada over it (with patches/)
+        id: build
+        if: steps.up.outputs.changed == 'true'
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          node tools/build-se.js 2>&1 | tee build.log
+
+      # test/plugin.test.js runs the plugin against kit.txt's reference hub, which lives in its own repository
+      - name: Check out kit.txt (for the plugin test)
+        if: steps.up.outputs.changed == 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: cxxperman/kit.txt
+          path: .kit
+
+      - name: Why the build failed (for the pull request)
+        id: why
+        if: steps.up.outputs.changed == 'true' && steps.build.outcome != 'success'
+        run: |
+          {
+            echo 'text<<EOF'
+            grep -E '^Error' build.log || tail -n 5 build.log
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Checks and tests
+        if: steps.up.outputs.changed == 'true' && steps.build.outcome == 'success'
+        run: |
+          npm run check
+          node test/plugin.test.js .kit/hub/hub.js
+
+      - name: Open a pull request
+        if: steps.up.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: upstream/steam-enhanced
+          delete-branch: true
+          add-paths: |
+            upstream/**
+          commit-message: 'Steam Enhanced ${{ steps.up.outputs.ref }}'
+          title: 'Steam Enhanced ${{ steps.up.outputs.ref }}'
+          body: |
+            Новая версия Steam Enhanced: **${{ steps.up.outputs.ref }}** (`${{ steps.up.outputs.new }}`).
+
+            Что изменилось у авторов: ${{ steps.up.outputs.compare || format('https://github.com/NVHT/Steam-Enhanced/commit/{0}', steps.up.outputs.new) }}
+
+            В PR только `upstream/` — их код как есть и `upstream/steam-enhanced.json`.
+
+            ${{ steps.build.outcome == 'success' && 'Сборка `node tools/build-se.js` (с нашими `patches/`), `npm run check` и тест плагина прошли на этой версии.' || '**Сборка не прошла** — скорее всего, наш патч из `patches/` не накладывается на их новый код: его надо обновить в этом же PR (или убрать, если они исправили сами). Ошибка сборки:' }}
+
+            ${{ steps.why.outputs.text }}
+
+            Перед слиянием стоит поставить `dist/arkada` в Steam и посмотреть глазами: слой `overlay/` держится за их переменные (`core/tokens.css`), имена классов (`.se-list-brand-word`) и названия настроек в `skin.json`; если у них это поменялось, сборка или вид скажут.
+
+            Создано workflow `.github/workflows/upstream.yml`.

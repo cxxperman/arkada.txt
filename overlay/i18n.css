@@ -1,0 +1,78 @@
+/*
+ * Arkada over Steam Enhanced: their words drawn by CSS (content: '…'), in Russian when Steam is.
+ * The words their scripts write straight into the DOM are translated by overlay/i18n.js.
+ *
+ * Each selector is theirs (the file and line of the English word are named above it), with
+ * html:lang(ru) in front: Steam puts its language on <html lang>, and the prefix outranks their
+ * rule whichever sheet loads first.
+ */
+
+/* client/game-page/overview.css:58 — the links row's first pill, the page you are on */
+html:lang(ru) ._3-V8vjmrwuJM6Ws3tsjFJj .DgVQapkBmhAW6oPY5rPZo::before { content: 'Обзор'; }
+
+/* client/game-page/play-bar.css:291 */
+html:lang(ru) ._1U7LKpx70kEsz3jJwAFOi- ._1dg8hJMsAYISbeQUxcCJcv ._1sKdg4-6_xRyPxMt0eRvaf:only-of-type::before,
+html:lang(ru) ._1U7LKpx70kEsz3jJwAFOi- ._1dg8hJMsAYISbeQUxcCJcv[data-se-bare] ._1sKdg4-6_xRyPxMt0eRvaf::before { content: 'Состояние'; }
+
+/* client/game-page/activity-feed.css:314 */
+html:lang(ru) [data-se-shot-side] > [data-se-side="comments"] .EhWKRN0QCGwfB7zcx7DwQ::after,
+html:lang(ru) [data-se-shot-side] > [data-se-side="comments"] .ActivityCommentThreadMinimized::after { content: 'Комментариев пока нет'; }
+
+/* client/game-page/activity.css:486, 494, 499 */
+html:lang(ru) [data-se-sec="cards"] [data-se-badge] :is(._3QrX3TTEetJIRvEW1x2Af2, ._36fG0uZyuCsYavuVvPrzst, .BadgeInfo)::before { content: 'Ваш значок'; }
+html:lang(ru) [data-se-sec="cards"] [data-se-badge="none"] :is(._3QrX3TTEetJIRvEW1x2Af2, ._36fG0uZyuCsYavuVvPrzst, .BadgeInfo)::before { content: 'Следующий значок'; }
+html:lang(ru) [data-se-sec="cards"] [data-se-badge="maxed"] :is(._3QrX3TTEetJIRvEW1x2Af2, ._36fG0uZyuCsYavuVvPrzst, .BadgeInfo)::before { content: 'Максимальный уровень'; }
+
+/* client/home/home-shelves.css:60, 64, 68 — a cover's button on hover */
+html:lang(ru) ._3AjoLnMNKxYmNTGTJCLfgs[data-se-cover-btn]:not(#se-none)._3yGiLsl__NlNYprnB7rt14:is([data-se-hot], :hover)::before { content: 'Установить'; }
+html:lang(ru) ._3AjoLnMNKxYmNTGTJCLfgs[data-se-cover-btn]:not(#se-none)._2PhYbL3_EgtG5edPuoTVtq:is([data-se-hot], :hover)::before { content: 'Обновить'; }
+html:lang(ru) ._3AjoLnMNKxYmNTGTJCLfgs[data-se-cover-btn]:not(#se-none)._1_Bo2Ied5s2Od4YKYTOsau:is([data-se-hot], :hover)::before { content: 'Играть'; }
+
+/* client/home/home-shelves.css:142, 149 */
+html:lang(ru) ._8YrRmy_c6O0FCxFT8gjqo[data-se-cover-btn]:not(#se-none):is([data-se-hot], :hover)::after,
+html:lang(ru) .WYgDg9NyCcMIVuMyZ_NBC:hover ._8YrRmy_c6O0FCxFT8gjqo[data-se-cover-btn]:not(#se-none)::after { content: 'Установить'; }
+html:lang(ru) ._8YrRmy_c6O0FCxFT8gjqo[data-se-cover-btn][data-se-act="stream"]:not(#se-none):is([data-se-hot], :hover)::after,
+html:lang(ru) .WYgDg9NyCcMIVuMyZ_NBC:hover ._8YrRmy_c6O0FCxFT8gjqo[data-se-cover-btn][data-se-act="stream"]:not(#se-none)::after { content: 'Трансляция'; }
+
+/* client/library/library-covers.css:132, 137, 142 — the same buttons on the library's covers */
+html:lang(ru) :is(.WYgDg9NyCcMIVuMyZ_NBC:hover, .WYgDg9NyCcMIVuMyZ_NBC:hover ~ *, :has(> .WYgDg9NyCcMIVuMyZ_NBC):hover, ._1esfEVxhqNfh8fzr_kEGKa:hover, ._31TK9DDDCRTzSsZCPgqtxX:hover, :has(> ._3AjoLnMNKxYmNTGTJCLfgs):hover) ._3AjoLnMNKxYmNTGTJCLfgs:not(.xp7A-08Y404Of3FBHqX32 ._3AjoLnMNKxYmNTGTJCLfgs, .WYgDg9NyCcMIVuMyZ_NBC._3VOR2AeYATx3qSE0I-Pm-5 ._3AjoLnMNKxYmNTGTJCLfgs):not([data-se-cover-btn])._3yGiLsl__NlNYprnB7rt14::before,
+html:lang(ru) ._3AjoLnMNKxYmNTGTJCLfgs:not(.xp7A-08Y404Of3FBHqX32 ._3AjoLnMNKxYmNTGTJCLfgs, .WYgDg9NyCcMIVuMyZ_NBC._3VOR2AeYATx3qSE0I-Pm-5 ._3AjoLnMNKxYmNTGTJCLfgs):not([data-se-cover-btn])._3yGiLsl__NlNYprnB7rt14:hover::before { content: 'Установить'; }
+html:lang(ru) :is(.WYgDg9NyCcMIVuMyZ_NBC:hover, .WYgDg9NyCcMIVuMyZ_NBC:hover ~ *, :has(> .WYgDg9NyCcMIVuMyZ_NBC):hover, ._1esfEVxhqNfh8fzr_kEGKa:hover, ._31TK9DDDCRTzSsZCPgqtxX:hover, :has(> ._3AjoLnMNKxYmNTGTJCLfgs):hover) ._3AjoLnMNKxYmNTGTJCLfgs:not(.xp7A-08Y404Of3FBHqX32 ._3AjoLnMNKxYmNTGTJCLfgs, .WYgDg9NyCcMIVuMyZ_NBC._3VOR2AeYATx3qSE0I-Pm-5 ._3AjoLnMNKxYmNTGTJCLfgs):not([data-se-cover-btn])._2PhYbL3_EgtG5edPuoTVtq::before,
+html:lang(ru) ._3AjoLnMNKxYmNTGTJCLfgs:not(.xp7A-08Y404Of3FBHqX32 ._3AjoLnMNKxYmNTGTJCLfgs, .WYgDg9NyCcMIVuMyZ_NBC._3VOR2AeYATx3qSE0I-Pm-5 ._3AjoLnMNKxYmNTGTJCLfgs):not([data-se-cover-btn])._2PhYbL3_EgtG5edPuoTVtq:hover::before { content: 'Обновить'; }
+html:lang(ru) :is(.WYgDg9NyCcMIVuMyZ_NBC:hover, .WYgDg9NyCcMIVuMyZ_NBC:hover ~ *, :has(> .WYgDg9NyCcMIVuMyZ_NBC):hover, ._1esfEVxhqNfh8fzr_kEGKa:hover, ._31TK9DDDCRTzSsZCPgqtxX:hover, :has(> ._3AjoLnMNKxYmNTGTJCLfgs):hover) ._3AjoLnMNKxYmNTGTJCLfgs:not(.xp7A-08Y404Of3FBHqX32 ._3AjoLnMNKxYmNTGTJCLfgs, .WYgDg9NyCcMIVuMyZ_NBC._3VOR2AeYATx3qSE0I-Pm-5 ._3AjoLnMNKxYmNTGTJCLfgs):not([data-se-cover-btn])._1_Bo2Ied5s2Od4YKYTOsau::before,
+html:lang(ru) ._3AjoLnMNKxYmNTGTJCLfgs:not(.xp7A-08Y404Of3FBHqX32 ._3AjoLnMNKxYmNTGTJCLfgs, .WYgDg9NyCcMIVuMyZ_NBC._3VOR2AeYATx3qSE0I-Pm-5 ._3AjoLnMNKxYmNTGTJCLfgs):not([data-se-cover-btn])._1_Bo2Ied5s2Od4YKYTOsau:hover::before { content: 'Играть'; }
+
+/* client/library/sort-segments.css:100, 379, 387 */
+html:lang(ru) [data-se-sortseg="main"] .DialogDropDown_CurrentDisplay::before { content: 'Ещё'; }
+html:lang(ru) [data-se-reorder-heading]::before { content: 'Порядок полок'; }
+html:lang(ru) [data-se-reorder-heading]::after { content: 'Перетащите полки, чтобы изменить порядок.'; }
+
+/* client/navigation/filters-panel.css:125 */
+html:lang(ru) .Woh0kBQCmatzC1daBX9i6 ._170Npw5h84elypMSQ8zNDI > ._1ennWu_xj2YF8FRYgJ2M2H:not(:empty)::before { content: 'Специальные возможности'; }
+
+/* client/downloads/downloads-queue.css:49, 488 */
+html:lang(ru) ._1bq4x9pa4-9RLY-dXWUZTp:not(.fqntpaymdveMMSFkyHYNz) ._1ugNiylO2vKXhirsGocAxa:not(:has(._1VNuYHM6BPBOJspC6zPf5r))::after { content: 'Очередь пуста'; }
+html:lang(ru) ._1bq4x9pa4-9RLY-dXWUZTp:not(.fqntpaymdveMMSFkyHYNz) .se-dlh[data-drop]::after { content: 'Отпустите, чтобы загрузить сейчас'; }
+
+/* client/friends/friends-dock.css:208, friend-hover.css:50, chat/messages.css:308 */
+html:lang(ru) :is(.se-fd-me, .se-fd-steam .currentUserContainer)::before { content: 'Друзья'; }
+html:lang(ru) [data-se-fh]::before { content: 'Сейчас играет'; }
+html:lang(ru) .multiChatDialog[data-se-chat] .msg.timeDivision.new_messages::after { content: 'Новые'; }
+
+/* client/dialogs/… */
+html:lang(ru) .se-bk-found::before { content: 'Найденные резервные копии'; }
+html:lang(ru) [data-se-delcoll] .DialogFooter .DialogButton.Primary::after { content: 'Удалить' / ''; }
+html:lang(ru) [data-se-exitgame] .DialogFooter .DialogButton:not(.Primary)::after { content: 'Продолжить игру' / ''; }
+html:lang(ru) [data-se-exitgame] .DialogFooter .DialogButton.Primary::after { content: 'Выйти из игры' / ''; }
+html:lang(ru) [data-se-inst] .Oo5JPcEk_erKEYAzYp2nY ._VEHWl9XgUCHDV7oGKSW4::after { content: 'По умолчанию'; }
+html:lang(ru) [data-se-inst] ._27EB_QZeH3i0zloLWPdw84::before { content: 'Ярлыки'; }
+
+/* client/settings/… */
+html:lang(ru) [data-se-props] .DialogBody ._3lj3-GDYOlcoIFB3fFo1ko .nsJRdcmwAO0dIk0dR87fv:has(._11Gq_4A3cMXdDfUnoeM14v)::after { content: 'Подключено'; }
+html:lang(ru) [data-se-props] .DialogBody ._3lj3-GDYOlcoIFB3fFo1ko > :nth-child(2n):empty::after { content: 'Выкл.'; }
+html:lang(ru) [data-se-props] .DialogBody ._1LCoWsUrJmZHr7SVX0luaG.dB7T-kfL2b2b0jd9Zg9fa .a19KifKnB2YZP_hYoFsar::after { content: 'Установлено'; }
+html:lang(ru) ._2rjVTGz8aLvqOdz5v2gq5C[data-se-ptitle]::before { content: 'Свойства'; }
+html:lang(ru) .MillenniumSettings .MillenniumThemes_ThemeItem[data-se-active] .MillenniumThemes_ThemeLabel::after { content: 'Используется'; }
+
+/* client/startup/sign-in.css:60 */
+html:lang(ru) [data-se-si="logo"]::after { content: 'Вход в Steam'; }

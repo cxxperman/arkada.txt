@@ -1,0 +1,50 @@
+Steam Enhanced, client/loader.js: a menu window's stylesheets in one file.
+
+Why. Steam opens every menu (the right-click menu of a game, Games, View, the Steam menu...) in a
+new popup window ("contextmenu_" + the menu's key, created on each open), and Steam Enhanced's
+loader puts its ~30 stylesheets into it as one <style blocking="render"> of @imports: the menu
+cannot draw until every one of them has been fetched. Measured in a menu window: the imports
+take ~80 ms from the first request to the last; Chromium then matches the same rules either way
+(3-4 ms for a menu's ~120 elements).
+
+What. Arkada's build (tools/build-se.js, menuBundles) writes the stylesheets a menu window gets
+into core/menu.bundle.css (groups "all") and core/menu-tray.bundle.css ("all" + "tray", the plain
+"Menu" windows), concatenated in the loader's list order, so the cascade is the same as with the
+imports (an @import'ed sheet folds into the importing sheet at its place). The only relative url()
+there is core/font.css's fonts/..., and the bundles sit in core/ next to it. In a menu window (not
+on the web) the loader then imports the one bundle instead of the files.
+
+For a pull request to Steam Enhanced: the bundling would go into their own build/release step
+(or a dev script), with the same MENU_BUNDLES lookup in the loader.
+
+--- a/client/loader.js
++++ b/client/loader.js
+@@ -512,6 +512,10 @@
+    * pending file.
+    */
+   const RUNTIME = ['core/classmap.js', 'core/runtime.js'];
++  // A menu window's stylesheets in one file each, by the groups bringing stylesheets (sorted, space-separated)
++  const MENU_BUNDLES = { all: 'core/menu.bundle.css', 'all tray': 'core/menu-tray.bundle.css' };
++  const cssGroups = () =>
++    [...groups].filter((g) => FILES.some(([group, file]) => group === g && file.endsWith('.css'))).sort().join(' ');
+   const load = () => {
+     const scripts = [];
+     for (const [group, file] of FILES) {
+@@ -520,6 +524,17 @@
+       if (file.endsWith('.css')) sheets.set(file, asset(file));
+       else scripts.push(file);
+     }
++    /*
++     * Menus: Steam opens every menu in a new popup window, and the window shows once its
++     * stylesheets are in (blocking="render"). A menu's ~30 files then cost ~30 requests before
++     * the menu can show; built together into one file (in list order, so the cascade is the
++     * same) they cost one. Which bundle: by the groups that bring stylesheets to this window.
++     */
++    const bundle = MENU && !onWeb ? MENU_BUNDLES[cssGroups()] : null;
++    if (bundle) {
++      sheets.clear();
++      sheets.set(bundle, asset(bundle));
++    }
+     if (sheets.size) addStylesheets();
+     if (window.__se) {
+       scripts.forEach(addScript);

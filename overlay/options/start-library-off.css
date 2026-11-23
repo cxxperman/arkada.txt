@@ -1,0 +1,9 @@
+/*
+ * Theme setting (skin.json Conditions): «Начальная страница», Как в Steam. Tells the Arkada plugin not to open
+ * the main window on the library's Home at start (plugin/src/startpage.js reads --arkada-start-library on <html>
+ * of the main window): Steam opens it where its own «Start up location» says. :root:root beats the on of
+ * arkada/tokens.css (html:root).
+ */
+:root:root {
+  --arkada-start-library: off;
+}

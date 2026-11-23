@@ -1,0 +1,645 @@
+/* Continues friends.css (in order, see client/loader.js): Section headers. */
+
+/* The list */
+.friendlist:not(.GamepadMode) .listContentContainer {
+  padding: var(--se-space-1) var(--se-space-2) var(--se-space-4);
+}
+
+.friendlist:not(.GamepadMode) .friendGroup {
+  margin: 0 !important;
+  border: 0 !important;
+}
+
+.friendlist:not(.GamepadMode) .friendGroup .groupHeaderContainer {
+  display: flex;
+  align-items: center;
+}
+
+/*
+ * A header with its sort button (OFFLINE): the header's box is the row, as Group Chats' title is
+ * (friends-chats.css): one 30 px row whose hover takes the button in too, the name filling it
+ * and the button at its end in the Group Chats button's tile, its glyph duotone as every icon:
+ * A-Z, or a clock while Steam sorts by recent (.Recent), each with its down arrow.
+ */
+.friendlist:not(.GamepadMode) .friendGroup .groupHeaderContainer:has(> .SortByRecent) {
+  box-sizing: border-box;
+  height: 30px;
+  margin: var(--se-space-2) 0 var(--se-space-half);
+  padding-inline-end: var(--se-space-half);
+  border-radius: var(--se-radius-sm);
+  transition: background-color var(--se-dur) ease-out;
+}
+
+.friendlist:not(.GamepadMode) .friendGroup .groupHeaderContainer:has(> .SortByRecent):hover {
+  background: var(--se-hover);
+}
+
+.friendlist:not(.GamepadMode) .friendGroup .groupHeaderContainer:has(> .SortByRecent) > .groupName {
+  flex: 1;
+  min-width: 0;
+  margin: 0 !important;
+  background: none !important;
+}
+
+.friendlist:not(.GamepadMode) .groupHeaderContainer > .SortByRecent {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: var(--se-radius-sm);
+  color: var(--se-text-muted);
+  transition: background-color var(--se-dur) ease-out, color var(--se-dur) ease-out, opacity var(--se-dur) ease-out;
+}
+
+/* No tile of its own: the row lights on hover and the icon brightens */
+.friendlist:not(.GamepadMode) .groupHeaderContainer > .SortByRecent:hover {
+  color: var(--se-text-strong);
+}
+
+.friendlist:not(.GamepadMode) .groupHeaderContainer > .SortByRecent {
+  --se-sort-icon: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23000'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Crect%20x='14.5'%20y='3'%20width='6'%20height='18'%20rx='3'%20fill='%23000'%20fill-opacity='.32'%20stroke='none'/%3E%3Cpath%20d='M17.5%205v14M14.5%2016l3%203%203-3'/%3E%3Cpath%20d='M3.5%2011l2.5-7%202.5%207M4.4%208.6h3.2M3.5%2014h5l-5%206h5'/%3E%3C/svg%3E");
+}
+
+.friendlist:not(.GamepadMode) .groupHeaderContainer > .SortByRecent.Recent {
+  --se-sort-icon: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23000'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Crect%20x='14.5'%20y='3'%20width='6'%20height='18'%20rx='3'%20fill='%23000'%20fill-opacity='.32'%20stroke='none'/%3E%3Cpath%20d='M17.5%205v14M14.5%2016l3%203%203-3'/%3E%3Ccircle%20cx='7.5'%20cy='12'%20r='5'%20fill='%23000'%20fill-opacity='.32'%20stroke='none'/%3E%3Ccircle%20cx='7.5'%20cy='12'%20r='5'/%3E%3Cpath%20d='M7.5%209.5V12l1.75%201.25'/%3E%3C/svg%3E");
+}
+
+.friendlist:not(.GamepadMode) .groupHeaderContainer > .SortByRecent > svg {
+  display: none !important;
+}
+
+.friendlist:not(.GamepadMode) .groupHeaderContainer > .SortByRecent::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  background: currentColor;
+  -webkit-mask: var(--se-sort-icon) center / 18px 18px no-repeat;
+  mask: var(--se-sort-icon) center / 18px 18px no-repeat;
+}
+
+.friendlist:not(.GamepadMode) .friendGroup .groupName hr {
+  display: none !important;
+}
+
+/* The chevron: right when closed, down when open */
+.friendlist:not(.GamepadMode) .friendGroup .ExpandPlusMinus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px !important;
+  min-width: 14px !important;
+  height: 14px !important;
+  margin: 0 !important;
+  opacity: 1 !important;
+  transform: none !important;
+  color: inherit !important;
+}
+
+.friendlist:not(.GamepadMode) .friendGroup .ExpandPlusMinus svg {
+  display: none !important;
+}
+
+.friendlist:not(.GamepadMode) .friendGroup .ExpandPlusMinus::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-right: 1.75px solid currentColor;
+  border-bottom: 1.75px solid currentColor;
+  /* Offset by transform, not margin, so the turn animates on the compositor */
+  transform: translateY(-3px) rotate(45deg);
+  transition: transform var(--se-dur) ease-out;
+}
+
+.friendlist:not(.GamepadMode) .friendGroup .groupName:is(.Collapsed, [data-se-fold="close"]) .ExpandPlusMinus::before {
+  transform: translateX(-3px) rotate(-45deg);
+}
+
+/*
+ * Folding and opening (client/friends/list/friends-list.js): what folds, the favorites or a
+ * section's friends, shrinks to nothing and grows back as one, fading, 0.3s eased in and out,
+ * its overflow clipped while it moves. Steam's own row fades (each row in or out, its margin
+ * pulled) are off while it moves, so the rows don't change its height under it.
+ */
+.friendlist:not(.GamepadMode) [data-se-folding] {
+  box-sizing: border-box;
+  overflow: hidden !important;
+  /* Layout transition on purpose: a fold has to move what sits below it, which a transform can't.
+     It runs only while [data-se-folding] / a fold is in progress. */
+  transition: height var(--se-dur-relaxed) ease-in-out, opacity var(--se-dur-relaxed) ease-in-out, padding var(--se-dur-relaxed) ease-in-out, margin var(--se-dur-relaxed) ease-in-out;
+}
+
+.friendlist:not(.GamepadMode) [data-se-folding] :is([class*="friend-anim-appear"], [class*="friend-anim-enter"], [class*="friend-anim-exit"]) {
+  opacity: 1 !important;
+  margin-bottom: 0 !important;
+  transition: none !important;
+}
+
+/*
+ * Section headers (Online, Offline, requests, your categories, In-Game): small labels,
+ * the chevron first and the count at the end
+ */
+.friendlist:not(.GamepadMode) .friendGroup:is(:not(.gameGroup), .OtherGamesGroup) .groupName {
+  display: flex !important;
+  align-items: center;
+  gap: var(--se-space-2);
+  height: 30px;
+  margin: var(--se-space-2) 0 var(--se-space-half) !important;
+  padding: 0 var(--se-space-2) !important;
+  border-radius: var(--se-radius-sm);
+  background: none;
+  font: var(--se-label-font) !important;
+  letter-spacing: var(--se-label-spacing) !important;
+  text-transform: uppercase;
+  color: var(--se-label-color) !important;
+}
+
+.friendlist:not(.GamepadMode) .friendGroup.friendRequests .groupName {
+  color: var(--se-warning) !important;
+}
+
+.friendlist:not(.GamepadMode) .friendGroup:is(:not(.gameGroup), .OtherGamesGroup) .groupName:hover {
+  background: var(--se-hover);
+}
+
+/* Lit (hovered or selected): faint text steps up to muted, AA on --se-hover and --se-selected
+   (--se-text-faint is only 4.1 / 3.4 on them): the group's name and count. !important: their own colours */
+.friendlist:not(.GamepadMode) .friendGroup:is(:not(.gameGroup), .OtherGamesGroup):not(.friendRequests) .groupName:hover,
+.friendlist:not(.GamepadMode) .friendGroup:is(:not(.gameGroup), .OtherGamesGroup) .groupName:hover .groupCount,
+.friendlist:not(.GamepadMode) .friendGroup:is(:not(.gameGroup), .OtherGamesGroup) .groupName:hover .groupCount[data-se-count]::after {
+  color: var(--se-text-muted) !important;
+}
+
+.friendlist:not(.GamepadMode) .OtherGamesGroup .gameGroupContainer {
+  display: contents !important;
+}
+
+.friendlist:not(.GamepadMode) .friendGroup:is(:not(.gameGroup), .OtherGamesGroup) .groupName .groupIcon {
+  width: 16px !important;
+  height: 16px !important;
+  margin: 0 !important;
+  border-radius: var(--se-radius-xs);
+}
+
+.friendlist:not(.GamepadMode) .friendGroup:is(:not(.gameGroup), .OtherGamesGroup) .groupName .groupCount {
+  margin-inline-start: auto !important;
+  opacity: 1 !important;
+  transform: none !important;
+  font: 700 var(--se-fs-xs)/14px var(--se-font), sans-serif !important;
+  color: var(--se-text-faint) !important;
+}
+
+.friendlist:not(.GamepadMode) .friendGroup:is(:not(.gameGroup), .OtherGamesGroup) .groupName .groupCount[data-se-count] {
+  font-size: 0 !important;
+}
+
+.friendlist:not(.GamepadMode) .friendGroup:is(:not(.gameGroup), .OtherGamesGroup) .groupName .groupCount[data-se-count]::after {
+  margin: 0;
+  padding: 0;
+  background: none;
+  font-size: var(--se-fs-xs);
+  line-height: 14px;
+  letter-spacing: 0;
+  color: var(--se-text-faint);
+}
+
+/* A game: one row with its icon, a green count, its name and who's in it */
+.friendlist:not(.GamepadMode) .gameGroup:not(.OtherGamesGroup) > .groupName {
+  position: relative;
+  display: grid !important;
+  grid-template-columns: 34px minmax(0, 1fr) 14px;
+  column-gap: var(--se-space-3);
+  align-items: center;
+  align-content: center;
+  min-height: 52px;
+  margin: var(--se-space-half) 0 0 !important;
+  padding: var(--se-space-2) var(--se-space-2) !important;
+  box-sizing: border-box;
+  border-radius: var(--se-radius-sm);
+  white-space: normal !important;
+  overflow: visible !important;
+  font: 700 var(--se-fs-md)/1.3 var(--se-font), sans-serif !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  color: var(--se-text) !important;
+  cursor: pointer;
+}
+
+.friendlist:not(.GamepadMode) .gameGroup:not(.OtherGamesGroup) > .groupName:hover {
+  background: var(--se-hover);
+}
+
+.friendlist:not(.GamepadMode) .gameGroup:not(.OtherGamesGroup) > .groupName:not(.Collapsed) {
+  background: var(--se-surface);
+}
+
+.friendlist:not(.GamepadMode) .gameGroup:not(.OtherGamesGroup) .gameGroupContainer {
+  display: contents !important;
+}
+
+.friendlist:not(.GamepadMode) .gameGroup:not(.OtherGamesGroup) .groupName .groupIcon {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  width: 34px !important;
+  height: 34px !important;
+  margin: 0 !important;
+  border-radius: var(--se-radius-md) !important;
+  object-fit: cover;
+  background: var(--se-surface-2);
+  box-shadow: none !important;
+}
+
+.friendlist:not(.GamepadMode) .gameGroup:not(.OtherGamesGroup) .groupName .ExpandPlusMinus {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  color: var(--se-text-faint) !important;
+}
+
+.friendlist:not(.GamepadMode) .gameGroup:not(.OtherGamesGroup) .groupName .groupCount {
+  position: absolute;
+  left: 31px;
+  top: 50%;
+  margin: var(--se-space-1) 0 0 !important;
+  opacity: 1 !important;
+  transform: none !important;
+  font-size: 0 !important;
+  line-height: 0;
+}
+
+.friendlist:not(.GamepadMode) .gameGroup:not(.OtherGamesGroup) .groupName .groupCount::after {
+  content: attr(data-se-count);
+  display: block;
+  box-sizing: border-box;
+  min-width: 16px;
+  height: 16px;
+  margin: 0 !important;
+  padding: 0 var(--se-space-1) !important;
+  border-radius: var(--se-radius-pill);
+  background: var(--se-running) !important;
+  box-shadow: 0 0 0 2px var(--se-sidebar);
+  font: 800 var(--se-fs-2xs)/16px var(--se-font), sans-serif !important;
+  letter-spacing: 0;
+  color: var(--se-bg-ink) !important;
+  text-align: center;
+}
+
+.friendlist:not(.GamepadMode) .gameGroup:not(.OtherGamesGroup) .groupName .groupCount:not([data-se-count])::after {
+  display: none;
+}
+
+.friendlist:not(.GamepadMode) .gameGroup:not(.OtherGamesGroup) .groupName.Collapsed .groupCount::after {
+  box-shadow: 0 0 0 2px var(--se-sidebar);
+}
+
+.friendlist:not(.GamepadMode) .gameGroup:not(.OtherGamesGroup) .groupName:not(.Collapsed) .groupCount::after {
+  box-shadow: 0 0 0 2px var(--se-surface);
+}
+
+.friendlist:not(.GamepadMode) .gameGroup:not(.OtherGamesGroup) .groupName[data-se-who]::after {
+  content: attr(data-se-who);
+  grid-column: 2;
+  grid-row: 2;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font: 500 var(--se-fs-sm)/1.3 var(--se-font), sans-serif;
+  color: var(--se-text-muted);
+}
+
+/* …and the friends in it on a thread line */
+.friendlist:not(.GamepadMode) .gameGroup:not(.OtherGamesGroup) > .friendsContainer:not(.groupCollapsed) {
+  margin: var(--se-space-half) 0 var(--se-space-1) var(--se-space-5);
+  padding-left: var(--se-space-2);
+  border-left: 1px solid var(--se-hairline);
+}
+
+.friendlist:not(.GamepadMode) .gameGroup:not(.OtherGamesGroup) .friend {
+  min-height: 38px;
+  padding-inline-start: var(--se-space-2) !important;
+}
+
+.friendlist:not(.GamepadMode) .SteamPlayerGroupLines {
+  display: none !important;
+}
+
+.friendlist:not(.GamepadMode) .friendGroup .SteamPlayerGroupFooter {
+  height: auto !important;
+  margin: 0 0 var(--se-space-1) !important;
+  padding: var(--se-space-half) var(--se-space-2) !important;
+  align-items: center;
+}
+
+.friendlist:not(.GamepadMode) .SteamPlayerGroupFooterCount {
+  width: auto !important;
+  border: 0 !important;
+  transform: none !important;
+}
+
+.friendlist:not(.GamepadMode) .SteamPlayerGroupFooterCount .count {
+  display: block !important;
+  margin: 0 !important;
+  font: 700 var(--se-fs-xs)/14px var(--se-font), sans-serif !important;
+  color: var(--se-running) !important;
+}
+
+.friendlist:not(.GamepadMode) .SteamPlayerGroupFooterLabel {
+  margin-inline-start: var(--se-space-1) !important;
+  padding: 0 !important;
+  -webkit-mask: none !important;
+  mask: none !important;
+  font: 500 var(--se-fs-sm)/14px var(--se-font), sans-serif !important;
+  color: var(--se-text-faint) !important;
+}
+
+/* A friend: rounded-square avatar with its status ring (green in game, blue online, gray offline) */
+.friendlist:not(.GamepadMode) .friendGroup .friend {
+  height: auto !important;
+  min-height: 44px;
+  box-sizing: border-box;
+  padding-block: var(--se-space-1) !important;
+  margin: 0 !important;
+  padding-inline: var(--se-space-2) !important;
+  align-items: center;
+  border-radius: var(--se-radius-sm);
+  background: none;
+  box-shadow: none !important;
+  cursor: pointer;
+}
+
+.friendlist:not(.GamepadMode) .friendGroup .friend:is(:hover, .Friend_ContextMenuActive) {
+  background: var(--se-hover) !important;
+}
+
+.friendlist:not(.GamepadMode) .friend {
+  --se-fd-ring: var(--se-border-strong);
+}
+
+.friendlist:not(.GamepadMode) .friend.online,
+.friendlist:not(.GamepadMode) .currentUserContainer.online {
+  --se-fd-ring: var(--se-online);
+}
+
+.friendlist:not(.GamepadMode) .friend.ingame,
+.friendlist:not(.GamepadMode) .currentUserContainer.ingame {
+  --se-fd-ring: var(--se-running);
+}
+
+.friendlist:not(.GamepadMode) .currentUserContainer {
+  --se-fd-ring: var(--se-border-strong);
+}
+
+.friendlist:not(.GamepadMode) .currentUserContainer:is(.online, .awayOrSnooze, .ingame) {
+  --se-fd-ring: var(--se-online);
+}
+
+.friendlist:not(.GamepadMode) .currentUserContainer.ingame {
+  --se-fd-ring: var(--se-running);
+}
+
+.friendlist:not(.GamepadMode) .friend .avatarHolder,
+.friendlist:not(.GamepadMode) .currentUserAvatar .avatarHolder {
+  flex: none;
+  position: relative;
+  width: 30px !important;
+  height: 30px !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  border-radius: var(--se-avatar-radius) !important;
+  transform: none !important;
+}
+
+.friendlist:not(.GamepadMode) .gameGroup:not(.OtherGamesGroup) .friend .avatarHolder {
+  width: 28px !important;
+  height: 28px !important;
+}
+
+.friendlist:not(.GamepadMode) .currentUserAvatar .avatarHolder {
+  width: 36px !important;
+  height: 36px !important;
+  margin-right: var(--se-space-half);
+}
+
+.friendlist:not(.GamepadMode) .friend .avatarHolder img.avatar,
+.friendlist:not(.GamepadMode) .currentUserAvatar .avatarHolder img.avatar,
+.friendlist:not(.GamepadMode) .friend .avatarHolder .avatar,
+.friendlist:not(.GamepadMode) .currentUserAvatar .avatarHolder .avatar {
+  width: 100% !important;
+  height: 100% !important;
+  border: 0 !important;
+  border-radius: var(--se-avatar-radius) !important;
+  object-fit: cover;
+  box-shadow: 0 0 0 2px var(--se-sidebar), 0 0 0 4px var(--se-fd-ring) !important;
+}
+
+/* Away and snoozing: the faded status ring (--se-away), as everywhere. */
+.friendlist:not(.GamepadMode) :is(.friend, .currentUserContainer).awayOrSnooze .avatarHolder :is(img.avatar, .avatar) {
+  box-shadow: none !important;
+  outline: 2px solid var(--se-away) !important;
+  outline-offset: 2px;
+}
+
+.friendlist:not(.GamepadMode) :is(.friend, .currentUserContainer).awayOrSnooze.ingame .avatarHolder :is(img.avatar, .avatar) {
+  outline-color: var(--se-away-ingame) !important;
+}
+
+.friendlist:not(.GamepadMode) .friend.offline .avatarHolder img.avatar {
+  filter: grayscale(.6) !important;
+  opacity: .6;
+}
+
+.friendlist:not(.GamepadMode) .friend.offline:hover .avatarHolder img.avatar {
+  filter: none !important;
+  opacity: 1;
+}
+
+.friendlist:not(.GamepadMode) .friend .avatarHolder .avatarStatus,
+.friendlist:not(.GamepadMode) .currentUserAvatar .avatarHolder .avatarStatus,
+.friendlist:not(.GamepadMode) .friend .avatarHolder .avatarFrame,
+.friendlist:not(.GamepadMode) .currentUserAvatar .avatarHolder .avatarFrame {
+  display: none !important;
+}
+
+.friendlist:not(.GamepadMode) .friend .labelHolder {
+  height: auto !important;
+  margin: 0 0 0 var(--se-space-3) !important;
+  padding: 0 !important;
+  align-self: center;
+}
+
+.friendlist:not(.GamepadMode) .friend .nOdcT-MoOaXGePXLyPe0H {
+  font: 600 var(--se-fs-md)/1.3 var(--se-font), sans-serif !important;
+  color: var(--se-text) !important;
+}
+
+.friendlist:not(.GamepadMode) .friend.offline .nOdcT-MoOaXGePXLyPe0H {
+  color: var(--se-text-faint) !important;
+}
+
+.friendlist:not(.GamepadMode) .friend ._3sxE7F1LV2IcSX68YsH9dI {
+  margin: 0 !important;
+}
+
+.friendlist:not(.GamepadMode) .friend ._2Ri005Wg_uXDTa71kdRbcN {
+  margin: 0 !important;
+  padding: 0 !important;
+  font: 500 var(--se-fs-sm)/1.3 var(--se-font), sans-serif !important;
+  color: var(--se-text-faint) !important;
+}
+
+.friendlist:not(.GamepadMode) .friend.online ._2Ri005Wg_uXDTa71kdRbcN {
+  color: var(--se-online) !important;
+}
+
+.friendlist:not(.GamepadMode) .friend.awayOrSnooze ._2Ri005Wg_uXDTa71kdRbcN {
+  color: color-mix(in srgb, var(--se-online) 70%, transparent) !important;
+}
+
+.friendlist:not(.GamepadMode) .friend.ingame ._2Ri005Wg_uXDTa71kdRbcN {
+  color: var(--se-running) !important;
+}
+
+/*
+ * Lit (hovered or selected): faint text steps up to muted, AA on --se-hover and --se-selected
+ * (--se-text-faint is only 4.1 / 3.4 on them): an offline friend's name and status line.
+ * !important: their own colours above.
+ */
+.friendlist:not(.GamepadMode) .friendGroup .friend.offline:is(:hover, .Friend_ContextMenuActive) .nOdcT-MoOaXGePXLyPe0H,
+.friendlist:not(.GamepadMode) .friendGroup .friend:is(:hover, .Friend_ContextMenuActive):not(.online, .awayOrSnooze, .ingame) ._2Ri005Wg_uXDTa71kdRbcN {
+  color: var(--se-text-muted) !important;
+}
+
+/* In-Game (games with one friend): the game's icon before the friend */
+.friendlist:not(.GamepadMode) .friend .FriendInGameIcon {
+  --se-friend-game-icon-size: 22px;
+  flex: none;
+  width: var(--se-friend-game-icon-size) !important;
+  height: var(--se-friend-game-icon-size) !important;
+  margin: 0 var(--se-space-2) 0 0 !important;
+  background: none !important;
+}
+
+.friendlist:not(.GamepadMode) .friend .FriendInGameIcon img {
+  width: var(--se-friend-game-icon-size) !important;
+  height: var(--se-friend-game-icon-size) !important;
+  margin: 0 !important;
+  border-radius: var(--se-radius-sm) !important;
+  box-shadow: none !important;
+}
+
+/* Give the native N/A placeholder the same slot as game artwork. */
+.friendlist:not(.GamepadMode) .friendGroup .friend .FriendInGameIcon:not(:has(img[src]:not([src=""]))) {
+  display: grid !important;
+  place-items: center;
+  overflow: hidden;
+  border-radius: var(--se-radius-sm) !important;
+  background: var(--se-surface-2) !important;
+  font-size: 0 !important;
+  color: var(--se-text-muted) !important;
+}
+
+.friendlist:not(.GamepadMode) .friendGroup .friend .FriendInGameIcon:not(:has(img[src]:not([src=""]))) > * {
+  display: none !important;
+}
+
+.friendlist:not(.GamepadMode) .friendGroup .friend .FriendInGameIcon:not(:has(img[src]:not([src=""])))::before {
+  content: "";
+  width: var(--se-friend-game-icon-size);
+  height: var(--se-friend-game-icon-size);
+  background: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='2 2.5 20 20' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg fill='%23000' fill-opacity='.32' stroke='none'%3E%3Crect x='3' y='7' width='18' height='11' rx='4'%3E%3C/rect%3E%3C/g%3E%3Crect x='3' y='7' width='18' height='11' rx='4'%3E%3C/rect%3E%3Cpath d='M8 11v3m-1.5-1.5h3m6-1h.01m3 2h.01'%3E%3C/path%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/*
+ * Compact friends list (Steam's "Compact friends list & chat view": .CompactFriendsList on the
+ * list). The same rows, tighter: a 24 px avatar with a slimmer ring, rows at 32 px, game rows at
+ * 40 px with a 28 px icon. Name and status stay two clear lines, and Steam's compact sizes
+ * (its fixed row and label heights, its smaller footer type) are set back so nothing overlaps;
+ * the "+3 Playing with…" footer lines up under the names.
+ */
+.friendlist:not(.GamepadMode) .CompactFriendsList .friendGroup .friend {
+  min-height: 32px;
+  padding-block: var(--se-space-half) !important;
+}
+
+.friendlist:not(.GamepadMode) .CompactFriendsList .gameGroup:not(.OtherGamesGroup) .friend {
+  min-height: 32px;
+}
+
+.friendlist:not(.GamepadMode) .CompactFriendsList .friend .avatarHolder,
+.friendlist:not(.GamepadMode) .CompactFriendsList .gameGroup:not(.OtherGamesGroup) .friend .avatarHolder {
+  width: 24px !important;
+  height: 24px !important;
+}
+
+.friendlist:not(.GamepadMode) .CompactFriendsList .friend .avatarHolder :is(img.avatar, .avatar) {
+  box-shadow: 0 0 0 2px var(--se-sidebar), 0 0 0 3.5px var(--se-fd-ring) !important;
+}
+
+.friendlist:not(.GamepadMode) .CompactFriendsList .friend:is(.awayOrSnooze) .avatarHolder :is(img.avatar, .avatar) {
+  box-shadow: none !important;
+  outline-width: 1.5px !important;
+}
+
+.friendlist:not(.GamepadMode) .CompactFriendsList .friend .labelHolder {
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  min-width: 0;
+  height: auto !important;
+  margin: 0 0 0 var(--se-space-2) !important;
+}
+
+.friendlist:not(.GamepadMode) .CompactFriendsList .friend .nOdcT-MoOaXGePXLyPe0H {
+  font: 600 var(--se-fs-base)/16px var(--se-font), sans-serif !important;
+}
+
+.friendlist:not(.GamepadMode) .CompactFriendsList .friend ._2Ri005Wg_uXDTa71kdRbcN {
+  font: 500 var(--se-fs-sm)/14px var(--se-font), sans-serif !important;
+}
+
+/* A game: a shorter row and icon */
+.friendlist:not(.GamepadMode) .CompactFriendsList .gameGroup:not(.OtherGamesGroup) > .groupName {
+  grid-template-columns: 28px minmax(0, 1fr) 14px;
+  column-gap: var(--se-space-2);
+  min-height: 40px;
+  padding: var(--se-space-1) var(--se-space-2) !important;
+}
+
+.friendlist:not(.GamepadMode) .CompactFriendsList .gameGroup:not(.OtherGamesGroup) .groupName .groupIcon {
+  width: 28px !important;
+  height: 28px !important;
+}
+
+.friendlist:not(.GamepadMode) .CompactFriendsList .gameGroup:not(.OtherGamesGroup) > .friendsContainer:not(.groupCollapsed) {
+  margin: 0 0 var(--se-space-1) var(--se-space-5);
+  padding-bottom: 0;
+}
+
+/* "+3 Playing with…": its count beside the label, both centred, under the names (24 px avatar + 10 px gap) */
+.friendlist:not(.GamepadMode) .CompactFriendsList .friendGroup .SteamPlayerGroupFooter {
+  display: flex !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin: 0 0 var(--se-space-half) !important;
+  padding: 0 var(--se-space-2) var(--se-space-half) var(--se-space-7) !important;
+}
+
+.friendlist:not(.GamepadMode) .CompactFriendsList .SteamPlayerGroupFooterCount {
+  height: auto !important;
+}
+
+.friendlist:not(.GamepadMode) .CompactFriendsList .SteamPlayerGroupFooterCount .count {
+  font: 700 var(--se-fs-xs)/14px var(--se-font), sans-serif !important;
+}
+
+.friendlist:not(.GamepadMode) .CompactFriendsList .SteamPlayerGroupFooterLabel {
+  font: 500 var(--se-fs-sm)/14px var(--se-font), sans-serif !important;
+}
+
+.friendlist:not(.GamepadMode) .CompactFriendsList .unreadFriend .FriendMessageCount {
+  margin-top: 0 !important;
+}

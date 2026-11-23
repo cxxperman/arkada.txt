@@ -1,0 +1,517 @@
+/*
+ * Design tokens and feature switches: the one source for the client windows (client/loader.js)
+ * and the Store, Community and Support web pages (their loaders). Feature code uses these and
+ * nothing raw: colours, type scale, radii, elevation, blur and motion each have one value here.
+ * The font face and the theme-wide font rule are core/font.css.
+ */
+:root {
+  /* Surface hierarchy (darkest to lightest) */
+  --se-bg: #171a20;
+  --se-sidebar: #1d2128;
+  --se-surface: #1f242b;
+  --se-surface-2: #262c35;
+  --se-hover: #2c3440;
+  --se-selected: #33404f;
+  --se-hairline: rgba(255, 255, 255, .06);
+  --se-divider: rgba(255, 255, 255, .08);
+  --se-pill: var(--se-hairline);
+  --se-track: #3a424d;
+  --se-border-strong: #4a525e;
+  --se-field: #15181d;
+  --se-check: var(--se-white-07);
+  --se-chip: rgba(12, 14, 18, .55);
+  --se-chip-hover: rgba(12, 14, 18, .75);
+
+  /* Typography colors */
+  --se-text: #e6e8eb;
+  --se-text-muted: #a2acb7; /* 4.6:1 on --se-selected (AA text) */
+  --se-text-dim: #b8c0c8;
+  --se-text-faint: #8994a2; /* 4.6:1 on --se-surface-2 (AA text) */
+  --se-text-strong: #fff;
+  --se-white: var(--se-text-strong);
+  --se-bg-ink: #0f1115;
+  --se-on-accent: var(--se-bg-ink); /* text and icons on an accent fill */
+  --se-on-danger: var(--se-bg-ink); /* text on a danger fill (a count badge, a mention): 8:1 */
+
+  /* Semantic & status accents */
+  /* The accent is a theme setting: --se-color-accent, from core/colors.css (skin.json RootColors) */
+  --se-accent: var(--se-color-accent, #7cc4ff);
+  --se-accent-hover: color-mix(in srgb, var(--se-accent), #fff 25%);
+  --se-accent-surface: color-mix(in srgb, var(--se-accent) 18%, var(--se-bg));
+  --se-gold: #f0c060;
+  --se-gold-text: #f3cf86;
+  --se-gold-light: #ffd98a;
+  --se-gold-surface: color-mix(in srgb, var(--se-gold) 16%, transparent);
+  --se-running: #6cc24a;
+  --se-online: #4cb4ff;
+  --se-offline: #848e99; /* 4.7:1 on --se-surface (AA text) */
+  /* Away (and snoozing): the status colour faded, as a solid ring, everywhere */
+  --se-away: color-mix(in srgb, var(--se-online) 50%, transparent);
+  --se-away-ingame: color-mix(in srgb, var(--se-running) 50%, transparent);
+  --se-accent-tint: color-mix(in srgb, var(--se-accent) 14%, transparent);
+  --se-accent-line: color-mix(in srgb, var(--se-accent) 30%, transparent);
+  --se-accent-strong: color-mix(in srgb, var(--se-accent) 55%, transparent);
+  --se-danger: #ef8f95; /* 4.5:1 on --se-selected (AA text) */
+  --se-warning: #f0c060;
+  /* Status accents beyond the core set */
+  --se-broadcast: #9c8fd4;
+  --se-hidden: #edc4fd;
+  /* Notification and toast kinds */
+  --se-kind-violet: #b08cff;
+  --se-kind-teal: #5fd4c4;
+  --se-kind-pink: #ff8fb8;
+  /* Metacritic score bands */
+  --se-mc-good: #00ce7a;
+  --se-mc-mixed: #ffbd3f;
+  --se-mc-bad: #ff6874;
+  /* Text and glass over game art */
+  --se-on-art: #d0d7de;
+  --se-glass: rgba(16, 18, 23, .8);
+  --se-danger-text: #ffb0b3;
+  --se-danger-surface: color-mix(in srgb, var(--se-danger) 16%, var(--se-bg));
+  /* The danger button (Delete, Leave, Revoke): a red tint, deep red on hover. One recipe, read
+     by every one (dialogs, Game Properties, the friends pages) */
+  --se-danger-btn-bg: var(--se-danger-surface);
+  --se-danger-btn-fg: var(--se-danger-text);
+  --se-danger-btn-bg-hover: var(--se-stop);
+  --se-danger-btn-fg-hover: var(--se-text-strong);
+  --se-play: #388620; /* 4.6:1 under white text (AA) */
+
+  /* Store item flags: on wishlist, in library, in cart; pre-purchase pill; live broadcast */
+  --se-wish: #ff8fb8;
+  --se-owned: #cfe8ff;
+  --se-cart: #a4d007;
+  --se-prepurchase: #b5df20;
+  --se-prepurchase-bg: rgba(164, 208, 7, .14);
+  --se-live: #ff4d5e;
+
+  /* Glass: chips on art (flags, DLC, price, titles) and round buttons (carousel arrows) */
+  --se-glass-chip: rgba(10, 12, 16, .62);
+  --se-glass-chip-line: var(--se-white-10);
+  --se-glass-btn: color-mix(in srgb, var(--se-bg) 78%, transparent);
+  --se-glass-btn-hover: rgba(44, 52, 64, .9);
+  --se-glass-btn-line: var(--se-white-12);
+  --se-blur-chip: blur(10px) saturate(1.4);
+  --se-blur-panel: blur(16px);
+  --se-blur-scrim: blur(6px); /* the page dimmed behind a dialog (client and web) */
+  --se-glass-bar: color-mix(in srgb, var(--se-bg) 72%, transparent); /* a bar floating over art (the game page's play bar) */
+  --se-blur-bar: blur(18px) saturate(1.15);
+  --se-blur-ambient: blur(48px); /* a picture blurred into its own backdrop (the Home stage's fill) */
+  /* Glass round buttons on art ("•••" options, share): the dots, light at rest, ink on accent */
+  --se-icon-dots-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Ccircle cx='6' cy='12' r='1.8'/%3E%3Ccircle cx='12' cy='12' r='1.8'/%3E%3Ccircle cx='18' cy='12' r='1.8'/%3E%3C/svg%3E");
+  --se-icon-dots-ink: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230f1115'%3E%3Ccircle cx='6' cy='12' r='1.8'/%3E%3Ccircle cx='12' cy='12' r='1.8'/%3E%3Ccircle cx='18' cy='12' r='1.8'/%3E%3C/svg%3E");
+  /* Icon and glyph sizes */
+  --se-dot: 8px; /* a status dot */
+  --se-icon-xs: 12px;
+  --se-icon-sm: 14px;
+  --se-icon-md: 16px;
+  --se-icon-glyph: 18px; /* a glyph inside a round button */
+  --se-icon-lg: 22px;
+  --se-icon-xl: 24px;
+  --se-icon-duo: .32; /* a duotone icon's soft fill (fill-opacity), under its outline */
+
+  /* Achievement rarity tiers, by global unlock rate */
+  --se-tier-legendary: #f0c060;
+  --se-tier-epic: #b98cff;
+  --se-tier-rare: #5fb2ff;
+  --se-tier-uncommon: #7bc46a;
+  --se-tier-common: #8d97a2;
+
+  /* Spacing scale: a 4px base (half a step for hairline gaps inside a stacked label) */
+  --se-space-half: 2px;
+  --se-space-1: 4px;
+  --se-space-2: 8px;
+  --se-space-3: 12px;
+  --se-space-4: 16px;
+  --se-space-5: 24px;
+  --se-space-6: 32px;
+  --se-space-7: 48px;
+
+  /* Radii, sizing, and elevation */
+  --se-radius-xs: 4px;
+  --se-radius-sm: 8px;
+  --se-radius-md: 10px;
+  --se-radius-ml: 12px;
+  --se-radius-lg: 14px;
+  --se-radius-xl: 18px;
+  --se-radius-pill: 999px;
+  /*
+   * Avatars: the toast's rounded square (12 px on 52 px), as a share of the side so every
+   * size keeps the same shape. Status rings follow it: 2 px gap, then a 2 px line.
+   */
+  --se-avatar-radius: 23%;
+  --se-control: var(--se-surface-2);
+  --se-control-h: 34px;
+  --se-control-h-sm: 28px;
+  --se-hit: 32px; /* the smallest hit target any control may have */
+  /*
+   * Search field: one look for every client search box (and plugin UI). Look only: a box keeps
+   * its own height where its row needs it (--se-search-h is the default).
+   */
+  --se-search-h: var(--se-control-h);
+  --se-search-radius: var(--se-radius-md);
+  --se-search-pad: var(--se-space-3);
+  --se-search-gap: var(--se-space-2);
+  --se-search-bg: var(--se-field);
+  --se-search-edge: inset 0 0 0 1px var(--se-hairline);
+  --se-search-edge-hover: inset 0 0 0 1px var(--se-white-12);
+  --se-search-edge-focus: inset 0 0 0 1px var(--se-accent-strong), 0 0 0 3px var(--se-accent-tint);
+  --se-search-icon-size: var(--se-icon-md);
+  --se-search-icon-color: var(--se-text-muted);
+  --se-search-text: var(--se-text);
+  --se-search-placeholder: var(--se-text-faint);
+  --se-search-font: 500 var(--se-fs-md) var(--se-font);
+  --se-switch-w: 38px; /* an on/off switch: track and knob */
+  --se-switch-h: 22px;
+  --se-switch-knob: 16px;
+  --se-check-size: var(--se-icon-md); /* checkbox and radio box (its label carries the hit target) */
+  --se-field-h: 36px; /* text fields and the price chip's height on the web */
+  --se-tile-lg: 56px; /* big round buttons on art (a video's play button) */
+  --se-spinner-max: 96px; /* a spinner's largest size, whatever box it fills (client and web) */
+  --se-menu-max-h: 20rem; /* a dropdown's open list scrolls past this, never growing the page */
+  --se-tile: 40px;
+  --se-tile-sm: 30px;
+  --se-tile-icon: 20px;
+  --se-tile-xl: 88px; /* a list row's preview picture (hub guides) */
+  --se-side-col: 320px; /* a page's side column beside its main list */
+  --se-reader-share: 58%; /* a list-and-reader page: the reader's share of the width */
+  --se-card-art: 28px; /* a friend card's footer: the featured badge and the level */
+  --se-window-w: 1080px; /* a centered tool window over the client (the Library Manager) */
+  --se-window-h: 680px;
+  /*
+   * Store price chip (web/store/shared/ui.css): one size everywhere, so a chip with a discount
+   * badge is as tall as one without. A host can set a larger variant (the front page's hero).
+   */
+  --se-price-h: 36px;
+  /* The chip's own surface: a lifted slate on cards, still frosted (with the glass blur) over art */
+  --se-price-bg: rgba(42, 47, 55, .82);
+  --se-price-edge: inset 0 0 0 1px var(--se-white-10);
+  --se-price-radius: var(--se-radius-md);
+  --se-price-pct-h: 24px;
+  --se-price-pct-inset: 6px;
+  --se-price-pct-pad: 7px;
+  --se-price-pct-pad-lg: 10px;
+  --se-price-pct-radius: 7px;
+  --se-price-pct-ink: #0f1a00; /* text on the --se-cart badge */
+  --se-price-size: var(--se-fs-md);
+  --se-price-was-size: 11.5px;
+  --se-price-pct-size: var(--se-fs-base);
+  /*
+   * Column widths: the game list (also Downloads' list and the game page's left column) and the
+   * Friends dock share one default. Each is a setting, Fixed or Adjustable: Adjustable reads the
+   * width dragged on the column's edge (options/library/, options/friends/).
+   * The default scales with the window on one line through 280 px at a 1280 px window and
+   * 350 px at 2560 (4K at 150%), held between 280 and 420: about 315 at 1920, 420 at 3840.
+   */
+  --se-col-w: clamp(280px, 210px + 5.46875vw, 420px);
+  --se-fd-w: var(--se-col-w);
+  --se-list-w: var(--se-col-w);
+  --se-fd-rail: 60px;
+  --se-fd-fly-lift: 6px; /* a dock card sits this far above its tile, head level with it */
+  --se-fd-fly-max: 440px; /* a "+N" flyout's tallest: head, search and about ten rows */
+  --se-shadow-card: 0 10px 24px -12px rgba(0, 0, 0, .8);
+  --se-shadow-pop: 0 18px 40px -10px rgba(0, 0, 0, .8), inset 0 0 0 1px rgba(255, 255, 255, .07);
+  /* The room a panel in its own popup window (the Steam menu, the account menu, the bell's) keeps
+     around it for --se-shadow-pop, which reaches 12px up, 30px to each side and 48px down: the
+     window's edge would cut it off in a hard line. client/header/menu/placement.js takes it back. */
+  --se-pop-room-top: var(--se-space-4);
+  --se-pop-room-side: var(--se-space-6);
+  --se-pop-room-bottom: var(--se-space-7);
+  --se-shadow-hero: 0 20px 50px -20px rgba(0, 0, 0, .7), inset 0 0 0 1px rgba(255, 255, 255, .06);
+  /* Hovered cover/card: accent ring plus lift */
+  --se-shadow-tooltip: 0 10px 24px -8px rgba(0, 0, 0, .8), inset 0 0 0 1px var(--se-hairline);
+  --se-shadow-ring: 0 0 0 2px var(--se-accent), 0 18px 30px -12px rgba(0, 0, 0, .85);
+  --se-shadow-sm: 0 6px 16px -8px rgba(0, 0, 0, .9);
+  --se-shadow-md: 0 18px 40px -16px rgba(0, 0, 0, .9);
+  --se-shadow-lg: 0 24px 48px -16px rgba(0, 0, 0, .9);
+  --se-shadow-lift: inset 0 0 0 1px var(--se-white-14), var(--se-shadow-md); /* a card raised on hover */
+  --se-text-shadow-art: 0 1px 8px var(--se-black-60); /* text over art */
+  --se-shadow-underline: inset 0 -1px 0 currentColor; /* a text link's underline, drawn as a shadow */
+  --se-glass-btn-shadow: var(--se-shadow-sm);
+  /* Pop-up panels (menus, dropdowns, tooltips, hover cards): one recipe everywhere */
+  --se-panel-bg: rgba(31, 36, 43, .96);
+  --se-panel-shadow: inset 0 0 0 1px var(--se-hairline), var(--se-shadow-lg);
+  --se-menu-width: 320px; /* the settings menu and the picker (.se-mn, client/shared/menu.css) */
+  --se-menu-row-h: var(--se-control-h); /* a row of either menu (.se-menu, .se-mn); taller with a hint */
+  /* Hover cards (game and friend, client and web): width, inner padding, art banner height */
+  --se-hc-width: 320px;
+  --se-hc-pad: 12px;
+  --se-hc-banner: 132px;
+  --se-hc-broadcast: var(--se-broadcast);
+  --se-play-hover: #44a028;
+  --se-play-glow: rgba(80, 180, 50, .55);
+  --se-play-fill: linear-gradient(180deg, color-mix(in srgb, var(--se-play) 72%, #b6f07a 28%), var(--se-play)); /* Play button face */
+  /* Install (and Update, Resume) button face: Play's recipe in the accent, deepened so white reads */
+  --se-install: color-mix(in srgb, var(--se-accent) 62%, var(--se-bg-ink));
+  --se-install-fill: linear-gradient(180deg, color-mix(in srgb, var(--se-install) 72%, var(--se-accent) 28%), var(--se-install));
+  --se-install-glow: var(--se-accent-strong);
+  /* Stop (the game running): the same recipe in red */
+  --se-stop: color-mix(in srgb, var(--se-danger) 58%, var(--se-bg-ink));
+  --se-stop-fill: linear-gradient(180deg, color-mix(in srgb, var(--se-stop) 72%, var(--se-danger) 28%), var(--se-stop));
+  /* The same faces as row tints: the games' right-click menu's main row (client/library/game-menu.css) */
+  --se-play-tint: color-mix(in srgb, var(--se-play) 30%, transparent);
+  --se-play-tint-hover: color-mix(in srgb, var(--se-play) 45%, transparent);
+  --se-install-tint: color-mix(in srgb, var(--se-install) 45%, transparent);
+  --se-install-tint-hover: color-mix(in srgb, var(--se-install) 65%, transparent);
+  --se-stop-tint: color-mix(in srgb, var(--se-stop) 45%, transparent);
+  --se-stop-tint-hover: color-mix(in srgb, var(--se-stop) 65%, transparent);
+  --se-lime: #c6ef5a; /* a bright label on dark art (Labs, sale tiers) */
+  --se-control-off: #4b5866; /* a checkbox that is on but disabled, and its unchecked ring */
+  --se-text-halo: 0 0 3px #0b0d10, 0 1px 2px #0b0d10; /* text-shadow for small text over art */
+  --se-art-scrim: rgba(8, 10, 14, .55); /* the dark end of a scrim over art */
+  --se-media-bg: #000; /* behind video and screenshots (letterbox) */
+
+  /* Page art: drawn illustration, not UI. Startup's placeholder covers (one glow per cover slot)
+     and its cards; the store front's event dots. */
+  --se-art-cover-1: #3a6aa0;
+  --se-art-cover-2: #2a5284;
+  --se-art-cover-3: #4a7fb8;
+  --se-art-cover-4: #24466e;
+  --se-art-cover-5: #3f78b4;
+  --se-art-cover-6: #2e5a8e;
+  --se-art-cover-7: #5089c4;
+  --se-art-cover-8: #26507e;
+  --se-art-card: linear-gradient(160deg, #2c5280, #162a44);
+  --se-art-card-on: linear-gradient(160deg, #3a6aa0, #1a3150);
+  --se-art-floor: #141922; /* startup art's base, where the covers fade out */
+  --se-event-pink: #ff5fa2;
+  --se-event-teal: #3ddbd0;
+
+  /* White overlays on dark surfaces, weakest to strongest (.06 is --se-hairline, .08 --se-divider);
+     .3 and up is translucent text and marks over art. */
+  --se-white-02: rgba(255, 255, 255, .02);
+  --se-white-03: rgba(255, 255, 255, .03);
+  --se-white-04: rgba(255, 255, 255, .04);
+  --se-white-07: rgba(255, 255, 255, .07);
+  --se-white-10: rgba(255, 255, 255, .1);
+  --se-white-12: rgba(255, 255, 255, .12);
+  --se-white-14: rgba(255, 255, 255, .14);
+  --se-white-18: rgba(255, 255, 255, .18);
+  --se-white-25: rgba(255, 255, 255, .25);
+  --se-white-32: rgba(255, 255, 255, .32);
+  --se-white-40: rgba(255, 255, 255, .4);
+  --se-white-45: rgba(255, 255, 255, .45);
+  --se-white-50: rgba(255, 255, 255, .5);
+  --se-white-55: rgba(255, 255, 255, .55);
+  --se-white-60: rgba(255, 255, 255, .6);
+  --se-white-65: rgba(255, 255, 255, .65);
+  --se-white-70: rgba(255, 255, 255, .7);
+  --se-white-75: rgba(255, 255, 255, .75);
+  --se-white-85: rgba(255, 255, 255, .85);
+
+  /* Black for shadows and scrims, weakest to strongest */
+  --se-black-04: rgba(0, 0, 0, .04);
+  --se-black-15: rgba(0, 0, 0, .15);
+  --se-black-20: rgba(0, 0, 0, .2);
+  --se-black-30: rgba(0, 0, 0, .3);
+  --se-black-40: rgba(0, 0, 0, .4);
+  --se-black-45: rgba(0, 0, 0, .45);
+  --se-black-50: rgba(0, 0, 0, .5);
+  --se-black-55: rgba(0, 0, 0, .55);
+  --se-black-60: rgba(0, 0, 0, .6);
+  --se-black-70: rgba(0, 0, 0, .7);
+  --se-black-74: rgba(0, 0, 0, .74);
+  --se-black-80: rgba(0, 0, 0, .8);
+  --se-black-90: rgba(0, 0, 0, .9);
+
+  /* Keyboard focus: one ring everywhere, drawn as an outline so it never fights box-shadow */
+  --se-focus-outline: 2px solid var(--se-accent);
+  --se-focus-offset: 2px;
+
+  /* Sizes read by single features (were fallbacks only, so defined here once) */
+  --se-link: var(--se-accent);           /* links in theme text (overlay notes) */
+  --se-fr-ring-style: solid;             /* friend avatar status ring line */
+  --se-steam-home-inset: 6px;            /* title-bar Steam/Home button inset */
+  --se-logs-h: 100%;                     /* Millennium Logs table height */
+  --se-dialog-art-h: 236px;              /* dialog header art height */
+  --se-halo-w: 3px; /* a soft ring around a selected or live element */
+  --se-avatar-ring-w: 3px; /* a slim presence ring's reach outside the avatar (Home friend rows) */
+
+  /* Motion: fast (hover, press), base (state), slow (panels), slower (page-scale) */
+  --se-ease: cubic-bezier(.2, .8, .2, 1);
+  --se-ease-spring: cubic-bezier(.34, 1.56, .64, 1); /* a small overshoot: a control popping into place */
+  --se-ease-in: cubic-bezier(.5, 0, .75, 0); /* speeding up as it leaves (a toast closing) */
+  --se-ease-inout: cubic-bezier(.65, 0, .35, 1); /* symmetric: a looping move that eases both ways */
+  --se-dur-fast: .12s;
+  --se-dur: .15s;
+  --se-dur-mid: .2s;
+  --se-dur-slow: .25s;
+  --se-dur-relaxed: .3s; /* a row or card settling (lists, toasts) */
+  --se-dur-long: .4s;
+  --se-dur-slower: .5s;
+  --se-press-scale: .97; /* a pressed control (:active), the same everywhere */
+  --se-dur-ambient: 1.2s; /* slow art drift (the age check's backdrop settling in) */
+  /* Loops, by what they do */
+  --se-dur-busy: 1.1s;    /* a loading bar or ring that keeps going */
+  --se-dur-shimmer: 1.4s; /* a skeleton shimmer or a waiting pulse */
+  --se-dur-pulse: 1.6s;   /* a live dot or a twinkle */
+  --se-dur-breathe: 2.4s; /* a slow breathe (running, snoozed, the startup mark) */
+  --se-dur-reduced: 3s;   /* a spinner slowed for reduced motion */
+  --se-dur-glow: 4s;      /* a soft glow rising and falling */
+  --se-dur-sweep: 4.5s;   /* a light sweep or a fade cycle across art */
+  /* Hover intent: how long the pointer rests before a card opens; tips wait as Steam's do */
+  --se-hover-delay: .15s;
+  --se-tip-delay: .2s;
+  /* Scroll to top: the game page's button and the web's, one design */
+  --se-top-size: 48px;
+  --se-top-inset: 28px; /* from the window's corner, where the page places it (web) */
+  --se-top-ring: 3px; /* the progress ring's width */
+  --se-top-rest: translateY(16px) scale(.9); /* hidden, before it rises in */
+  --se-top-face: color-mix(in srgb, var(--se-surface) 94%, transparent);
+  --se-top-face-hover: color-mix(in srgb, var(--se-hover) 96%, transparent);
+  --se-top-shadow: 0 10px 24px -8px var(--se-black-80);
+
+  /* Stacking layers */
+  --se-z-under: -1; /* behind its parent's content: washes and art layers */
+  --se-z-under-2: -2; /* behind an --se-z-under layer (the dialogs' third capsule) */
+  --se-z-raised: 1;
+  --se-z-raised-2: 2;
+  --se-z-raised-3: 3;
+  --se-z-sticky: 20;
+  --se-z-flyout: 40; /* the dock's game card, above the sticky bars */
+  --se-z-dropdown: 100;
+  --se-z-popover: 1000;
+  --se-z-drag: 9000;
+  --se-z-toast: 10000;
+  --se-z-max: 2147483000;
+
+  /* Typography */
+  --se-font: "SN Pro", "Motiva Sans", Arial, sans-serif; /* the "Font" setting (options/appearance/) */
+  --se-font-mono: "Cascadia Mono", Consolas, "Courier New", monospace; /* logs, timestamps, file paths */
+  --se-label-lh: 14px;
+  --se-label-font: 700 var(--se-fs-xs)/var(--se-label-lh) var(--se-font);
+  --se-label-spacing: .1em;
+  --se-label-color: var(--se-text-faint);
+  /* Type scale (px): 10.5 / 11 / 12 / 13 / 14 / 16 / 18 / 20 / 24 / 30, then fluid titles */
+  --se-fs-2xs: 10.5px;
+  --se-fs-xs: 11px;
+  --se-fs-sm: 12px;
+  --se-fs-base: 13px;
+  --se-fs-md: 14px;
+  --se-fs-lg: 16px;
+  --se-fs-xl: 18px;
+  --se-fs-2xl: 20px;
+  --se-fs-3xl: 24px;
+  --se-fs-4xl: 30px;
+  --se-fs-headline: clamp(24px, 2.2vw, 32px); /* section titles */
+  --se-fs-display: clamp(30px, 3vw, 44px); /* page titles */
+  --se-fs-hero: clamp(38px, 4vw, 60px); /* hero titles */
+
+  /*
+   * Web components (store, community, checkout, help). One recipe per component, read by every
+   * page that draws one (web/store/shared/ui.css, web/community/shared/ui.css, web/shared/select.css and the
+   * page files), so a button, chip or card looks the same on every page. Every corner is
+   * rounded (--se-radius-control), never a pill.
+   */
+  /* Control heights: small (chips, tags, compact rows), the default (buttons, fields, dropdowns,
+     segmented controls) and large (buy buttons, hero actions) */
+  --se-ctl-sm: 28px;
+  --se-ctl: var(--se-control-h); /* one control height, client and web (34) */
+  --se-ctl-lg: 44px;
+  --se-radius-control: var(--se-radius-md);
+  /* Menus and menu-like panels: Settings, account, notifications, Downloads (as Steam's right-click menus) */
+  --se-radius-menu: var(--se-radius-lg);
+  --se-radius-control-inner: var(--se-radius-sm); /* a control inside a control (a segment) */
+  --se-radius-card: var(--se-radius-xl);
+  /* Type styles: size, weight and line height together, so no page mixes its own */
+  --se-type-badge: 700 var(--se-fs-xs)/1 var(--se-font);
+  --se-type-caption: 600 var(--se-fs-xs)/1.3 var(--se-font);
+  --se-type-label: 600 var(--se-fs-sm)/1 var(--se-font);
+  --se-type-small: 500 var(--se-fs-sm)/1.4 var(--se-font);
+  --se-type-control: 600 var(--se-fs-base)/1 var(--se-font);
+  --se-type-body: 500 var(--se-fs-base)/1.5 var(--se-font);
+  --se-type-control-lg: 600 var(--se-fs-md)/1 var(--se-font);
+  --se-type-body-lg: 500 var(--se-fs-md)/1.5 var(--se-font);
+  --se-type-title: 700 var(--se-fs-lg)/1.3 var(--se-font);
+  --se-type-title-lg: 700 var(--se-fs-xl)/1.3 var(--se-font);
+  --se-type-heading: 700 var(--se-fs-2xl)/1.3 var(--se-font);
+  --se-type-heading-lg: 700 var(--se-fs-3xl)/1.2 var(--se-font);
+  /* A surface's hairline edge, and the three elevations above it */
+  --se-edge: inset 0 0 0 1px var(--se-hairline);
+  /* The same 1px inner ring at other strengths, and hairline rules on one side */
+  --se-edge-soft: inset 0 0 0 1px var(--se-white-10);
+  --se-edge-mid: inset 0 0 0 1px var(--se-white-12);
+  --se-edge-lift: inset 0 0 0 1px var(--se-white-14); /* a card on hover */
+  --se-edge-divider: inset 0 0 0 1px var(--se-divider);
+  --se-edge-glass: inset 0 0 0 1px var(--se-glass-chip-line);
+  --se-edge-accent: inset 0 0 0 1px var(--se-accent-line);
+  --se-rule-top: inset 0 1px 0 var(--se-hairline);
+  --se-rule-bottom: inset 0 -1px 0 var(--se-hairline);
+  --se-elevation-1: var(--se-edge), var(--se-shadow-sm);
+  --se-elevation-2: var(--se-edge), var(--se-shadow-md);
+  --se-elevation-3: var(--se-edge), var(--se-shadow-lg);
+  /* Buttons: secondary (the default), primary (a view's one main action), ghost (quiet, no face) */
+  --se-btn-h: var(--se-ctl);
+  --se-btn-pad: 0 var(--se-space-4);
+  --se-btn-gap: var(--se-space-2);
+  --se-btn-font: var(--se-type-control);
+  --se-btn-bg: var(--se-pill);
+  --se-btn-bg-hover: var(--se-hover);
+  --se-btn-edge: inset 0 0 0 1px var(--se-glass-btn-line);
+  --se-btn-color: var(--se-text);
+  --se-btn-color-hover: var(--se-white);
+  --se-btn-primary-bg: var(--se-accent);
+  --se-btn-primary-bg-hover: var(--se-accent-hover);
+  --se-btn-primary-color: var(--se-on-accent);
+  --se-btn-ghost-bg: transparent;
+  --se-btn-ghost-bg-hover: var(--se-btn-bg-hover);
+  --se-btn-ghost-color: var(--se-text-muted);
+  --se-btn-ghost-color-hover: var(--se-btn-color-hover);
+  --se-btn-disabled-opacity: .45;
+  /* Fields and dropdown buttons */
+  --se-field-bg: var(--se-field);
+  --se-field-edge: var(--se-edge);
+  --se-field-edge-hover: inset 0 0 0 1px var(--se-white-12);
+  --se-field-edge-focus: inset 0 0 0 1px var(--se-accent);
+  /* Chips: tags, filters, flags; on when chosen */
+  --se-chip-h: var(--se-ctl-sm);
+  --se-chip-pad: 0 var(--se-space-3);
+  --se-chip-font: var(--se-type-label);
+  --se-chip-bg: var(--se-pill);
+  --se-chip-bg-on: var(--se-accent-surface);
+  --se-chip-edge-on: inset 0 0 0 1px var(--se-accent-line);
+  /* Menus: dropdown lists, popup menus, suggestion lists (the panel recipe above) */
+  --se-menu-radius: var(--se-radius-control);
+  --se-menu-pad: var(--se-space-2);
+  --se-menu-item-pad: var(--se-space-2) var(--se-space-3);
+  --se-menu-item-radius: var(--se-radius-control-inner);
+  --se-menu-item-font: 500 var(--se-fs-base)/1.3 var(--se-font);
+  /* Cards: the dark surface every grouped block sits on */
+  --se-card-bg: var(--se-surface);
+  --se-card-edge: var(--se-edge);
+  --se-card-radius: var(--se-radius-card);
+
+  /* Startup background: library | hero | mosaic | wall | plain | dots | steam */
+  --se-startup-background: library;
+
+  /*
+   * Window entrance, once a window has loaded:
+   *   splash  the main window plays the Steam Enhanced splash while the Library builds, and
+   *           reaches "Ready" as the Library shows; other windows use logo
+   *   logo    the theme's mark breathes while the window loads, then dissolves into it
+   *   fade    the window fades in
+   *   none    the window appears at once
+   */
+  --se-entrance: splash;
+
+  /* In-game overlay restyle: on | off; backdrop dim: 0.4-1.4 (edges black at 1, all black at 1.4) */
+  --se-overlay: on;
+  --se-overlay-dim: 1.2;
+
+  /*
+   * Notification toasts: on | off; in game too: on | off.
+   * Style, desktop and in game: stage (bottom-centre Stage) | compact (restyled Steam toasts)
+   */
+  --se-toasts: on;
+  --se-toasts-ingame: on;
+  --se-toasts-style: stage;
+  /* Compact toasts: center (centre of the screen edge, Steam's stacking kept) | corner (Steam's corner) */
+  --se-toasts-position: center;
+
+  /*
+   * Theme branding (sources in assets/) lives with the only files that use it, so menus and
+   * toasts don't carry ~20 KB of base64: --se-brand-logo in about-steam.css, --se-brand-mark in
+   * core/spinner.css (shared by startup.css and sign-in.css), --se-brand-icon in nav-rail.css.
+   */
+
+}

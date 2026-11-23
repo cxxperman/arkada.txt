@@ -1,0 +1,699 @@
+/*
+ * In-game overlay shell (SP Overlay windows).
+ *
+ * Restyles Steam's desktop overlay in the Steam Enhanced look. The top-left
+ * column gains a game card and Game Overview's content (Achievements,
+ * Friends, Screenshots, Guides, Recent News) plus tabbed views, built by
+ * the overlay scripts (client/overlay/*.js). Steam's toolbars and top-right
+ * Back to Game are hidden: the column covers them, and widget windows open
+ * centred at a fixed size.
+ *
+ * Rules on Steam's markup are gated on `html[data-se-ov]`, which `main.js`
+ * sets while `--se-overlay` is not `off`; the `.se-ov-*` elements only exist
+ * while it is set. Keyboard-only and pinned-preview states keep Steam's own
+ * presentation.
+ *
+ * Overlay buttons are DialogButtons, so the global `button.DialogButton:not(#se-none)`
+ * skin in `client/dialogs/dialogs.css` (specificity 1,1,1) would win; button
+ * rules here carry `:not(#se-none)` to outrank it.
+ *
+ * Continued, by section, in overlay-views.css, overlay-tools.css (same folder), listed after
+ * this file in client/loader.js: together they keep one file's order.
+ */
+html[data-se-ov] {
+  --se-ov-ink: 15, 17, 21;
+  /* Left column width (rail + drawer); it stops short of the game's own menu. */
+  --se-ov-col: 520px;
+  --se-ov-rail-btn: 44px;
+}
+
+/* ---------- Backdrop ---------- */
+
+/* --se-overlay-dim runs 0.4-1.4: the edges are opaque from 1, the centre
+   (72% of it) from 1.4. Alphas over 1 clamp. */
+html[data-se-ov] ._3b_pllMxcr_an1aQ5goWvB:not(._2hcWZXLXQaKJxwEEsiUibw) {
+  background: radial-gradient(
+    ellipse at 50% 45%,
+    rgba(var(--se-ov-ink), calc(var(--se-overlay-dim) * 0.72)),
+    rgba(var(--se-ov-ink), var(--se-overlay-dim))
+  ) !important;
+  box-shadow: inset 0 0 240px 20px rgba(var(--se-ov-ink), 0.85) !important;
+  font-family: var(--se-font) !important;
+}
+
+/* ---------- Top section: game card (top left) ---------- */
+
+/* Steam caps the top section at 1920px and centres it; on wider screens that
+   pushed the card inward. Span the full width so it sits in the corner. */
+html[data-se-ov] .fi6UDkxJq66MLo2z9wabQ {
+  max-width: none !important;
+  width: auto !important;
+  margin: 0 !important;
+  padding: var(--se-space-5) var(--se-space-6) 0 !important;
+}
+
+/* Steam's time-stats column, top to bottom (set with `order`):
+     0 `.se-ov-card`   header: logo, Time · This session, Total · Last 2 weeks
+     2 native rows     network status, time trial, ...
+     5 `.se-ov-body`   the rail (tabs, Back to game, Exit game) and the drawer
+   Steam's clock, date, "this session" line and Exit game button are hidden:
+   the header and the rail stand in for them (the rail's Exit clicks Steam's). */
+html[data-se-ov] .fi6UDkxJq66MLo2z9wabQ .vCykYvbW9JAoUuOZK3L8M {
+  align-self: flex-start !important;
+  width: var(--se-ov-col) !important;
+  max-width: calc(100vw - 80px) !important;
+  display: flex !important;
+  flex-flow: row wrap !important;
+  align-items: center !important;
+  gap: var(--se-space-3) !important;
+}
+
+html[data-se-ov] .fi6UDkxJq66MLo2z9wabQ .vCykYvbW9JAoUuOZK3L8M > :not(.se-ov-card, .se-ov-body) {
+  flex: 1 0 100% !important;
+  order: 2 !important;
+}
+
+html[data-se-ov] .fi6UDkxJq66MLo2z9wabQ .vCykYvbW9JAoUuOZK3L8M > :is(.Snc8nF7w027y6b7Pt3ch0, ._2tSzhkf_Zg2yKYhOs79Cid, .BoygotvcKo4DC4dSix8G3),
+html[data-se-ov] .fi6UDkxJq66MLo2z9wabQ .vCykYvbW9JAoUuOZK3L8M > ._3YTmrWKcB8D-K9XYuAiR09:nth-child(1 of ._3YTmrWKcB8D-K9XYuAiR09) {
+  display: none !important;
+}
+
+html[data-se-ov] .fi6UDkxJq66MLo2z9wabQ .vCykYvbW9JAoUuOZK3L8M ._3YTmrWKcB8D-K9XYuAiR09,
+html[data-se-ov] .fi6UDkxJq66MLo2z9wabQ .vCykYvbW9JAoUuOZK3L8M ._1QRGzYZlQ54Eg7j_SjklDd {
+  font: 500 var(--se-fs-base)/18px var(--se-font) !important;
+  color: var(--se-text-muted) !important;
+}
+
+html[data-se-ov] .fi6UDkxJq66MLo2z9wabQ .vCykYvbW9JAoUuOZK3L8M ._1pESmYOjS2Hv9u_1C73d4S {
+  font: 600 var(--se-fs-base)/18px var(--se-font) !important;
+  color: var(--se-gold-text) !important;
+}
+
+/* Steam's centred logo moves into the header. */
+html[data-se-ov][data-se-ov-logo] .fi6UDkxJq66MLo2z9wabQ ._3KwfoP3QLtY80hx0gtZBZ4 > * {
+  visibility: hidden !important;
+}
+
+/* Header: the logo spans both rows; the stats sit in a 2 × 2 grid beside it,
+   the right column behind a hairline. */
+html[data-se-ov] .se-ov-card {
+  order: 0;
+  flex: 1 0 100%;
+  display: grid;
+  grid-template-columns: 200px repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, 56px);
+  align-items: center;
+  gap: var(--se-space-2) 0;
+  margin: 0 0 var(--se-space-1);
+  font-family: var(--se-font);
+  user-select: none;
+}
+
+.se-ov-logo,
+.se-ov-name {
+  grid-row: 1 / 3;
+  grid-column: 1;
+  margin-inline-end: var(--se-space-4);
+}
+
+.se-ov-logo {
+  display: block;
+  max-width: calc(100% - 20px);
+  max-height: 122px;
+  object-fit: contain;
+  object-position: left center;
+  filter: drop-shadow(0 6px 24px var(--se-black-60));
+}
+
+.se-ov-name {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--se-text-strong);
+  font-size: var(--se-fs-3xl);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.se-ov-logo[hidden],
+.se-ov-name[hidden] {
+  display: none;
+}
+
+.se-ov-stat {
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--se-space-1);
+}
+
+/* Right column (This session, Last 2 weeks). */
+.se-ov-stat:nth-child(4),
+.se-ov-stat:nth-child(6) {
+  padding-inline-start: var(--se-space-4);
+  box-shadow: inset 1px 0 0 var(--se-white-12);
+}
+
+.se-ov-stat-label {
+  color: var(--se-text-dim);
+  font: 700 var(--se-fs-sm)/16px var(--se-font);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.se-ov-stat-value {
+  display: flex;
+  align-items: baseline;
+  gap: var(--se-space-1);
+  white-space: nowrap;
+}
+
+.se-ov-stat-value b {
+  color: var(--se-text-strong);
+  font-size: var(--se-fs-3xl);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.se-ov-stat-value small {
+  color: var(--se-text-dim);
+  font-size: var(--se-fs-lg);
+  font-weight: 500;
+}
+
+/* Time: a stat that is also the timer's button. Same box as the others, so
+   the four line up; running, it turns accent. */
+html[data-se-ov] .se-ov-time:not(#se-none) {
+  align-items: flex-start;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  text-shadow: inherit;
+  cursor: pointer;
+}
+
+html[data-se-ov] .se-ov-time:hover .se-ov-stat-label {
+  color: var(--se-text-muted);
+}
+
+html[data-se-ov] .se-ov-time[data-mode='running'] :is(.se-ov-stat-label, .se-ov-stat-value b) {
+  color: var(--se-accent);
+}
+
+html[data-se-ov] .se-ov-time[data-mode='paused'] .se-ov-stat-value b {
+  color: var(--se-text-muted);
+}
+
+html[data-se-ov] .se-ov-time:focus-visible {
+  outline: var(--se-focus-outline);
+  outline-offset: 4px;
+}
+
+/* ---------- Top section: Game Overview sections ---------- */
+
+/* Flat sections (no card) under the buttons, built by `dom.js`. They take
+   the height left on screen (`--se-ov-avail`, measured by `main.js`) and
+   scroll inside it; a fade marks more content below. */
+html[data-se-ov] .se-ov-overview {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--se-space-5);
+  max-height: var(--se-ov-avail, none);
+  /* Room for avatar rings, tier auras and sparkles that the scroll box would
+     otherwise clip at the column's edges. */
+  margin: var(--se-space-1) calc(-1 * var(--se-space-2)) 0;
+  padding: var(--se-space-1) var(--se-space-2) 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  font-family: var(--se-font);
+  user-select: none;
+}
+
+/* Bright game art can sit behind the column: a soft shadow keeps small
+   labels and links readable on it. */
+html[data-se-ov] :is(.se-ov-overview, .se-ov-card) {
+  text-shadow: 0 1px 2px rgba(var(--se-ov-ink), 0.85), 0 0 12px rgba(var(--se-ov-ink), 0.6);
+}
+
+html[data-se-ov] .se-ov-overview::-webkit-scrollbar {
+  display: none;
+}
+
+html[data-se-ov] .se-ov-overview[data-se-ov-scroll] {
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 56px), transparent);
+}
+
+.se-ov-sec[hidden] {
+  display: none;
+}
+
+.se-ov-sec-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--se-space-3);
+  min-height: 22px;
+  margin-bottom: var(--se-space-2);
+}
+
+.se-ov-sec-note {
+  color: var(--se-text);
+  font: 500 var(--se-fs-base)/1 var(--se-font);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.se-ov-sec-label {
+  color: var(--se-text-dim);
+  font: 700 var(--se-fs-base)/18px var(--se-font);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+html[data-se-ov] .se-ov-sec-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--se-space-1);
+  height: 22px;
+  margin: 0 calc(-1 * var(--se-space-1)) 0 0;
+  padding: 0 var(--se-space-1) 0 var(--se-space-2);
+  border: 0;
+  border-radius: var(--se-radius-xs);
+  background: transparent;
+  color: var(--se-text);
+  font: 600 var(--se-fs-base)/1 var(--se-font);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: background-color var(--se-dur) ease-out, color var(--se-dur) ease-out;
+}
+
+html[data-se-ov] .se-ov-sec-link:hover {
+  background: var(--se-hover);
+  color: var(--se-text-strong);
+}
+
+html[data-se-ov] .se-ov-sec-link:focus-visible {
+  outline: var(--se-focus-outline);
+  outline-offset: var(--se-focus-offset);
+}
+
+.se-ov-sec-link svg {
+  width: 14px;
+  height: 14px;
+}
+
+.se-ov-bar {
+  height: 4px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--se-white-14);
+}
+
+/* The list's overall bar: taller, on a visible track. */
+.se-ov-achl > .se-ov-bar {
+  flex: none;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--se-white-18);
+  box-shadow: inset 0 0 0 1px var(--se-black-30);
+}
+
+.se-ov-bar > i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--se-accent);
+}
+
+.se-ov-ach-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--se-space-1);
+  margin: var(--se-space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.se-ov-ach {
+  display: flex;
+  align-items: center;
+  gap: var(--se-space-3);
+  padding: var(--se-space-1) 0;
+}
+
+/* Achievement icons carry their rarity tier (client/shared/achievement-tiers.css). */
+:is(.se-ov-ach-icon, .se-ov-achl-icon) {
+  position: relative;
+  display: block;
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--se-radius-sm);
+  background: var(--se-surface-2);
+}
+
+:is(.se-ov-ach-icon, .se-ov-achl-icon) img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+}
+
+:is(.se-ov-ach-icon, .se-ov-achl-icon)[data-se-tier]:not([data-se-tier-locked]) {
+  box-shadow: var(--se-tier-aura) color-mix(in srgb, var(--se-tier) 55%, transparent);
+}
+
+:is(.se-ov-ach-icon, .se-ov-achl-icon) .se-ach-fx b {
+  right: 2px;
+  bottom: 1px;
+  font-size: var(--se-fs-xs);
+}
+
+.se-ov-ach-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--se-space-1);
+}
+
+.se-ov-ach-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--se-space-3);
+}
+
+.se-ov-ach-name {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--se-text);
+  font: 600 var(--se-fs-md)/18px var(--se-font);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.se-ov-ach-count {
+  flex: 0 0 auto;
+  color: var(--se-text-muted);
+  font: 500 var(--se-fs-sm)/16px var(--se-font);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.se-ov-avatars {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--se-space-3);
+  padding: var(--se-space-1);
+}
+
+/* Friend avatars as in the theme's friends list: rounded squares (as in the toasts), with a status ring
+   (green in game, blue online, dashed when away, gray and faded offline).
+   Clicking one opens the chat. */
+html[data-se-ov] .se-ov-avatar {
+  --se-ov-ring: var(--se-border-strong);
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--se-avatar-radius);
+  background: var(--se-surface-2);
+  box-shadow: 0 0 0 2px rgb(var(--se-ov-ink)), 0 0 0 4px var(--se-ov-ring);
+  cursor: pointer;
+  transition: box-shadow var(--se-dur) ease-out;
+}
+
+html[data-se-ov] .se-ov-avatar[data-status='online'] {
+  --se-ov-ring: var(--se-online);
+}
+
+html[data-se-ov] .se-ov-avatar[data-status='ingame'] {
+  --se-ov-ring: var(--se-running);
+}
+
+html[data-se-ov] .se-ov-avatar[data-away] {
+  box-shadow: none;
+  outline: 2px dashed var(--se-ov-ring);
+  outline-offset: 2px;
+}
+
+html[data-se-ov] .se-ov-avatar[data-status='online'][data-away] {
+  --se-ov-ring: color-mix(in srgb, var(--se-online) 50%, transparent);
+}
+
+.se-ov-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--se-avatar-radius);
+  object-fit: cover;
+  transition: filter var(--se-dur) ease-out, opacity var(--se-dur) ease-out;
+}
+
+.se-ov-avatar[data-status='offline'] img {
+  filter: grayscale(0.6);
+  opacity: 0.6;
+}
+
+html[data-se-ov] .se-ov-avatar:hover img {
+  filter: none;
+  opacity: 1;
+}
+
+html[data-se-ov] .se-ov-avatar[data-steamid]:hover {
+  box-shadow: 0 0 0 2px rgb(var(--se-ov-ink)), 0 0 0 4px var(--se-ov-ring), 0 0 0 7px var(--se-hover);
+}
+
+html[data-se-ov] .se-ov-avatar[data-away]:hover {
+  box-shadow: none;
+}
+
+/* Offset past the 4px status ring */
+html[data-se-ov] .se-ov-avatar:focus-visible {
+  outline: var(--se-focus-outline);
+  outline-offset: calc(var(--se-focus-offset) + 3px);
+}
+
+html[data-se-ov] .se-ov-avatar-more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--se-text-dim);
+  font: 600 var(--se-fs-sm)/1 var(--se-font);
+  cursor: default;
+}
+
+/* Shared row reset for the section buttons below. */
+html[data-se-ov] :is(.se-ov-shot, .se-ov-guide, .se-ov-news-lead, .se-ov-news-row) {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+html[data-se-ov] :is(.se-ov-shot, .se-ov-guide, .se-ov-news-lead, .se-ov-news-row):focus-visible {
+  outline: var(--se-focus-outline);
+  outline-offset: var(--se-focus-offset);
+}
+
+/* Screenshots: the two newest, 16:9. */
+.se-ov-shots {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--se-space-2);
+}
+
+html[data-se-ov] .se-ov-shot {
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: var(--se-radius-sm);
+  background: var(--se-surface-2);
+  box-shadow: var(--se-edge);
+}
+
+.se-ov-shot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--se-dur) ease-out, filter var(--se-dur) ease-out;
+}
+
+html[data-se-ov] .se-ov-shot:hover img {
+  transform: scale(1.04);
+  filter: brightness(1.1);
+}
+
+/* Guides: favorites (gold star, tinted row), then top rated. */
+.se-ov-guides {
+  display: flex;
+  flex-direction: column;
+  gap: var(--se-space-half);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+html[data-se-ov] .se-ov-guide {
+  width: 100%;
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  gap: var(--se-space-2);
+  padding: 0 var(--se-space-2);
+  border-radius: var(--se-radius-sm);
+  color: var(--se-text-muted);
+  transition: background-color var(--se-dur) ease-out, color var(--se-dur) ease-out;
+}
+
+html[data-se-ov] .se-ov-guide[data-fav='true'] {
+  background: var(--se-surface);
+  color: var(--se-text);
+}
+
+html[data-se-ov] .se-ov-guide:hover {
+  background: var(--se-hover);
+  color: var(--se-text-strong);
+}
+
+.se-ov-guide-icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  color: var(--se-text-faint);
+}
+
+.se-ov-guide[data-fav='true'] .se-ov-guide-icon {
+  color: var(--se-gold-text);
+}
+
+.se-ov-guide-icon svg {
+  width: 13px;
+  height: 13px;
+  fill: currentColor;
+}
+
+.se-ov-guide-title {
+  min-width: 0;
+  overflow: hidden;
+  font: 500 var(--se-fs-base)/18px var(--se-font);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* News: the newest post as a card with its capsule, older ones as rows. */
+html[data-se-ov] .se-ov-news-lead {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--se-space-1);
+}
+
+.se-ov-news-art {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 7;
+  margin-bottom: var(--se-space-1);
+  border-radius: var(--se-radius-sm);
+  object-fit: cover;
+  background: var(--se-surface-2);
+  transition: filter var(--se-dur) ease-out;
+}
+
+html[data-se-ov] .se-ov-news-lead:hover .se-ov-news-art {
+  filter: brightness(1.12);
+}
+
+.se-ov-news-kicker {
+  color: var(--se-accent);
+  font: 700 var(--se-fs-xs)/16px var(--se-font);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.se-ov-news-title {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  color: var(--se-text-strong);
+  font: 600 var(--se-fs-md)/19px var(--se-font);
+}
+
+html[data-se-ov] .se-ov-news-lead:hover .se-ov-news-title {
+  text-decoration: underline;
+}
+
+html[data-se-ov] .se-ov-news-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--se-space-2);
+  margin-top: var(--se-space-2);
+  padding-top: var(--se-space-2);
+  box-shadow: var(--se-rule-top);
+  color: var(--se-text-muted);
+  transition: color var(--se-dur) ease-out;
+}
+
+html[data-se-ov] .se-ov-news-row:hover {
+  color: var(--se-text-strong);
+}
+
+.se-ov-news-thumb {
+  flex: 0 0 auto;
+  width: 64px;
+  height: 36px;
+  overflow: hidden;
+  border-radius: var(--se-radius-xs);
+  background: var(--se-surface-2);
+}
+
+.se-ov-news-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.se-ov-news-row-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font: 500 var(--se-fs-base)/18px var(--se-font);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.se-ov-news-date {
+  flex: 0 0 auto;
+  color: var(--se-text-dim);
+  font: 500 var(--se-fs-sm)/16px var(--se-font);
+  font-variant-numeric: tabular-nums;
+}

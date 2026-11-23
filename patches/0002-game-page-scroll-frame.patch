@@ -1,0 +1,115 @@
+Steam Enhanced, client/game-page/page.js: no layout reads in a scroll frame.
+
+Why. placeScrolled() runs once per frame while a scroller scrolls. Measured on a game page
+(2 s of scrolling, Steam's ScrollToTopButton present): placeScrolled 177-229 ms of its own time
+(scrollHeight / scrollTop / offsetWidth reads that force the layout count there), plus
+getBoundingClientRect 39-51 ms and querySelectorAll 45-54 ms; 26-68 frames/s.
+Two causes:
+  - placeTop() set --se-scroll on the button and then read four boxes: the write made every read
+    after it recompute the styles and the layout, every frame;
+  - a scroll re-measured the button's place, though a scroll does not move it (the scroller's
+    box moves on a resize, which topSizer and onResizeTop already handle);
+  - and a scroller no button served was searched again on every frame (querySelectorAll plus
+    two boxes per button in servesScroller()).
+
+What. placeTop(btn, scrollOnly): on a scroll of a placed button only the progress is read and
+set; every read comes before every write. A scroller no button serves is remembered (WeakMap)
+with the number of buttons there were, and is not searched again until that number changes.
+
+--- a/client/game-page/page.js
++++ b/client/game-page/page.js
+@@ -30,23 +30,39 @@
+     live.topSizer.observe(sc);
+   }
+ 
+-  function placeTop(btn) {
++  /*
++   * scrollOnly: a scroll of a scroller whose button is placed. The button's place follows the
++   * scroller's box, which a scroll does not move (a resize does: topSizer, onResizeTop), so only
++   * the progress is set. Every read comes before every write: a write between two reads made the
++   * second one force the styles and the layout again, on every frame of a scroll.
++   */
++  function placeTop(btn, scrollOnly = false) {
+     const sc = btn.__seSc;
+     if (!sc?.isConnected) return;
+-    placedFor.set(btn, sc);
+-    if (!servesScroller(btn, sc)) {
+-      btn.__seSc = null;
+-      return;
++    if (!scrollOnly) {
++      placedFor.set(btn, sc);
++      if (!servesScroller(btn, sc)) {
++        btn.__seSc = null;
++        return;
++      }
+     }
+     const max = sc.scrollHeight - sc.clientHeight;
+-    setVar(btn, '--se-scroll', String(max > 0 ? Math.min(1, Math.max(0, sc.scrollTop / max)).toFixed(3) : 0));
+-    const wrap = btn.parentElement;
+-    if (!wrap) return;
+-    const o = wrap.getBoundingClientRect();
+-    const r = sc.getBoundingClientRect();
+-    const bar = sc.offsetWidth - sc.clientWidth;
+-    setVar(btn, '--se-top-x', `${Math.round(r.right - o.left - bar - 48 - 20)}px`);
+-    setVar(btn, '--se-top-y', `${Math.round(Math.min(r.bottom, innerHeight) - o.top - 48 - 20)}px`);
++    const progress = String(max > 0 ? Math.min(1, Math.max(0, sc.scrollTop / max)).toFixed(3) : 0);
++    const wrap = scrollOnly ? null : btn.parentElement;
++    let x = null;
++    let y = null;
++    if (wrap) {
++      const o = wrap.getBoundingClientRect();
++      const r = sc.getBoundingClientRect();
++      const bar = sc.offsetWidth - sc.clientWidth;
++      x = `${Math.round(r.right - o.left - bar - 48 - 20)}px`;
++      y = `${Math.round(Math.min(r.bottom, innerHeight) - o.top - 48 - 20)}px`;
++    }
++    setVar(btn, '--se-scroll', progress);
++    if (x !== null) {
++      setVar(btn, '--se-top-x', x);
++      setVar(btn, '--se-top-y', y);
++    }
+   }
+ 
+   /*
+@@ -68,6 +84,8 @@
+   let scrolled = null;
+   live.scrollFrame = 0;
+   const topFor = new WeakMap();
++  /** scroller -> how many buttons there were when none served it */
++  const noButton = new WeakMap();
+ 
+   function onAnyScroll(e) {
+     scrolled = e.target === document ? document.scrollingElement : e.target;
+@@ -82,12 +100,17 @@
+     if (t.closest(SE.SIDE)) return;
+     const known = topFor.get(t);
+     if (known?.isConnected && known.__seSc === t) {
+-      placeTop(known);
++      placeTop(known, true);
+       return;
+     }
++    // A scroller no button serves is remembered with the number of buttons there were: until that
++    // changes, its scrolls look no further (the search below reads two boxes per button, a forced
++    // layout, and ran on every frame of a scroll that had no button, e.g. a game page)
++    const buttons = document.querySelectorAll(TOP_BTN);
++    if (noButton.get(t) === buttons.length) return;
+     let best = null;
+     let bestSteps = 7;
+-    for (const btn of document.querySelectorAll(TOP_BTN)) {
++    for (const btn of buttons) {
+       if (!servesScroller(btn, t)) continue;
+       let steps = 0;
+       for (let n = btn.parentElement; n && steps < bestSteps; n = n.parentElement, steps++) {
+@@ -98,7 +121,11 @@
+         bestSteps = steps;
+       }
+     }
+-    if (!best) return;
++    if (!best) {
++      noButton.set(t, buttons.length);
++      return;
++    }
++    noButton.delete(t);
+     best.__seSc = t;
+     topFor.set(t, best);
+     watchScroller(t);

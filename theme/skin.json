@@ -1,9 +1,9 @@
 {
   "name": "Arkada",
-  "description": "arkada.txt™ — тёмное стекло dev.txt для клиента Steam: те же цвета, скругления и шрифт, что в Kapsula, Aura и core.txt.",
+  "description": "arkada.txt™ — клиент Steam как приложение Windows 11 на токенах dev.txt: фон Mica, плавающие слои с тонкой обводкой, те же цвета, скругления и шрифт, что в Kapsula, Aura и core.txt.",
   "author": "dev.txt",
   "version": "0.1.0",
-  "tags": ["Dark", "Glass", "Minimal", "dev.txt"],
+  "tags": ["Dark", "Fluent", "Windows 11", "Minimal", "dev.txt"],
   "Steam-WebKit": "webkit.css",
   "Patches": [
     { "MatchRegexString": "^Steam$", "TargetCss": "libraryroot.custom.css" },
@@ -14,7 +14,11 @@
     { "MatchRegexString": "Supernav$", "TargetCss": "base.css" },
     { "MatchRegexString": "^notificationtoasts_", "TargetCss": "base.css" },
     { "MatchRegexString": "^OverlayBrowser_Browser$", "TargetCss": "base.css" },
-    { "MatchRegexString": "^SP Overlay:", "TargetCss": "base.css" }
+    { "MatchRegexString": "^SP Overlay:", "TargetCss": "base.css" },
+    { "MatchRegexString": ".HoverPopup", "TargetCss": "base.css" },
+    { "MatchRegexString": ".ModalDialogBody", "TargetCss": "base.css" },
+    { "MatchRegexString": "^(?:Войти в Steam|Sign in to Steam|Bei Steam anmelden|Увійти до Steam)$", "TargetCss": "base.css" },
+    { "MatchRegexString": "^(?:SteamBrowser_Find|OverlayBrowser_.*_Find)$", "TargetCss": "base.css" }
   ],
   "Conditions": {
     "Акцент": {
@@ -32,8 +36,48 @@
         "Розовый": { "TargetCss": { "affects": [".*"], "src": "options/accent-pink.css" } }
       }
     },
+    "Прозрачность окна": {
+      "description": "Сквозь окна Steam видно размытый рабочий стол, как в приложениях Windows 11. Нужен плагин Millennium «Window Styler (DWMX)» и включённые эффекты прозрачности Windows (Параметры → Персонализация → Цвета). Без плагина ничего не меняется.",
+      "default": "yes",
+      "values": {
+        "yes": { "TargetCss": { "affects": [".*"], "src": "options/transparency.css" } },
+        "no": {}
+      }
+    },
+    "«Что нового» на главной": {
+      "description": "Полоса новостей игр над полками библиотеки.",
+      "default": "Показывать",
+      "values": {
+        "Показывать": {},
+        "Скрыть": { "TargetCss": { "affects": ["^Steam$"], "src": "options/hide-whats-new.css" } }
+      }
+    },
+    "Кнопка «Добавить новый раздел»": {
+      "description": "Кнопка между «Что нового» и полками. Новую полку можно добавить и из меню у названия полки.",
+      "default": "Показывать",
+      "values": {
+        "Показывать": {},
+        "Скрыть": { "TargetCss": { "affects": ["^Steam$"], "src": "options/hide-add-shelf.css" } }
+      }
+    },
+    "Строка адреса": {
+      "description": "Строка с адресом и кнопкой «Обновить» над страницами магазина и сообщества.",
+      "default": "Показывать",
+      "values": {
+        "Показывать": {},
+        "Скрыть": { "TargetCss": { "affects": ["^Steam$"], "src": "options/hide-url-bar.css" } }
+      }
+    },
+    "Раскладка": {
+      "description": "Как в Steam — вкладки Магазин, Библиотека, Сообщество и Профиль в шапке. Боковая панель — те же вкладки со значками в узкой панели слева, шапка в одну строку.",
+      "default": "Как в Steam",
+      "values": {
+        "Как в Steam": {},
+        "Боковая панель": { "TargetCss": { "affects": ["^Steam$"], "src": "options/layout-sidebar.css" } }
+      }
+    },
     "Скруглённые углы": {
-      "description": "Скругления dev.txt: блок 18, строка 14, элемент управления 11, подсказка 9.",
+      "description": "Скругления dev.txt: панель и карточка 8, строка, кнопка и подсказка 4.",
       "default": "yes",
       "values": {
         "yes": {},

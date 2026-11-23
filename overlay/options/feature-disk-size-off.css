@@ -1,0 +1,12 @@
+/*
+ * Theme setting (skin.json Conditions): «Размер на диске», Выкл. Tells the Arkada plugin not to draw the size
+ * on disk on a game's page (plugin/src/features.js reads --arkada-disk-size, plugin/src/disksize.js is
+ * stopped), and hides the one already drawn at once, before the plugin notices.
+ */
+:root:root {
+  --arkada-disk-size: off;
+}
+
+[data-arkada-disk-size] {
+  display: none !important;
+}

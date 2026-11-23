@@ -1,0 +1,522 @@
+/*
+ * Continues millennium.css (in order, see client/loader.js): Millennium pages redesign;
+ * Millennium Settings page-level layouts.
+ */
+
+/* The uppercase label: the toolbars' headings and the redesigned pages' section labels */
+.MillenniumSettings .se-mtool-label,
+.MillenniumSettings .se-mlabel {
+  font: var(--se-label-font);
+  letter-spacing: var(--se-label-spacing);
+  text-transform: uppercase;
+  color: var(--se-label-color);
+}
+
+/*
+ * The redesigned pages' pieces (Plugins, Updates, Logs), one of each:
+ * duotone icons, icon tiles, buttons, status chips, the version chip and the spinner.
+ */
+.MillenniumSettings .se-micon {
+  flex: none;
+  width: var(--se-icon-md);
+  height: var(--se-icon-md);
+}
+
+.MillenniumSettings .se-duo {
+  fill: currentColor;
+  fill-opacity: var(--se-icon-duo);
+}
+
+.MillenniumSettings .se-mtile {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: var(--se-tile);
+  height: var(--se-tile);
+  border-radius: var(--se-radius-md);
+  background: var(--se-surface-2);
+  box-shadow: var(--se-edge);
+  color: var(--se-text-dim);
+}
+
+.MillenniumSettings .se-mtile .se-micon {
+  width: var(--se-tile-icon);
+  height: var(--se-tile-icon);
+}
+
+.MillenniumSettings .se-mbtn {
+  all: unset;
+  box-sizing: border-box;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--se-space-2);
+  height: var(--se-field-h);
+  padding: 0 var(--se-space-4);
+  border-radius: var(--se-radius-md);
+  background: var(--se-surface-2);
+  box-shadow: var(--se-edge);
+  color: var(--se-text);
+  font: 700 var(--se-fs-base) / 1 var(--se-font);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--se-dur) var(--se-ease), color var(--se-dur) var(--se-ease);
+}
+
+.MillenniumSettings .se-mbtn .se-micon {
+  color: var(--se-text-dim);
+}
+
+.MillenniumSettings .se-mbtn:hover:not(:disabled) {
+  background: var(--se-hover);
+  color: var(--se-text-strong);
+}
+
+.MillenniumSettings .se-mbtn:active:not(:disabled) {
+  transform: scale(var(--se-press-scale));
+}
+
+.MillenniumSettings .se-mbtn:focus-visible {
+  outline: var(--se-focus-outline);
+  outline-offset: var(--se-focus-offset);
+}
+
+.MillenniumSettings .se-mbtn:disabled {
+  opacity: .55;
+  cursor: default;
+}
+
+.MillenniumSettings .se-mbtn[data-tone="primary"] {
+  background: var(--se-accent);
+  box-shadow: none;
+  color: var(--se-on-accent);
+}
+
+.MillenniumSettings .se-mbtn[data-tone="primary"] .se-micon {
+  color: currentColor;
+}
+
+.MillenniumSettings .se-mbtn[data-tone="primary"]:hover:not(:disabled) {
+  background: var(--se-accent-hover);
+  color: var(--se-on-accent);
+}
+
+.MillenniumSettings .se-mbtn[data-tone="ghost"] {
+  background: transparent;
+  box-shadow: none;
+  color: var(--se-text-muted);
+}
+
+.MillenniumSettings .se-mbtn[data-size="sm"] {
+  height: var(--se-control-h-sm);
+  padding: 0 var(--se-space-3);
+  border-radius: var(--se-radius-sm);
+  font-size: var(--se-fs-sm);
+}
+
+.MillenniumSettings .se-mbtn[data-size="icon"] {
+  width: var(--se-hit);
+  height: var(--se-hit);
+  padding: 0;
+  border-radius: var(--se-radius-sm);
+}
+
+/* A status chip: Up to date, Update available, Errors in log … */
+.MillenniumSettings .se-mchip {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--se-space-1);
+  height: 22px;
+  padding: 0 var(--se-space-2);
+  border-radius: var(--se-radius-xs);
+  background: var(--se-hairline);
+  color: var(--se-text-dim);
+  font: 700 var(--se-fs-xs) / 1 var(--se-font);
+  white-space: nowrap;
+}
+
+.MillenniumSettings .se-mchip .se-micon {
+  width: var(--se-icon-xs);
+  height: var(--se-icon-xs);
+}
+
+.MillenniumSettings .se-mchip[data-tone="ok"] {
+  background: color-mix(in srgb, var(--se-running) 14%, transparent);
+  color: color-mix(in srgb, var(--se-running), var(--se-white) 25%);
+}
+
+.MillenniumSettings .se-mchip[data-tone="accent"] {
+  background: var(--se-accent-tint);
+  color: var(--se-accent-hover);
+}
+
+.MillenniumSettings .se-mchip[data-tone="warning"] {
+  background: var(--se-gold-surface);
+  color: var(--se-gold-text);
+}
+
+.MillenniumSettings .se-mchip[data-tone="error"] {
+  background: color-mix(in srgb, var(--se-danger) 18%, transparent);
+  color: var(--se-danger-text);
+}
+
+.MillenniumSettings .se-mver {
+  flex: none;
+  padding: var(--se-space-half) var(--se-space-1);
+  border-radius: var(--se-radius-xs);
+  background: var(--se-hairline);
+  color: var(--se-text-muted);
+  font: 600 var(--se-fs-xs) / 1 var(--se-font);
+}
+
+/* The shared spinner (core/spinner.css, .se-spin-arc draws it), at icon size */
+.MillenniumSettings .se-mspin {
+  flex: none;
+  width: var(--se-icon-sm);
+  height: var(--se-icon-sm);
+}
+
+/*
+ * Millennium pages redesign
+ * The sidebar is left as it was; the pages get the
+ * canvas's layouts. client/settings/millennium/millennium-pages.js adds the toolbars, the Quick CSS editor,
+ * the Logs sources and marks General's About.
+ */
+[data-se-hide]:not(#se-none):not(#se-p2) {
+  display: none !important;
+}
+
+/*
+ * Millennium Settings page-level layouts (Themes grid, Plugins filter bar,
+ * inline Quick CSS editor, Logs source list, Updates cards, and General About card).
+ */
+.MillenniumSettings .MillenniumButtonsSection .DialogButton:not(:last-child):not([data-button-type="save"]):not(#se-none):not(#se-p2) {
+  background: var(--se-accent) !important;
+  color: var(--se-bg-ink) !important;
+  box-shadow: none !important;
+  padding: 0 var(--se-space-3) !important;
+}
+
+.MillenniumSettings .MillenniumButtonsSection .DialogButton:not(:last-child):not([data-button-type="save"]):hover:not(#se-none):not(#se-p2) {
+  filter: brightness(1.08);
+}
+
+.MillenniumSettings .MillenniumButtonsSection .DialogButton:not(:last-child):not([data-button-type="save"]) svg {
+  color: currentColor !important;
+}
+
+/* Toolbars: a heading or segments on the left, a filter on the right */
+.MillenniumSettings .se-mtool {
+  display: flex;
+  align-items: center;
+  gap: var(--se-space-3);
+  margin: var(--se-space-4) 0 0;
+  min-height: 32px;
+  grid-column: 1 / -1;
+}
+
+.MillenniumSettings .se-mtool-label {
+  padding-left: var(--se-space-1);
+}
+
+/* Themes' pager: previous, "1 of 2", next */
+.MillenniumSettings .se-mpager {
+  display: flex;
+  align-items: center;
+  gap: var(--se-space-2);
+  margin-left: auto;
+  font: 600 var(--se-fs-sm) / 1 var(--se-font);
+  color: var(--se-text-muted);
+}
+
+.MillenniumSettings .se-mpager[hidden] {
+  display: none;
+}
+
+/* The pager's buttons, and Brew Hub's Refresh beside them (compat/brew-hub/brew-hub.css): one
+   small square icon button */
+.MillenniumSettings :is(.se-mpager button, .se-bh-refresh) {
+  all: unset;
+  box-sizing: border-box;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--se-control-h-sm);
+  height: var(--se-control-h-sm);
+  border-radius: var(--se-radius-sm);
+  background: var(--se-surface-2);
+  color: var(--se-text-dim);
+  cursor: pointer;
+  transition: background var(--se-dur) var(--se-ease), color var(--se-dur) var(--se-ease);
+}
+
+/* The hit area out to --se-hit; the look stays */
+.MillenniumSettings :is(.se-mpager button, .se-bh-refresh)::before {
+  content: '';
+  position: absolute;
+  inset: calc((var(--se-control-h-sm) - var(--se-hit)) / 2);
+}
+
+.MillenniumSettings :is(.se-mpager button, .se-bh-refresh):hover:not(:disabled) {
+  background: var(--se-hover);
+  color: var(--se-text-strong);
+}
+
+.MillenniumSettings :is(.se-mpager button, .se-bh-refresh):active:not(:disabled) {
+  transform: scale(var(--se-press-scale));
+}
+
+.MillenniumSettings :is(.se-mpager button, .se-bh-refresh):focus-visible {
+  outline: var(--se-focus-outline);
+  outline-offset: var(--se-focus-offset);
+}
+
+.MillenniumSettings :is(.se-mpager button, .se-bh-refresh):disabled {
+  opacity: .4;
+  cursor: default;
+}
+
+.MillenniumSettings .se-mpager svg {
+  width: var(--se-icon-md);
+  height: var(--se-icon-md);
+}
+
+.MillenniumSettings .se-mfilter {
+  display: flex;
+  align-items: center;
+  gap: var(--se-search-gap);
+  flex: none;
+  height: var(--se-search-h);
+  width: 220px;
+  margin-left: auto;
+  padding: 0 var(--se-search-pad);
+  box-sizing: border-box;
+  border-radius: var(--se-search-radius);
+  background: var(--se-search-bg);
+  box-shadow: var(--se-search-edge);
+  color: var(--se-search-icon-color);
+  transition: box-shadow var(--se-dur) var(--se-ease);
+}
+
+.MillenniumSettings .se-mfilter:hover:not(:focus-within) {
+  box-shadow: var(--se-search-edge-hover);
+}
+
+.MillenniumSettings .se-mfilter:focus-within {
+  box-shadow: var(--se-search-edge-focus);
+}
+
+.MillenniumSettings .se-mfilter input:not(#se-none):not(#se-p2) {
+  all: unset;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  box-sizing: border-box;
+  color: var(--se-search-text);
+  font: var(--se-search-font);
+  cursor: text;
+  line-height: var(--se-search-h);
+}
+
+.MillenniumSettings .se-mfilter input::placeholder {
+  color: var(--se-search-placeholder) !important;
+  font-style: normal !important;
+}
+
+.MillenniumSettings .se-mfilter input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+
+/* Themes: the theme in use as a large card, the rest as a grid of cards */
+.MillenniumSettings [data-se-mill-page="themes"] .DialogBody:not(#se-none):not(#se-p2) {
+  --se-mtheme-art: 84px; /* a card's picture: two rows of cards fit the window under the theme in use */
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-rows: max-content;
+  gap: var(--se-space-3) !important;
+  align-items: stretch;
+  /* The page body fills the window; rows keep their own height instead of sharing it
+     (with one theme installed its card was stretched to the bottom). */
+  align-content: start !important;
+}
+
+.MillenniumSettings [data-se-mill-page="themes"] .DialogBody > :not(.MillenniumThemes_ThemeItem),
+.MillenniumSettings [data-se-mill-page="themes"] .DialogBody > .MillenniumThemes_ThemeItem[data-se-active] {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 980px) {
+  .MillenniumSettings [data-se-mill-page="themes"] .DialogBody:not(#se-none):not(#se-p2) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.MillenniumSettings [data-se-mill-page="themes"] .MillenniumThemes_ThemeItem:not(#se-none):not(#se-p2) {
+  display: grid !important;
+  margin: 0 !important;
+  min-height: 0 !important;
+  border: 0 !important;
+  border-radius: var(--se-radius-lg) !important;
+  background: var(--se-surface) !important;
+  background-image: none !important;
+  box-shadow: var(--se-edge) !important;
+}
+
+/* The image: the theme's header_image, else its initial */
+.MillenniumSettings [data-se-mill-page="themes"] .MillenniumThemes_ThemeItem[data-se-initial]::before {
+  content: attr(data-se-initial) !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  position: static !important;
+  grid-column: 1 / -1;
+  grid-row: 1;
+  width: auto !important;
+  height: var(--se-mtheme-art) !important;
+  margin: 0 !important;
+  border-radius: var(--se-radius-md);
+  background: var(--se-thumb, none) center / cover no-repeat, var(--se-field) !important;
+  box-shadow: var(--se-edge);
+  font: 800 var(--se-fs-4xl)/1 var(--se-font);
+  color: var(--se-text-faint) !important;
+  -webkit-mask: none !important;
+  mask: none !important;
+}
+
+.MillenniumSettings [data-se-mill-page="themes"] .MillenniumThemes_ThemeItem[data-se-thumb]::before {
+  content: '' !important;
+}
+
+.MillenniumSettings [data-se-mill-page="themes"] .MillenniumThemes_ThemeItem ._1W1to_azoBRG95oNAFpf9Q:not(#se-none):not(#se-p2) {
+  padding-left: 0 !important;
+}
+
+.MillenniumSettings [data-se-mill-page="themes"] .MillenniumThemes_ThemeItem > ._2tALpM7z8naXJ35Pp5fNAG:not(#se-none):not(#se-p2),
+.MillenniumSettings [data-se-mill-page="themes"] .MillenniumThemes_ThemeItem > .PSZtxj2h3MlyYv-c9dgke:not(#se-none):not(#se-p2) {
+  margin: 0 !important;
+  padding: 0 !important;
+  max-width: none !important;
+  min-width: 0 !important;
+}
+
+/*
+ * A card: the picture, then the name and description across the card, then its buttons on a row
+ * of their own, so names are not cut short by the buttons.
+ */
+.MillenniumSettings [data-se-mill-page="themes"] .MillenniumThemes_ThemeItem:not([data-se-active]):not(#se-none):not(#se-p2) {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: var(--se-mtheme-art) auto auto;
+  gap: var(--se-space-2) !important;
+  align-items: center !important;
+  padding: var(--se-space-2) !important;
+}
+
+.MillenniumSettings [data-se-mill-page="themes"] .MillenniumThemes_ThemeItem:not([data-se-active]):hover:not(#se-none):not(#se-p2) {
+  box-shadow: var(--se-edge-accent) !important;
+}
+
+.MillenniumSettings [data-se-mill-page="themes"] .MillenniumThemes_ThemeItem:not([data-se-active]) > ._2tALpM7z8naXJ35Pp5fNAG {
+  grid-column: 1;
+  grid-row: 2;
+  padding-left: var(--se-space-1) !important;
+}
+
+.MillenniumSettings [data-se-mill-page="themes"] .MillenniumThemes_ThemeItem:not([data-se-active]) > .PSZtxj2h3MlyYv-c9dgke {
+  grid-column: 1;
+  grid-row: 3;
+  justify-self: start;
+}
+
+/* A card on another page of the pager (the card's own display: grid would otherwise win) */
+.MillenniumSettings [data-se-mill-page="themes"] .MillenniumThemes_ThemeItem[data-se-hide]:not(#se-none):not(#se-p2):not(#se-p3) {
+  display: none !important;
+}
+
+.MillenniumSettings [data-se-mill-page="themes"] .MillenniumThemes_ThemeItem:not([data-se-active]) .MillenniumThemes_ThemeLabel:not(#se-none):not(#se-p2) {
+  display: block !important;
+  flex-wrap: nowrap !important;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.MillenniumSettings [data-se-mill-page="themes"] .MillenniumThemes_ThemeItem:not([data-se-active]) .MillenniumThemes_ThemeLabel > .MillenniumItem_Version:not(#se-none):not(#se-p2) {
+  display: none !important;
+}
+
+.MillenniumSettings [data-se-mill-page="themes"] .MillenniumThemes_ThemeItem:not([data-se-active]) .MillenniumThemes_Author {
+  display: none !important;
+}
+
+.MillenniumSettings [data-se-mill-page="themes"] .MillenniumThemes_ThemeItem:not([data-se-active]) .MillenniumThemes_Description {
+  white-space: nowrap !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The theme in use */
+.MillenniumSettings [data-se-mill-page="themes"] .MillenniumThemes_ThemeItem[data-se-active]:not(#se-none):not(#se-p2) {
+  order: -1;
+  grid-template-columns: 276px minmax(0, 1fr);
+  grid-template-rows: auto 1fr auto;
+  column-gap: var(--se-space-5) !important;
+  row-gap: var(--se-space-3) !important;
+  align-items: start !important;
+  margin: var(--se-space-4) 0 0 !important;
+  padding: var(--se-space-4) !important;
+  box-shadow: var(--se-edge-accent) !important;
+}
+
+.MillenniumSettings [data-se-mill-page="themes"] .MillenniumThemes_ThemeItem[data-se-active][data-se-initial]::before {
+  grid-column: 1;
+  grid-row: 1 / -1;
+  height: 156px !important;
+  font-size: 56px;
+  color: var(--se-accent) !important;
+}
+
+.MillenniumSettings [data-se-mill-page="themes"] .MillenniumThemes_ThemeItem[data-se-active] > ._2tALpM7z8naXJ35Pp5fNAG {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  padding-top: var(--se-space-1) !important;
+}
+
+.MillenniumSettings [data-se-mill-page="themes"] .MillenniumThemes_ThemeItem[data-se-active] > .PSZtxj2h3MlyYv-c9dgke {
+  grid-column: 2;
+  grid-row: 3;
+  justify-self: start;
+}
+
+.MillenniumSettings [data-se-mill-page="themes"] .MillenniumThemes_ThemeItem[data-se-active] .MillenniumThemes_ThemeLabel:not(#se-none):not(#se-p2) {
+  font: 800 var(--se-fs-3xl)/28px var(--se-font) !important;
+}
+
+.MillenniumSettings [data-se-mill-page="themes"] .MillenniumThemes_ThemeItem[data-se-active] .MillenniumThemes_ThemeLabel > .MillenniumItem_Version {
+  font-size: var(--se-fs-xs) !important;
+}
+
+.MillenniumSettings [data-se-mill-page="themes"] .MillenniumThemes_ThemeItem[data-se-active] ._1W1to_azoBRG95oNAFpf9Q:not(#se-none):not(#se-p2) {
+  display: flex !important;
+  flex-direction: column-reverse;
+  gap: var(--se-space-2);
+  margin-top: var(--se-space-1) !important;
+}
+
+.MillenniumSettings [data-se-mill-page="themes"] .MillenniumThemes_ThemeItem[data-se-active] .MillenniumThemes_Description:not(#se-none) {
+  white-space: normal !important;
+  max-width: 480px;
+  color: var(--se-text-dim);
+  font-size: var(--se-fs-md);
+}
+
+.MillenniumSettings [data-se-mill-page="themes"] .MillenniumThemes_ThemeItem[data-se-active] .MillenniumThemes_Author:not(#se-none) {
+  color: var(--se-text-muted);
+  font-size: var(--se-fs-base);
+}
+
+/* Plugins: the toolbar sits right on the list */
+.MillenniumSettings [data-se-mill-page="plugins"] .se-mtool {
+  margin-bottom: 0;
+}

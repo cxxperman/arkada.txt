@@ -1,54 +1,980 @@
-/* arkada.txt — главное окно Steam: шапка, библиотека, страница игры.
- * Основа (переменные, кнопки, диалоги, меню) — в base.css. */
+/* Сгенерировано tools/build.js из theme/src/libraryroot.custom.css и steam-classes.json (клиент 1794536281, 2026-11-13). Руками не править. */
+/* arkada.txt — главное окно Steam: каркас окна, шапка, библиотека, страница игры, загрузки, нижняя панель.
+ * Основа (переменные, кнопки, диалоги, меню, подсказки) — в base.css.
+ *
+ * Классы вида .\@PlayBar — читаемые имена хешированных классов Steam; хеши подставляет tools/build.js
+ * из steam-classes.json. Где имя есть в нескольких модулях, после него названо ещё одно имя того же
+ * модуля: .\@TopBar\@URLBar — «TopBar из модуля, где есть URLBar».
+ * Специфичность селекторов повторяет специфичность правил самого Steam (их видно в <Steam>\steamui\css),
+ * поэтому !important здесь почти не нужен.
+ *
+ * Каркас как у приложения Windows 11 (WinUI 3): окно — фон Mica (спокойный тон с едва заметным оттенком
+ * акцента); список игр, основная область и нижняя панель — слои Fluent, чуть светлее фона, с тонкой
+ * обводкой 1px и зазором --arkada-gap от краёв окна и друг от друга. Тяжёлых теней и свечений нет;
+ * акриловое размытие — только у всплывающих элементов (меню, подсказки, выпадающие списки — base.css).
+ * Все крупные контейнеры внутри слоёв прозрачные. */
 
 @import url("./base.css");
 
+:root {
+  --arkada-gap: 8px;
+  /* Слой Fluent поверх Mica: белый 4% по фону окна и обводка ~8% */
+  --arkada-layer: color-mix(in srgb, white 4%, transparent);
+  --arkada-layer-solid: color-mix(in srgb, var(--dt-bg), white 6%);
+  --arkada-layer-edge: inset 0 0 0 1px var(--dt-separator);
+  /* Карточка на слое (раздел страницы игры, «Итоги игры», «Избранное») */
+  --arkada-card: color-mix(in srgb, white 3%, transparent);
+  /* Индикатор выбранного пункта (NavigationView / ListView): 3px, скругление */
+  --arkada-indicator: 3px;
+}
+
+/* ═════════ Каркас окна ═════════ */
 html.MillenniumWindow_MainSteamWindow body { background: var(--dt-bg); }
+._1ENHEsrSLcTRtPQFl1F-wL._1DvwQt0JN-Ogp_4tVZdkzX { background: var(--arkada-window-bg); }
 
-/* ═════════ ХРУПКОЕ: каркас главного окна ═════════
- * Большие поверхности библиотеки Steam красит напрямую, цветом в хешированном классе: ни переменных,
- * ни читаемых имён у них нет. Здесь ровно девять таких классов — по одному на поверхность — и только
- * цвет, кромка и скругление: размеры и раскладку тема не трогает, поэтому устаревший класс ничего не ломает,
- * а лишь возвращает этой поверхности родной цвет Steam.
- * Что есть что, сверено с css клиента на день сборки темы (см. README, «Что не проверено»). */
+/* Полоска 12px между шапкой и библиотекой — прозрачный зазор */
+.RGNMWtyj73_-WdhflrmuY ._2CmrnGY-Amtd83ScJkFvx2 {
+  min-height: var(--arkada-gap);
+  height: var(--arkada-gap);
+  background: transparent;
+  box-shadow: none;
+}
+.RGNMWtyj73_-WdhflrmuY._3WJCt_OkjPA6npxOtguSt5 ._2CmrnGY-Amtd83ScJkFvx2,
+.RGNMWtyj73_-WdhflrmuY._3WJCt_OkjPA6npxOtguSt5 ._2CmrnGY-Amtd83ScJkFvx2.Maximized,
+.Maximized .RGNMWtyj73_-WdhflrmuY._3WJCt_OkjPA6npxOtguSt5 ._2CmrnGY-Amtd83ScJkFvx2 { box-shadow: none; }
 
-/* Шапка окна: меню Steam, навигация, кнопки окна */
-._3Z7VQ1IMk4E3HsHvrkLNgo {
-  background: var(--dt-bg);
-  box-shadow: inset 0 -1px 0 var(--dt-separator);
+/* Библиотека: список слева и основная область — две панели с зазором */
+._3xRRJfD2xy95i9NhJxLTp0,
+._3ub8asusiEC9WIdLh7pGDd {
+  box-sizing: border-box;
+  padding: 0 var(--arkada-gap) var(--arkada-gap);
+}
+._9sPoVBFyE_vE87mnZJ5aB > ._3x1HklzyDs4TEjACrRO2tB,
+._298_NBin_2wV9a3P1Smj5i > ._3x1HklzyDs4TEjACrRO2tB {
+  border-radius: var(--arkada-r-block);
+  background: var(--arkada-layer);
+  background-image: none;
+  box-shadow: var(--arkada-layer-edge);
+}
+._3BFcmjAaMyP6GTPwc0VyWi,
+._1iWOJQlrzyvbZvZo_x2KA3 {
+  border-radius: var(--arkada-r-block);
+  background: var(--arkada-layer);
+  box-shadow: var(--arkada-layer-edge);
+}
+/* Содержимое основной области обрезается по скруглению панели (overflow: hidden у Steam уже стоит) */
+._2Dd4T78PcCTUVgOtDGFY5j,
+._1PY8F7ZGiEdmM7634_AnUK {
+  border-radius: var(--arkada-r-block);
+  background: transparent;
+}
+
+/* Перегородка между панелями: сам зазор, при наведении — тонкая линия посередине */
+._276E6ijBpjMA2_iTxNhhjc,
+._2sl_ld4h49_4MhwbZsqG5Y {
+  width: var(--arkada-gap);
+  min-width: var(--arkada-gap);
+  background: transparent;
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out);
+}
+._276E6ijBpjMA2_iTxNhhjc._2g5K_hJWc7jVo81zuejhk2:hover,
+._2sl_ld4h49_4MhwbZsqG5Y._1fn9cBVE8vtlKR4cGUNx2a:hover {
+  background: linear-gradient(to right, transparent 3px, var(--dt-fill-2) 3px, var(--dt-fill-2) 5px, transparent 5px);
+}
+._2ZP8eOoQ1-pME4-pF91qSt ._276E6ijBpjMA2_iTxNhhjc,
+._37s6gm02-LeQnuxiAIuliR ._2sl_ld4h49_4MhwbZsqG5Y {
+  background: linear-gradient(to right, transparent 3px, var(--arkada-accent) 3px, var(--arkada-accent) 5px, transparent 5px);
+}
+
+/* ═════════ Шапка окна ═════════
+ * TopBar = TitleBar (меню Steam/Вид/…, место для перетаскивания, кнопки аккаунта, кнопки окна)
+ *        + SuperNavBar (назад/вперёд, вкладки Магазин/Библиотека/Сообщество/Профиль). */
+._3Z7VQ1IMk4E3HsHvrkLNgo,
+._3Z7VQ1IMk4E3HsHvrkLNgo.Maximized,
+.Maximized ._3Z7VQ1IMk4E3HsHvrkLNgo {
+  background: transparent;
+  box-shadow: none;
 }
 /* Светящаяся линия под шапкой у активного окна */
 ._3pXasCUulX4jjqO79s4q_F { display: none; }
-/* Строка адреса над страницами магазина и сообщества */
-._1bGewp3tfzqAF6fVTFFUOz .UkR3sY319PuaUNuUWks2K {
-  background: var(--dt-bg);
-  box-shadow: none;
+
+/* Меню Steam, Вид, Друзья, Игры, Справка */
+._2UyOBeiSdBayaFdRa39N2O {
+  margin-block: 4px;
+  padding: 2px 8px;
+  border-radius: var(--arkada-r-tip);
+  color: var(--dt-label-2);
+  transition: background var(--dt-dur-fast) var(--dt-ease-out), color var(--dt-dur-fast) var(--dt-ease-out);
+}
+._2UyOBeiSdBayaFdRa39N2O:hover:not(._2hcblpUHuN5CYOoq6eU2y0) {
+  background: var(--dt-fill);
+  color: var(--dt-label);
+}
+._2UyOBeiSdBayaFdRa39N2O._2hcblpUHuN5CYOoq6eU2y0 { color: var(--dt-label-3); }
+
+/* Кнопки справа в шапке: объявления, уведомления, аккаунт с кошельком — стекло, без синих плашек */
+._5wILZhsLODVwGfcJ0hKmJ,
+.RtSv39ZoBOySnb8XQ5hJf._3qhGkQ5qLVNQQ-J2-uPoHt,
+.RtSv39ZoBOySnb8XQ5hJf._9YK5IY219Pm_F53DAxyYp,
+._3yD46y5pd3zOGR7CzKs0mC {
+  border-radius: var(--arkada-r-tip);
+  background-color: var(--dt-fill);
+  color: var(--dt-label-2);
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out), color var(--dt-dur-fast) var(--dt-ease-out);
+}
+._5wILZhsLODVwGfcJ0hKmJ:hover,
+._3yD46y5pd3zOGR7CzKs0mC:hover {
+  background-color: var(--dt-fill-2);
+  color: var(--dt-label);
+}
+._5wILZhsLODVwGfcJ0hKmJ._1oEwirQksXfZ-3RWWslbAR,
+.RtSv39ZoBOySnb8XQ5hJf._3L1c8C0o_xXzPy26aoLBFd {
+  border-radius: var(--arkada-r-tip);
+  background-color: var(--arkada-accent-soft);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--arkada-accent) 45%, transparent);
+  color: var(--dt-label);
+}
+._5wILZhsLODVwGfcJ0hKmJ._1oEwirQksXfZ-3RWWslbAR:hover,
+.RtSv39ZoBOySnb8XQ5hJf._3L1c8C0o_xXzPy26aoLBFd:not(._1QQWjaXmb1eTHZpeIhQA_5):hover {
+  background-color: color-mix(in srgb, var(--arkada-accent) 36%, transparent);
+}
+._3yD46y5pd3zOGR7CzKs0mC ._2jphjrSifC6orDT4g_7Wd { color: var(--dt-label-3); }
+._3yD46y5pd3zOGR7CzKs0mC.ingame { background-color: color-mix(in srgb, var(--dt-green) 24%, transparent); }
+._2Szzh5sKyGgnLUR870zbDE:hover { color: var(--dt-label); }
+
+/* Вторая строка шапки — компактнее */
+._3Z3ohQ8-1NKnCZkbS6fvy {
+  height: 34px;
+  min-height: 34px;
+  padding: 0 0 0 var(--arkada-gap);
 }
 
-/* Левая колонка библиотеки и её верхняя строка */
-._3x1HklzyDs4TEjACrRO2tB {
-  background: var(--arkada-step-1);
-  background-image: none;
+/* Назад / вперёд */
+._25lBLzuVeYAUG279up4xP8 {
+  border-radius: var(--arkada-r-tip);
+  color: var(--dt-label-3);
+  transition: color var(--dt-dur-fast) var(--dt-ease-out), background-color var(--dt-dur-fast) var(--dt-ease-out);
 }
-._2TKEazUUS3TlniZfpc8OOe {
+._25lBLzuVeYAUG279up4xP8._1LYTHQzcI1u6tcxbbcc5V3:hover { color: var(--dt-label); background-color: var(--dt-fill); }
+._25lBLzuVeYAUG279up4xP8._2cO0HdvLEGAdhosLekWsmo { color: var(--dt-fill-2); }
+
+/* Вкладки Магазин / Библиотека / Сообщество / Профиль — как верхний NavigationView в WinUI:
+ * мягкая заливка при наведении и у выбранной, под выбранной — короткая акцентная полоска 3px. */
+._2D64jIEK7wpUR_NlObDW76 ._7AlhCx3XGzBeIrQaCneUD,
+._2D64jIEK7wpUR_NlObDW76 ._7AlhCx3XGzBeIrQaCneUD:first-child,
+._2D64jIEK7wpUR_NlObDW76 ._7AlhCx3XGzBeIrQaCneUD:last-child {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 2px;
+  box-sizing: border-box;
+  font-family: var(--dt-font-text);
+  font-size: var(--dt-size-body);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  -webkit-app-region: no-drag;
+}
+._2D64jIEK7wpUR_NlObDW76 ._7AlhCx3XGzBeIrQaCneUD:nth-child(1 of ._7AlhCx3XGzBeIrQaCneUD) { margin-inline-start: 6px; }
+._2D64jIEK7wpUR_NlObDW76 ._7AlhCx3XGzBeIrQaCneUD ._19axKcqYRuaJ8vdYKYmtTQ {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 30px;
+  max-width: 200px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  border-radius: var(--arkada-r-control);
+  color: var(--dt-label-2);
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out), color var(--dt-dur-fast) var(--dt-ease-out);
+}
+._7AlhCx3XGzBeIrQaCneUD:hover:not(._2cO0HdvLEGAdhosLekWsmo) ._19axKcqYRuaJ8vdYKYmtTQ {
+  color: var(--dt-label);
+  text-shadow: none;
+  background-color: var(--dt-fill);
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out), color var(--dt-dur-fast) var(--dt-ease-out);
+}
+._7AlhCx3XGzBeIrQaCneUD:active:not(._2cO0HdvLEGAdhosLekWsmo) ._19axKcqYRuaJ8vdYKYmtTQ {
+  color: var(--dt-label-2);
+  background-color: var(--dt-fill-press);
+}
+._7AlhCx3XGzBeIrQaCneUD._1gqEjB5QsKT_NftD1dEsdZ:not(._2cO0HdvLEGAdhosLekWsmo) ._19axKcqYRuaJ8vdYKYmtTQ {
+  color: var(--dt-label);
+  text-shadow: none;
+  font-weight: 400;
+  background-color: var(--dt-fill);
+}
+/* Индикатор выбранной вкладки: полоска Steam, сжатая до 16×3 по центру низа */
+._7AlhCx3XGzBeIrQaCneUD._1gqEjB5QsKT_NftD1dEsdZ:not(._2cO0HdvLEGAdhosLekWsmo) ._19axKcqYRuaJ8vdYKYmtTQ::after {
+  position: absolute;
+  left: 50%;
+  bottom: 1px;
+  width: 16px;
+  height: var(--arkada-indicator);
+  margin: 0 0 0 -8px;
+  border-radius: 2px;
+  background: var(--arkada-accent);
+  animation: arkada-indicator-in var(--dt-dur-base) var(--dt-ease-out);
+}
+@keyframes arkada-indicator-in { from { transform: scaleX(0.3); opacity: 0; } }
+._7AlhCx3XGzBeIrQaCneUD._2cO0HdvLEGAdhosLekWsmo ._19axKcqYRuaJ8vdYKYmtTQ { color: var(--dt-label-3); }
+
+/* Строка адреса над страницами магазина и сообщества */
+._1bGewp3tfzqAF6fVTFFUOz .UkR3sY319PuaUNuUWks2K {
+  background: transparent;
+  box-shadow: inset 0 -1px 0 var(--dt-separator);
+}
+._1bGewp3tfzqAF6fVTFFUOz .UkR3sY319PuaUNuUWks2K ._3izqEKa-zuPIrUDSm1bRvf { color: var(--dt-label-3); }
+._1bGewp3tfzqAF6fVTFFUOz .UkR3sY319PuaUNuUWks2K ._3KaB94Jl4r0hFkthDPJy09:hover {
+  background: var(--dt-fill);
+  border-radius: var(--arkada-r-tip);
+  color: var(--dt-label);
+}
+._2m_orETo6AghzAnc0sISCt { color: var(--dt-label-3); }
+
+/* ═════════ Левый список библиотеки ═════════ */
+._2TKEazUUS3TlniZfpc8OOe,
+._2TKEazUUS3TlniZfpc8OOe.Maximized,
+.Maximized ._2TKEazUUS3TlniZfpc8OOe {
+  padding: 8px 8px 2px;
   background: none;
   box-shadow: none;
 }
-/* Кнопка «Главная» */
+
+/* Кнопка «Главная» и кнопка коллекций — нейтральное стекло, выбранная чуть светлее и с точкой акцента */
 ._3pSPluBgf0NeR1kkCLWMhR {
   border: 1px solid var(--dt-edge);
   border-top-color: var(--dt-edge-top);
   border-radius: var(--arkada-r-control);
-  background: var(--dt-glass);
+  background-color: var(--dt-fill);
+  background-image: none;
+  color: var(--dt-label);
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out), transform var(--dt-dur-fast) var(--dt-ease-out);
+}
+._3pSPluBgf0NeR1kkCLWMhR:hover { background-color: var(--dt-fill-2); }
+._3pSPluBgf0NeR1kkCLWMhR:active { transform: scale(0.98); transition-duration: var(--dt-dur-press); }
+._3pSPluBgf0NeR1kkCLWMhR.eNLOx4LVceeMwRvTVWh3 {
+  background-color: var(--dt-fill-2);
+  border-color: var(--dt-edge-top);
+}
+._3pSPluBgf0NeR1kkCLWMhR ._1ooROmAgkhoBH_o65yl9dJ { opacity: 0.5; }
+._3pSPluBgf0NeR1kkCLWMhR:hover ._3O48LaKWcabKx07xdrt1TH { color: var(--dt-label); }
+._3pSPluBgf0NeR1kkCLWMhR ._2tyaVs9BpqcW068aaOrO56 { background-color: var(--dt-label-3); border-radius: 2px; }
+._3pSPluBgf0NeR1kkCLWMhR:hover ._2tyaVs9BpqcW068aaOrO56,
+._3pSPluBgf0NeR1kkCLWMhR.eNLOx4LVceeMwRvTVWh3 ._2tyaVs9BpqcW068aaOrO56 { background-color: var(--dt-label); }
+
+/* Выпадающий список вида: «Игры и программы» */
+._1ZS_xta5HMXzR8JgxDH6n7 { padding-inline: 2px; }
+._1ZS_xta5HMXzR8JgxDH6n7 ._2PF_m-I5yte3WnQhpcz8RC {
+  border: 0;
+  border-radius: var(--arkada-r-control);
+  background-color: var(--dt-fill);
+  color: var(--dt-label-2);
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out), color var(--dt-dur-fast) var(--dt-ease-out);
+}
+._1ZS_xta5HMXzR8JgxDH6n7 ._2PF_m-I5yte3WnQhpcz8RC:hover {
+  background-color: var(--dt-fill-2);
   color: var(--dt-label);
 }
-._3pSPluBgf0NeR1kkCLWMhR:hover { background: var(--dt-glass-hover); }
-/* Поиск по библиотеке */
+._1ZS_xta5HMXzR8JgxDH6n7 ._2PF_m-I5yte3WnQhpcz8RC ._15aGnszAf3gHD-PFdJBoFD polygon { fill: var(--dt-label-3); }
+
+/* Поиск */
 ._20QAC4WMXm8qFE8waUT5oo {
+  margin-inline: 8px;
   border-radius: var(--arkada-r-control);
-  background: var(--dt-fill);
+  background-color: var(--dt-fill);
+  box-shadow: inset 0 0 0 1px var(--dt-edge);
+  transition: box-shadow var(--dt-dur-fast) var(--dt-ease-out), background-color var(--dt-dur-fast) var(--dt-ease-out);
+}
+._20QAC4WMXm8qFE8waUT5oo:focus-within {
+  background-color: var(--dt-fill-2);
+  box-shadow: inset 0 0 0 1px var(--arkada-accent);
+}
+._20QAC4WMXm8qFE8waUT5oo ._12vo5L1hsNGdao6_ssuirS { color: var(--dt-label); border-radius: var(--arkada-r-control); }
+._20QAC4WMXm8qFE8waUT5oo ._12vo5L1hsNGdao6_ssuirS .DialogTextInputBase {
+  background-color: transparent !important; /* base.css красит все поля с !important; здесь поле внутри своей рамки */
+  box-shadow: none !important;
+}
+._20QAC4WMXm8qFE8waUT5oo ._12vo5L1hsNGdao6_ssuirS .DialogTextInputBase:hover {
+  background-color: transparent;
+  box-shadow: none;
 }
 
-/* Главная библиотеки и страница игры */
-._2Dd4T78PcCTUVgOtDGFY5j { background: var(--dt-bg); }
-._2l416KfEtI4CL0mCUEmOBw { background-color: var(--dt-bg); }
+/* Полоса фильтров: «Недавние», вид, «Готовые к игре», «Загруженные» */
+._1ZS_xta5HMXzR8JgxDH6n7 ._1PgAonvorr0o_NMxNKiDFU ._3mzKdQXht__YHo6PX1LmB6 {
+  border-radius: var(--arkada-r-tip);
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out);
+}
+._1ZS_xta5HMXzR8JgxDH6n7 ._1PgAonvorr0o_NMxNKiDFU ._3mzKdQXht__YHo6PX1LmB6:hover { background-color: var(--dt-fill); }
+
+/* Заголовки коллекций и групп в списке — Caption 12, полужирный, приглушённый (как группы в списках WinUI) */
+._2sYIghGVXJr6tsQVvcryy8 {
+  border-radius: var(--arkada-r-tip);
+  border-color: transparent;
+  background: none;
+  color: var(--dt-label-3);
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out);
+}
+._2sYIghGVXJr6tsQVvcryy8._2zGph-MSF37bUmk_Qlu_XG { background-color: var(--dt-fill); }
+._2sYIghGVXJr6tsQVvcryy8.sXMOsx8OIRalBMxO9yFY5 {
+  background: var(--dt-fill-2);
+  box-shadow: none;
+}
+._3cV3O8FnPQqpJO5kIMUlLX { color: var(--dt-label-3); }
+._3cV3O8FnPQqpJO5kIMUlLX svg { fill: var(--dt-label-3); }
+._3cV3O8FnPQqpJO5kIMUlLX:hover ._2mZ8LlvoUiyeEUtIWuTri { color: var(--dt-label); }
+._2mZ8LlvoUiyeEUtIWuTri {
+  font-size: var(--dt-size-caption);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--dt-label-3);
+}
+._29uten9Yy8q-n7woDEOXVF { color: var(--dt-label-3); opacity: 0.7; }
+
+/* Строки игр — как ListView в WinUI: скругление, мягкая заливка при наведении, у выбранной — заливка
+ * и короткая вертикальная акцентная полоска слева.
+ * Цвета состояний — из токенов: запущенная зелёная, обновляется — акцент, не установлена — тусклая */
+._2-O4ZG0KrnSrzISHBKctFQ {
+  position: relative;
+  margin-inline: 6px;
+  font-size: var(--dt-size-body);
+  border-radius: var(--arkada-r-tip);
+  border-color: transparent;
+  color: var(--dt-label-2);
+  transition: background-color var(--dt-dur-press) var(--dt-ease-out), color var(--dt-dur-press) var(--dt-ease-out);
+}
+._2-O4ZG0KrnSrzISHBKctFQ:hover,
+._2-O4ZG0KrnSrzISHBKctFQ._3cMVyOc-9F9Jvp3uKF7_xj {
+  background-color: var(--dt-fill);
+  border-radius: var(--arkada-r-tip);
+  color: var(--dt-label);
+}
+._1UBpAXP408Ez_L_mXhW5Q9._2-O4ZG0KrnSrzISHBKctFQ,
+._1UBpAXP408Ez_L_mXhW5Q9 ._2-O4ZG0KrnSrzISHBKctFQ {
+  background-color: var(--dt-fill-2);
+  box-shadow: none;
+}
+._1UBpAXP408Ez_L_mXhW5Q9._2-O4ZG0KrnSrzISHBKctFQ::before,
+._1UBpAXP408Ez_L_mXhW5Q9 ._2-O4ZG0KrnSrzISHBKctFQ::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 50%;
+  width: var(--arkada-indicator);
+  height: 14px;
+  margin-top: -7px;
+  border-radius: 2px;
+  background: var(--arkada-accent);
+}
+._1UBpAXP408Ez_L_mXhW5Q9._2-O4ZG0KrnSrzISHBKctFQ:hover,
+._1UBpAXP408Ez_L_mXhW5Q9._2-O4ZG0KrnSrzISHBKctFQ._3cMVyOc-9F9Jvp3uKF7_xj,
+._1UBpAXP408Ez_L_mXhW5Q9 ._2-O4ZG0KrnSrzISHBKctFQ:hover,
+._1UBpAXP408Ez_L_mXhW5Q9 ._2-O4ZG0KrnSrzISHBKctFQ._3cMVyOc-9F9Jvp3uKF7_xj {
+  background-color: color-mix(in srgb, white 11%, transparent);
+}
+._2-O4ZG0KrnSrzISHBKctFQ._1UBpAXP408Ez_L_mXhW5Q9._2ws8DONH9fxQjPXEmRpujE { color: var(--dt-label); }
+._3km84Vscc0uS91f0RN_30C:hover,
+._3km84Vscc0uS91f0RN_30C._2-O4ZG0KrnSrzISHBKctFQ._3cMVyOc-9F9Jvp3uKF7_xj { background-color: var(--dt-fill-2); }
+._2-O4ZG0KrnSrzISHBKctFQ._2ws8DONH9fxQjPXEmRpujE { color: var(--dt-label-2); }
+._2-O4ZG0KrnSrzISHBKctFQ._2ws8DONH9fxQjPXEmRpujE:hover { color: var(--dt-label); }
+._2-O4ZG0KrnSrzISHBKctFQ._5YTBr7WwIfzVU_3nUtAph { color: var(--dt-label-3); }
+._2-O4ZG0KrnSrzISHBKctFQ._5YTBr7WwIfzVU_3nUtAph:hover,
+._2-O4ZG0KrnSrzISHBKctFQ._5YTBr7WwIfzVU_3nUtAph._3cMVyOc-9F9Jvp3uKF7_xj,
+._2-O4ZG0KrnSrzISHBKctFQ._1UBpAXP408Ez_L_mXhW5Q9._5YTBr7WwIfzVU_3nUtAph,
+._1UBpAXP408Ez_L_mXhW5Q9 ._2-O4ZG0KrnSrzISHBKctFQ._5YTBr7WwIfzVU_3nUtAph { color: var(--dt-label-2); }
+._2-O4ZG0KrnSrzISHBKctFQ._10GdoB3tQXXGFToQ3yY_SK { color: var(--dt-green); }
+._2-O4ZG0KrnSrzISHBKctFQ._10GdoB3tQXXGFToQ3yY_SK ._3uk3F1BmAJQR6rl1TPcaif { color: var(--dt-green); }
+._2-O4ZG0KrnSrzISHBKctFQ._1LVQp3h_vGOZ8TuDUEge0k,
+._2-O4ZG0KrnSrzISHBKctFQ._1UBpAXP408Ez_L_mXhW5Q9._1LVQp3h_vGOZ8TuDUEge0k,
+._1UBpAXP408Ez_L_mXhW5Q9 ._2-O4ZG0KrnSrzISHBKctFQ._1LVQp3h_vGOZ8TuDUEge0k {
+  color: var(--arkada-accent-hi);
+  font-weight: 400;
+}
+/* Значок игры в строке — со скруглением */
+._1vO6BoiVslZgs1kqDGdUs8 .ga1hyw11cdBVodrCAidPF { border-radius: 5px; overflow: hidden; }
+
+/* ═════════ Главная библиотеки ═════════ */
+._2gSXCB6PbOlMxslr8hm6dm,
+._3Sb2o_mQ30IDRh0C72QUUu {
+  background: transparent;
+  background-image: none;
+}
+/* Содержимое главной — карточки на слое (как режим Panel у Zehn, но в виде Windows 11):
+ * «Что нового» и каждая полка — отдельная карточка со скруглением 8 и обводкой 1px */
+._17uEBe5Ri8TMsnfELvs8-N {
+  height: auto;
+  margin: 12px 12px 0;
+  padding: 14px 16px 12px;
+  border-radius: var(--arkada-r-block);
+  background: var(--arkada-card);
+  background-image: none;
+  box-shadow: var(--arkada-layer-edge);
+}
+._2tC_c87MH67xQM7Y0pVyXm {
+  margin-bottom: 12px;
+  padding: 10px 8px 4px;
+  border-radius: var(--arkada-r-block);
+  background: var(--arkada-card);
+  box-shadow: var(--arkada-layer-edge);
+}
+._17uEBe5Ri8TMsnfELvs8-N ._2hfibYuzyMOQ0sj2egsHh0 {
+  font-family: var(--dt-font-display);
+  font-size: var(--dt-size-title);
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--dt-label);
+}
+/* Заголовки полок: «Недавние игры», «Все игры», свои полки */
+._1NCHRjqdjqGE3JbG4b0rLF ._1QOqxv1IVU4TSd_6unnCY0 { color: var(--dt-label); }
+._1NCHRjqdjqGE3JbG4b0rLF ._1QOqxv1IVU4TSd_6unnCY0 ._1p4KV0LZCs0tnDlcOahdCN {
+  font-family: var(--dt-font-display);
+  font-size: var(--dt-size-title);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+._1NCHRjqdjqGE3JbG4b0rLF ._1QOqxv1IVU4TSd_6unnCY0 ._1MYMREA5xYFsdsMnorH64r {
+  height: 1px;
+  background-color: var(--dt-separator);
+}
+._23SnllqT_AqZ1C_QHcNQ4Z { color: var(--dt-label); }
+._23SnllqT_AqZ1C_QHcNQ4Z ._1PhK8scyztOxjJwWUpkiLJ {
+  height: 1px;
+  border-radius: 1px;
+  background-color: var(--dt-separator);
+}
+._23SnllqT_AqZ1C_QHcNQ4Z .Hbe3LLzP-c2kpERi6rU4n {
+  font-family: var(--dt-font-display);
+  font-size: var(--dt-size-heading);
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--dt-label-3);
+}
+/* Название полки — выпадающий список Steam: крупный заголовок без рамки поля.
+ * base.css красит все .DialogDropDown с !important — здесь без рамки, поэтому тоже !important */
+._23SnllqT_AqZ1C_QHcNQ4Z ._1YdRdM9TZ_3Xolwv9aVEv- .DialogDropDown {
+  height: auto;
+  padding: 2px 6px 2px 0;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+._23SnllqT_AqZ1C_QHcNQ4Z ._1YdRdM9TZ_3Xolwv9aVEv- .DialogDropDown:hover { background: var(--dt-fill) !important; }
+._23SnllqT_AqZ1C_QHcNQ4Z ._1YdRdM9TZ_3Xolwv9aVEv- .DialogDropDown_CurrentDisplay {
+  font-family: var(--dt-font-display);
+  font-size: var(--dt-size-title);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--dt-label);
+}
+._23SnllqT_AqZ1C_QHcNQ4Z ._1YdRdM9TZ_3Xolwv9aVEv- .DialogDropDown_Arrow { color: var(--dt-label-3); }
+._23SnllqT_AqZ1C_QHcNQ4Z ._30PVtUudUBJBzac0vEncl_ { color: var(--dt-label-3); }
+/* «Сортировка: по алфавиту» — подпись Caption, без капса и разрядки */
+._23SnllqT_AqZ1C_QHcNQ4Z ._1ljKTq3H58WbDZGNPfM0TY {
+  font-size: var(--dt-size-caption);
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--dt-label-3);
+}
+._23SnllqT_AqZ1C_QHcNQ4Z ._DialogInputContainer {
+  font-size: var(--dt-size-caption);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+/* Карточки игр: скругление 8 и тонкая обводка; при наведении — едва заметный подъём, без свечения */
+.WYgDg9NyCcMIVuMyZ_NBC {
+  border: 0;
+  border-radius: var(--arkada-r-block);
+  box-shadow: 0 0 0 1px var(--dt-edge);
+  transition-property: filter, box-shadow, transform;
+  transition-duration: var(--dt-dur-fast);
+  transition-timing-function: var(--dt-ease-out);
+}
+._54PuCatl_tYG836TOs4Mv .WYgDg9NyCcMIVuMyZ_NBC:hover,
+._54PuCatl_tYG836TOs4Mv .WYgDg9NyCcMIVuMyZ_NBC:has(~ ._1LJqx_qFOC8199RBQO5kU8:hover),
+._54PuCatl_tYG836TOs4Mv .WYgDg9NyCcMIVuMyZ_NBC._2YsY_x7hLyKlUqjX9bhn0R {
+  transform: translateY(-2px);
+  filter: brightness(1.04);
+  box-shadow: 0 0 0 1px var(--dt-edge-top), 0 4px 12px color-mix(in srgb, black 26%, transparent);
+}
+._54PuCatl_tYG836TOs4Mv .WYgDg9NyCcMIVuMyZ_NBC:hover:active,
+._54PuCatl_tYG836TOs4Mv .WYgDg9NyCcMIVuMyZ_NBC._2YsY_x7hLyKlUqjX9bhn0R:active {
+  transform: none;
+  transition-duration: var(--dt-dur-press);
+  filter: brightness(0.94);
+}
+/* Блик Steam поверх обложки — убираем */
+.MyNb5dG3FsBnKdp8j_ntk { display: none; }
+/* Обложки внутри карточки — тем же скруглением */
+.WYgDg9NyCcMIVuMyZ_NBC > div:first-child,
+.WYgDg9NyCcMIVuMyZ_NBC img { border-radius: inherit; }
+
+/* Недавняя игра: блок «Вы играли» — непрозрачный слой Fluent вместо синего, кнопка «Играть» — акцентом */
+._2d1hSvdpY5L2-GN1EnUb9Z {
+  background-color: var(--arkada-layer-solid);
+  box-shadow: inset 0 1px 0 var(--dt-separator);
+  border-end-start-radius: var(--arkada-r-block);
+  border-end-end-radius: var(--arkada-r-block);
+}
+._2d1hSvdpY5L2-GN1EnUb9Z .RhmvOTLHkomDhCTDX9hLA { display: none; }
+._2d1hSvdpY5L2-GN1EnUb9Z ._3bkuozxKIatrWG3aeisthc._2zIRlEsAfHhI-_3bZ3X60z {
+  color: var(--dt-label);
+  font-size: var(--dt-size-body);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+._2d1hSvdpY5L2-GN1EnUb9Z ._3bkuozxKIatrWG3aeisthc { color: var(--dt-label-2); font-size: var(--dt-size-caption); }
+/* Кнопки на обложках (играть, скачать): нейтральная кнопка; «Играть» — сплошной акцент (AccentButton), не зелёный */
+._3AjoLnMNKxYmNTGTJCLfgs {
+  border-radius: var(--arkada-r-control);
+  background: var(--arkada-layer-solid);
+  box-shadow: var(--arkada-layer-edge);
+}
+.xp7A-08Y404Of3FBHqX32 ._3AjoLnMNKxYmNTGTJCLfgs,
+._3AjoLnMNKxYmNTGTJCLfgs._1_Bo2Ied5s2Od4YKYTOsau:not(._1aml4h4CSJbtrNbX4brUYs) {
+  background: var(--arkada-accent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, white 8%, transparent);
+}
+._54PuCatl_tYG836TOs4Mv ._3AjoLnMNKxYmNTGTJCLfgs._1_Bo2Ied5s2Od4YKYTOsau:not(._1aml4h4CSJbtrNbX4brUYs):hover {
+  background: color-mix(in srgb, var(--arkada-accent) 90%, transparent);
+}
+._54PuCatl_tYG836TOs4Mv .WYgDg9NyCcMIVuMyZ_NBC ._3AjoLnMNKxYmNTGTJCLfgs:hover:not(._1aml4h4CSJbtrNbX4brUYs):not(._1_Bo2Ied5s2Od4YKYTOsau) {
+  background: color-mix(in srgb, var(--dt-bg), white 10%);
+}
+._3AjoLnMNKxYmNTGTJCLfgs._1_Bo2Ied5s2Od4YKYTOsau:not(._1aml4h4CSJbtrNbX4brUYs) .SVGIcon_Play,
+._3AjoLnMNKxYmNTGTJCLfgs .SVGIcon_Play { fill: var(--dt-label); }
+
+/* «Что нового» — карточки событий */
+.B-vCdL38RiJlhfSRgZv78 .SPz0ipLqfF1oAO7tdrkdY {
+  border-radius: var(--arkada-r-block);
+  box-shadow: 0 0 0 1px var(--dt-edge);
+  transition: box-shadow var(--dt-dur-fast) var(--dt-ease-out);
+}
+.B-vCdL38RiJlhfSRgZv78._278jFDApipeB4kFsi44_F5:hover .SPz0ipLqfF1oAO7tdrkdY {
+  box-shadow: 0 0 0 1px var(--dt-edge-top), 0 4px 12px color-mix(in srgb, black 26%, transparent);
+}
+.B-vCdL38RiJlhfSRgZv78 ._3Rb_j3lgHaVVIud4Gla7_m { border-radius: var(--arkada-r-block); }
+.B-vCdL38RiJlhfSRgZv78 ._3OSZu24hLN7YKjqGi7I2Xp {
+  border-top-left-radius: var(--arkada-r-tip);
+  background-color: var(--arkada-accent);
+  color: var(--dt-label);
+}
+.B-vCdL38RiJlhfSRgZv78._278jFDApipeB4kFsi44_F5:hover ._3Rb_j3lgHaVVIud4Gla7_m {
+  background-color: color-mix(in srgb, var(--dt-bg) 78%, transparent);
+}
+._3YO5BpDmZERh_G8kaWbaSJ ._2rlKqvybYupc-uk64cdQ8D { color: var(--dt-label-3); }
+._3YO5BpDmZERh_G8kaWbaSJ .DVBcpUzJ0x6kaRMfug0OJ { color: var(--dt-label); }
+._3YO5BpDmZERh_G8kaWbaSJ ._3_xMyCJAh_Dv99KgZ54P3j {
+  border-radius: var(--arkada-r-tip);
+  background-color: var(--dt-fill);
+}
+
+/* «Добавить новый раздел» */
+._3SkuN_ykQuWGF94fclHdhJ { color: var(--dt-label-2); }
+._3SkuN_ykQuWGF94fclHdhJ ._2aw5aUUo3lrK6wxJb4_ms5 {
+  border: 1px solid var(--dt-edge);
+  border-top-color: var(--dt-edge-top);
+  border-radius: var(--arkada-r-control);
+  background: var(--dt-fill);
+  opacity: 1;
+  transition: background var(--dt-dur-fast) var(--dt-ease-out), transform var(--dt-dur-fast) var(--dt-ease-out);
+}
+._3SkuN_ykQuWGF94fclHdhJ._3dQDoCmoAJqOiOK7oAJIKM ._2aw5aUUo3lrK6wxJb4_ms5 {
+  background: var(--dt-fill-2);
+  color: var(--dt-label);
+}
+._3SkuN_ykQuWGF94fclHdhJ ._2aw5aUUo3lrK6wxJb4_ms5:active { background: var(--dt-fill-press); color: var(--dt-label-2); transition-duration: var(--dt-dur-press); }
+._3SkuN_ykQuWGF94fclHdhJ ._1PhK8scyztOxjJwWUpkiLJ { background-color: var(--dt-separator); }
+._3SkuN_ykQuWGF94fclHdhJ svg line,
+._3SkuN_ykQuWGF94fclHdhJ svg circle { stroke: var(--dt-label-2); }
+._3SkuN_ykQuWGF94fclHdhJ._3dQDoCmoAJqOiOK7oAJIKM svg line,
+._3SkuN_ykQuWGF94fclHdhJ._3dQDoCmoAJqOiOK7oAJIKM svg circle { stroke: var(--dt-label); }
+
+/* ═════════ Страница игры ═════════ */
+._2l416KfEtI4CL0mCUEmOBw,
+._3FmxxjyWNHU1PrBGnBe6tm._2l416KfEtI4CL0mCUEmOBw {
+  background-color: transparent;
+  background-image: none;
+}
+._27RcNu8aXKBpYkHcNNrt-X .OhSdLYuggDtBcWjYP0j_9 { background-color: transparent; }
+
+/* Шапка-герой на всю ширину, нижний край плавно уходит в слой панели */
+.NZMJ6g2iVnFsOOp-lDmIP { background-color: transparent; }
+/* Маска с «мягким плечом»: до 30% картинка целиком, к 70% остаётся треть, к низу — ничего.
+ * Так даже белая картинка не обрывается краем над полосой запуска */
+._1IX7FPSY9Jb82KhBVBSkZa {
+  --arkada-hero-fade: linear-gradient(to bottom,
+    black 30%,
+    color-mix(in srgb, black 72%, transparent) 50%,
+    color-mix(in srgb, black 32%, transparent) 70%,
+    color-mix(in srgb, black 8%, transparent) 86%,
+    transparent 100%);
+  -webkit-mask-image: var(--arkada-hero-fade);
+  mask-image: var(--arkada-hero-fade);
+}/* Подложка Steam под полосой запуска не нужна: полоса сама — слой */
+._1Qa-Aq8WFiF9584yU_1xuC .Jbe--NUNw7sxbxGsMSjVa,
+.Jbe--NUNw7sxbxGsMSjVa { background: none; backdrop-filter: none; }
+
+/* Полоса запуска — плавающий слой Fluent с отступом от краёв панели: непрозрачный, обводка 1px.
+ * Когда страница прокручена, та же полоса прилипает к верху (StickyHeader) */
+._3fLo166MlaNqP8r8tTyRz,
+._3DeO92O5aVkcdwEBCJDjWm._3fLo166MlaNqP8r8tTyRz {
+  width: auto;
+  margin-inline: 16px;
+  border-radius: var(--arkada-r-block);
+  background: var(--arkada-layer-solid);
+  box-shadow: var(--arkada-layer-edge);
+  backdrop-filter: none;
+}
+._39RheXihcN6H2k2muQTjkI ._3fLo166MlaNqP8r8tTyRz,
+._39RheXihcN6H2k2muQTjkI ._3DeO92O5aVkcdwEBCJDjWm {
+  margin-top: 8px;
+  padding-top: 0;
+  background: var(--arkada-layer-solid);
+  box-shadow: var(--arkada-layer-edge), 0 8px 16px color-mix(in srgb, black 26%, transparent);
+  backdrop-filter: none;
+}
+._2_86QNCjVvJTL3Qe6Xztx_ { display: none; }
+
+/* Большая кнопка: Играть, Установить, Обновить, Остановить — сплошной акцент, как AccentButton в WinUI.
+ * Наведение — чуть прозрачнее, нажатие — ещё прозрачнее и текст приглушается */
+._1FnJ6dPuknQFQ2RTpKTI16 {
+  border-radius: var(--arkada-r-control);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, white 8%, transparent);
+}
+._2AzIX5kl9k6JnxLfR5H4kX,
+._3cI5TXsFX3bvpR-7EBOtxq > ._2AzIX5kl9k6JnxLfR5H4kX,
+._3cI5TXsFX3bvpR-7EBOtxq > ._2AzIX5kl9k6JnxLfR5H4kX._2q-gZ3XJzlvSGHSF-GvSmi {
+  background: var(--arkada-accent);
+  background-size: 100% 100%;
+  color: var(--dt-label);
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out), color var(--dt-dur-fast) var(--dt-ease-out);
+}
+._3cI5TXsFX3bvpR-7EBOtxq > ._2AzIX5kl9k6JnxLfR5H4kX._2q-gZ3XJzlvSGHSF-GvSmi {
+  box-shadow: inset 1px 0 0 color-mix(in srgb, black 18%, transparent);
+}
+:not(._1Pb6PMh_3L5p5NzuUz0Pp9) > ._2AzIX5kl9k6JnxLfR5H4kX:hover,
+:not(._1Pb6PMh_3L5p5NzuUz0Pp9) > ._3cI5TXsFX3bvpR-7EBOtxq > ._2AzIX5kl9k6JnxLfR5H4kX:hover {
+  background: color-mix(in srgb, var(--arkada-accent) 90%, transparent);
+  background-size: 100% 100%;
+  color: var(--dt-label);
+}
+:not(._1Pb6PMh_3L5p5NzuUz0Pp9) > ._2AzIX5kl9k6JnxLfR5H4kX:active,
+:not(._1Pb6PMh_3L5p5NzuUz0Pp9) > ._3cI5TXsFX3bvpR-7EBOtxq > ._2AzIX5kl9k6JnxLfR5H4kX:active {
+  background: color-mix(in srgb, var(--arkada-accent) 80%, transparent);
+  color: var(--dt-label-2);
+  transition-duration: var(--dt-dur-press);
+}
+._3cI5TXsFX3bvpR-7EBOtxq > ._2AzIX5kl9k6JnxLfR5H4kX svg,
+:not(._1Pb6PMh_3L5p5NzuUz0Pp9) > ._3cI5TXsFX3bvpR-7EBOtxq > ._2AzIX5kl9k6JnxLfR5H4kX:hover svg { fill: currentColor; }
+._3ydigb6zZAjJ0JCDgHwSYA ._33cnXIqTRgRr49_FNXIHj6 {
+  font-family: var(--dt-font-text);
+  font-size: var(--dt-size-body);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Время в игре, последний запуск, достижения */
+._1kiZKVbDe-9Ikootk57kpA {
+  border-radius: var(--arkada-r-control);
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out);
+}
+._1qG6xUlNu-qvdhpSxwed5._1kiZKVbDe-9Ikootk57kpA:hover { background-color: var(--dt-fill); }
+._1kiZKVbDe-9Ikootk57kpA .MbTRimZpGCATmn39ae8RT,
+._1kiZKVbDe-9Ikootk57kpA .k-QNT9kzOEOvG0U_kGmwr { color: var(--dt-label-3); }
+._34lrt5-Fc3usZU6trA1P0- {
+  color: var(--dt-label-3);
+  font-size: var(--dt-size-caption);
+  letter-spacing: 0;
+  text-transform: none;
+}
+._2TYVGoD27ZMfjRirKQNLfk,
+._3pS8kMrtScuY1Qf-W8tmRV ._1nfJNsQjTOXSQQyFahGnRi { color: var(--dt-label); font-size: var(--dt-size-body); }
+
+/* Кнопки справа: настройки, сведения, избранное — обычные кнопки WinUI: нейтральная заливка с обводкой */
+._3qDWQGB0rtwM3qpXTb11Q- {
+  border: 1px solid var(--dt-edge);
+  border-top-color: var(--dt-edge-top);
+  border-radius: var(--arkada-r-control);
+  background: var(--dt-fill);
+  color: var(--dt-label-2);
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out), color var(--dt-dur-fast) var(--dt-ease-out);
+}
+._3qDWQGB0rtwM3qpXTb11Q-:hover { background: var(--dt-fill-2); color: var(--dt-label); }
+._3qDWQGB0rtwM3qpXTb11Q-:active { background: var(--dt-fill-press); color: var(--dt-label-2); transition-duration: var(--dt-dur-press); }
+._3qDWQGB0rtwM3qpXTb11Q-.fyJia4DC2A-H5pIR9DD87 { background: var(--dt-fill-2); color: var(--dt-label); }
+
+/* Разделы страницы: лента активности слева, колонки справа (друзья, достижения, карточки, заметки).
+ * Заголовок раздела — Body Strong (14, полужирный), как подписи групп в «Параметрах» Windows */
+._2r4TK4BAuU-J4FuF_O7v_5 { font-family: inherit; color: var(--dt-label-2); }
+._2r4TK4BAuU-J4FuF_O7v_5 ._1Q2q_tQ9_Eq8YdEHNAHS3F {
+  font-family: var(--dt-font-text);
+  font-size: var(--dt-size-body);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--dt-label);
+}
+._31ptFGGMZrSQc5BCX1e5lm { border-radius: var(--arkada-r-block); }
+/* Карточки правой колонки */
+._31ptFGGMZrSQc5BCX1e5lm._3KfxIwlXEvum7FCD_AM2_t {
+  border: 0;
+  border-image: none;
+  background: var(--arkada-card);
+  box-shadow: var(--arkada-layer-edge);
+  overflow: hidden;
+}
+/* Ссылки «Страница в магазине», «Центр сообщества»… — карточка, а не серый градиент Steam */
+._3-V8vjmrwuJM6Ws3tsjFJj > div {
+  background: var(--arkada-card) !important; /* у Steam здесь фон с !important */
+  box-shadow: var(--arkada-layer-edge) !important;
+}
+._3-V8vjmrwuJM6Ws3tsjFJj ._1b6LYWVijW-9E4YV0keDWZ {
+  border-radius: var(--arkada-r-control);
+  color: var(--dt-label-2);
+  transition: color var(--dt-dur-fast) var(--dt-ease-out), background-color var(--dt-dur-fast) var(--dt-ease-out);
+}
+._3-V8vjmrwuJM6Ws3tsjFJj ._1b6LYWVijW-9E4YV0keDWZ:hover { color: var(--dt-label); background-color: var(--dt-fill); }
+/* Мастерская: серый фон под кнопкой */
+._176QJCynkEUSdR_-9btdAW { background: transparent; background-image: none; }
+
+/* «Итоги игры» — карточка */
+._2MKO5j24KqDdD-92hH5FXi {
+  border-radius: var(--arkada-r-block);
+  background: var(--arkada-card);
+  background-image: none;
+  box-shadow: var(--arkada-layer-edge);
+}
+/* Заголовок «Итоги игры» — как остальные заголовки разделов: Body Strong, без капса */
+.P_gQ8X-yCsgXeXpP68KS0 {
+  font-family: var(--dt-font-text);
+  font-size: var(--dt-size-body);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--dt-label);
+}
+
+/* Лента активности: поле «Расскажите…» и дни ленты — карточки на слое */
+.YFAtL5H6txGXk5T_IhpUF._2bqRppbRWGNAZV5lfubW7-,
+.S2Fu9HxHCA5MaCLGrN2ib {
+  border: 0;
+  border-radius: var(--arkada-r-block);
+  background: var(--arkada-card);
+  box-shadow: var(--arkada-layer-edge);
+}
+.S2Fu9HxHCA5MaCLGrN2ib {
+  margin-bottom: 8px;
+  padding: 12px 16px;
+  color: var(--dt-label-3);
+}
+.LibriMVXcLl1HB60ZUp78,
+._1HZy7BvOZuPT8feUwadL4W,
+._1cTQlOcbPwx6RW55bVgCN,
+._1wJJQwnV-ssGrL0xveFujy {
+  border-radius: var(--arkada-r-block);
+  /* clip-path, а не overflow: hidden — overflow сделал бы блок шириной 100% новым контекстом,
+   * и он ушёл бы под плавающую правую колонку страницы игры */
+  clip-path: inset(0 round var(--arkada-r-block));
+}
+
+/* «Избранное» — крупное обновление: карточка с тонкой обводкой вместо синей рамки и синего заголовка */
+.UVeN0kaD3zv1feMj_mMw5._3xi-HLpFVHaakihoqhQ_6C {
+  border: 0;
+  border-image: none;
+  border-radius: var(--arkada-r-block);
+  background: var(--arkada-card);
+  box-shadow: var(--arkada-layer-edge);
+  clip-path: inset(0 round var(--arkada-r-block));
+}
+.UVeN0kaD3zv1feMj_mMw5 ._1WdC0YUP8FT0dYWZ-QIVZL {
+  padding: 6px 16px;
+  background: var(--dt-fill);
+  color: var(--dt-label);
+  font-size: var(--dt-size-caption);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Друзья, которые играют */
+.qGJMO0uQwngYsOvMwgGWa .nTb1NqsRSnwl0UTOYn_JA { color: var(--dt-label-3); }
+
+/* ═════════ Нижняя панель: загрузки, друзья и чат — плавающая стеклянная полоса ═════════ */
+._3vCzSrrXZzZjVJFZNg9SGu,
+._3vCzSrrXZzZjVJFZNg9SGu.Maximized,
+.Maximized ._3vCzSrrXZzZjVJFZNg9SGu {
+  flex: 0 0 40px;
+  margin: 0 var(--arkada-gap) var(--arkada-gap);
+  padding: 0 8px;
+  border-radius: var(--arkada-r-block);
+  background: var(--arkada-layer);
+  box-shadow: var(--arkada-layer-edge);
+}
+._2foCkpRXhqq0UGVE50BWqj,
+._1TdaAqMFadi0UTqilrkelR {
+  padding-inline: 6px;
+  border-radius: var(--arkada-r-tip);
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out), transform var(--dt-dur-fast) var(--dt-ease-out);
+}
+._2foCkpRXhqq0UGVE50BWqj:hover,
+._1TdaAqMFadi0UTqilrkelR:hover:not(._2Sdix9OOEHP6z_b4W2oaU9) { background-color: var(--dt-fill); }
+._2foCkpRXhqq0UGVE50BWqj:active,
+._1TdaAqMFadi0UTqilrkelR:active:not(._2Sdix9OOEHP6z_b4W2oaU9) { transform: scale(0.97); transition-duration: var(--dt-dur-press); }
+._2foCkpRXhqq0UGVE50BWqj ._1KrJ3sFAqPBN9mfpaNTU5F,
+._1TdaAqMFadi0UTqilrkelR ._1KrJ3sFAqPBN9mfpaNTU5F { color: var(--dt-label-3); }
+._2foCkpRXhqq0UGVE50BWqj ._3OhUxFVlQYr9W5ThxstR8k,
+._1TdaAqMFadi0UTqilrkelR ._3OhUxFVlQYr9W5ThxstR8k { color: var(--dt-label-2); }
+._2foCkpRXhqq0UGVE50BWqj:hover ._1KrJ3sFAqPBN9mfpaNTU5F,
+._1TdaAqMFadi0UTqilrkelR:hover:not(._2Sdix9OOEHP6z_b4W2oaU9) ._1KrJ3sFAqPBN9mfpaNTU5F,
+._2foCkpRXhqq0UGVE50BWqj:hover ._3OhUxFVlQYr9W5ThxstR8k,
+._1TdaAqMFadi0UTqilrkelR:hover:not(._2Sdix9OOEHP6z_b4W2oaU9) ._3OhUxFVlQYr9W5ThxstR8k { color: var(--dt-label); }
+._2_FomluqqgQ2Hx8ON3AVep .wi0pDywRgOCxhG7OqQNaA {
+  --color-progress-bar-foreground: var(--arkada-accent);
+  --color-progress-bar-background: var(--dt-fill);
+}
+
+/* ═════════ Страница загрузок ═════════
+ * Здесь списка игр нет: основная область лежит прямо в LocalContentContainer — тот же слой с зазором.
+ * Текущая загрузка и каждая секция очереди — карточки на слое. */
+.RGNMWtyj73_-WdhflrmuY > ._3BFcmjAaMyP6GTPwc0VyWi,
+.RGNMWtyj73_-WdhflrmuY > ._1iWOJQlrzyvbZvZo_x2KA3 { margin: 0 var(--arkada-gap) var(--arkada-gap); }
+._1bq4x9pa4-9RLY-dXWUZTp { padding: 12px; background: transparent; }
+._373v1eWNyaPKhgnea9FZSt ._3Mbhnlk1Go2j8yCdjthzc7.IbePLaw-vSvhG1GTenYFg,
+._1ugNiylO2vKXhirsGocAxa ._3Mbhnlk1Go2j8yCdjthzc7 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-radius: var(--arkada-r-block);
+  background: var(--arkada-card);
+  box-shadow: var(--arkada-layer-edge);
+  overflow: hidden;
+}
+._373v1eWNyaPKhgnea9FZSt ._3Mbhnlk1Go2j8yCdjthzc7.IbePLaw-vSvhG1GTenYFg { padding-bottom: 0; }
+._1bq4x9pa4-9RLY-dXWUZTp ._373v1eWNyaPKhgnea9FZSt { margin-bottom: 12px; }
+/* Синий градиент-подложка Steam слева от графика, когда загрузок нет */
+._3mZ2rKd2RECK4q4ufmsDYX.pHDI1ddoKXceD5KL7W-4z { display: none; }
+.qq2xItSXjpCsNrcxyPJtO {
+  font-family: var(--dt-font-display);
+  font-size: var(--dt-size-title);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.qq2xItSXjpCsNrcxyPJtO ._1CGnw50aAma6AYKF51Qzsm {
+  color: var(--dt-label-3);
+  font-size: var(--dt-size-body);
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.qq2xItSXjpCsNrcxyPJtO ._1CTr1yKRkOXnJ4gSS1-1A3 { height: 1px; background-color: var(--dt-separator); }
+
+/* Текущая загрузка: кромка при наведении — стеклянная, не синяя */
+._2sCvZTD6ZTZz3p9_ekH_gI ._3B3J2qtE6ozU_VXMMN2L51 {
+  border-width: 1px;
+  border-radius: var(--arkada-r-block);
+}
+._2sCvZTD6ZTZz3p9_ekH_gI:hover ._3B3J2qtE6ozU_VXMMN2L51 { border-color: var(--dt-edge-top); }
+._2m6Q3ca-wXeLIVShFCO51T ._2sCvZTD6ZTZz3p9_ekH_gI ._3B3J2qtE6ozU_VXMMN2L51 { border-color: var(--arkada-accent); }
+._2sCvZTD6ZTZz3p9_ekH_gI ._1r3ouwFT2-tsTAcnXYZ6NU ._3nx-k9xXUVgejG1BIAc84r { color: var(--dt-label-2); }
+
+/* График скорости */
+._1BxZDLT8KveuJzn-1q4NTP .gpPxCvNVctmdxo8yfyEAJ,
+._1BxZDLT8KveuJzn-1q4NTP .OS07NfYlp6v-Eh5oQ7dwn { color: color-mix(in srgb, var(--arkada-accent) 55%, transparent); }
+._1BxZDLT8KveuJzn-1q4NTP .gpPxCvNVctmdxo8yfyEAJ:hover ._3raSL6OYLHmLlbF96kGtnr { color: var(--arkada-accent-hi); }
+._1BxZDLT8KveuJzn-1q4NTP .gpPxCvNVctmdxo8yfyEAJ:hover ._10Culn1h2NcqjUXJQdhPFm { color: var(--dt-label); }
+._3mdnpmV9S9u27eB5JFwFNk ._3BdWqJYvZfTohY-twD2i6Q { font-family: var(--dt-font-display); color: var(--dt-label); }
+
+/* Очередь */
+._1VNuYHM6BPBOJspC6zPf5r {
+  border-radius: var(--arkada-r-row);
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out);
+}
+._1VNuYHM6BPBOJspC6zPf5r:hover { background-color: var(--dt-fill); }
+._1SyggnJY6qbRSmbZpkK3-H ._1vMU1vG5ZtLihr3mfXUymR {
+  border-radius: 2px;
+  background-color: var(--dt-fill);
+  overflow: hidden;
+}
+._1SyggnJY6qbRSmbZpkK3-H ._1vMU1vG5ZtLihr3mfXUymR div { background-color: var(--arkada-accent); }
+._1SyggnJY6qbRSmbZpkK3-H ._1vMU1vG5ZtLihr3mfXUymR._2mLZnQr2HzWQ1K8D8xouc- div { background-color: color-mix(in srgb, var(--arkada-accent) 50%, transparent); }
+._1SyggnJY6qbRSmbZpkK3-H ._1vMU1vG5ZtLihr3mfXUymR.HifZB5TP6WNuubp1dzyxS div { background-color: var(--dt-green); }
+
+/* ═════════ Сведения об игре при наведении на обложку ═════════
+ * Всплывающая карточка — как всплывающие элементы WinUI: акрил, скругление 8, обводка, мягкая тень.
+ * Размытая обложка на фоне у Steam даёт грязный бурый тон — приглушаем её под акрил */
+._2sGn0cBsD44TjnUIh-lx9d {
+  border: 1px solid var(--dt-edge);
+  border-top-color: var(--dt-edge-top);
+  border-radius: var(--arkada-r-block);
+  background-color: var(--dt-menu);
+  box-shadow: 0 8px 16px color-mix(in srgb, black 26%, transparent);
+  backdrop-filter: blur(30px) saturate(1.25);
+}
+._2sGn0cBsD44TjnUIh-lx9d .AcLtE9axR9tWhAVfDP9lv { filter: blur(24px) opacity(18%) saturate(0.6); }
+._2sGn0cBsD44TjnUIh-lx9d ._1RfxlV1H3JsSs-aRaXVJQt {
+  font-family: var(--dt-font-text);
+  font-size: var(--dt-size-body);
+  font-weight: 600;
+  color: var(--dt-label);
+}
+._2sGn0cBsD44TjnUIh-lx9d ._1VGPO4xU5sgRK6DFt4t74O { color: var(--dt-label-2); font-size: var(--dt-size-caption); }
+._2sGn0cBsD44TjnUIh-lx9d ._1VGPO4xU5sgRK6DFt4t74O .MIHa_O-B1JXrzkoGc255n {
+  color: var(--dt-label);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* ═════════ Регистр: как в Windows 11, без капса и разрядки ═════════
+ * Steam пишет многие подписи капсом через text-transform; строки в локализации уже в нужном регистре. */
+._1ujzuoxGhLunHZQqHAqRgg,
+._1ujzuoxGhLunHZQqHAqRgg .ElNfQSVSKeMaOVHygQ4Nh,
+.S2Fu9HxHCA5MaCLGrN2ib ._19LfMT7PFWg2xHOqNjR99q,
+._1J21tLst5SEhBPkVRT53UV,
+._1J21tLst5SEhBPkVRT53UV *,
+._2b6WkTnmJxMuX1biL7aS3C ._1HS4twEHtDJ_8MWgJT4VBd,
+._1axoiZsC1RBp22JQmxiBIc ._3iV2vMTw_vwWJ_gmiz1Q1k,
+._2XqX2Zbz7zS2_xq8AksGCu ._34H1wIZZZBEL43X2j8RFu6,
+.Ayu--dDVVaKmP2gNYPAQ0 ._1iulCOMUxV6sBbqoKo_yXw,
+.hGZq446tJ_aWpDLU9rRSM ._1iulCOMUxV6sBbqoKo_yXw {
+  text-transform: none;
+  letter-spacing: 0;
+}
+.Ayu--dDVVaKmP2gNYPAQ0 ._1iulCOMUxV6sBbqoKo_yXw,
+.hGZq446tJ_aWpDLU9rRSM ._1iulCOMUxV6sBbqoKo_yXw { font-family: var(--dt-font-text); font-size: var(--dt-size-caption); }
+._1ujzuoxGhLunHZQqHAqRgg { font-size: var(--dt-size-body); font-weight: 600; }
+.S2Fu9HxHCA5MaCLGrN2ib ._19LfMT7PFWg2xHOqNjR99q {
+  font-size: var(--dt-size-body);
+  font-weight: 600;
+  color: var(--dt-label);
+}
+
+/* Подложки-«блики» в карточках правой колонки (значок, Мастерская, обзоры) — ровная заливка слоя */
+._31ptFGGMZrSQc5BCX1e5lm ._38t1mljBjmJfqjpVzMT1CG {
+  border-radius: 0;
+  border-bottom: 1px solid var(--dt-separator);
+  box-shadow: none;
+  color: var(--dt-label-2);
+  background: var(--dt-fill);
+  background-image: none;
+}
+
+/* ═════════ Меньше движения ═════════
+ * Длительности уже нулевые (tokens.css и base.css); здесь убираются сами сдвиги, чтобы ничего не прыгало. */
+:root[data-arkada-motion='reduced'] ._54PuCatl_tYG836TOs4Mv .WYgDg9NyCcMIVuMyZ_NBC:hover,
+:root[data-arkada-motion='reduced'] ._54PuCatl_tYG836TOs4Mv .WYgDg9NyCcMIVuMyZ_NBC._2YsY_x7hLyKlUqjX9bhn0R { transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  ._54PuCatl_tYG836TOs4Mv .WYgDg9NyCcMIVuMyZ_NBC:hover,
+  ._54PuCatl_tYG836TOs4Mv .WYgDg9NyCcMIVuMyZ_NBC._2YsY_x7hLyKlUqjX9bhn0R { transform: none; }
+}

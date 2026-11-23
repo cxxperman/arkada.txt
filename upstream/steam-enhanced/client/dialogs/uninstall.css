@@ -1,0 +1,226 @@
+/*
+ * Uninstall dialog (styles for client/dialogs/uninstall.js).
+ *
+ * Without the script the dialog keeps the baseline in client/dialogs/utility/modals.css. Once
+ * the script has marked it ([data-se-uninst], desktop windows only):
+ *
+ *   [ hero art, fading into the card                          (×) ]
+ *   [ UNINSTALL                                                   ]
+ *   [ [ capsule ]  Assassin's Creed Shadows                       ]
+ *   [              Would you like to uninstall … from this device? ]
+ *   [ ┌ (drive) Frees 95.21 GB  on Windows (C:)                 ┐ ]
+ *   [ │         C:\Program Files\Steam                         │ ]
+ *   [ │         [■■■■■■■▒▒▒▒······································] │ ]
+ *   [ └         1.08 TB of 3.91 TB used        2.92 TB free after ┘ ]
+ *   [                                 [ (🗑) Uninstall ] [ Cancel ] ]
+ *
+ * The drive card stays hidden until SteamClient has answered. Uninstall is the theme's blue
+ * Primary button (dialogs.css); icons stay neutral, the theme's duotone (an outline over a 30%
+ * fill).
+ *
+ * UninstallDialog _7au1m_-ZIF7Hx_rCvrDfI, UninstallingText _24I3SrKur3IMEKCeyiBdq7,
+ * UninstallError _2n_P7MWsN2y6PwS2a957_c.
+ */
+
+[data-se-uninst] {
+  --uninst-i-trash: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path fill='%23000' fill-opacity='.3' stroke='none' d='M6 7.5h12l-.8 11.1A2 2 0 0 1 15.2 20.5H8.8a2 2 0 0 1-2-1.9z'/><path d='M4.5 7.5h15M9.5 7.5V5.5a1.5 1.5 0 0 1 1.5-1.5h2a1.5 1.5 0 0 1 1.5 1.5v2M6 7.5l.8 11.1a2 2 0 0 0 2 1.9h6.4a2 2 0 0 0 2-1.9L18 7.5M10 11v5.5M14 11v5.5'/></svg>");
+}
+
+/* Body: capsule and name beside Steam's confirmation, the drive card under both */
+[data-se-uninst] .DialogBodyText:not(#se-none) {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: var(--se-space-4);
+  row-gap: var(--se-space-1);
+  margin: 0 !important;
+}
+
+.se-uninst-game {
+  display: contents;
+}
+
+/* The capsules (.se-dialog-capsules, client/dialogs/dialogs.css) beside the name and text */
+.se-uninst-game > .se-dialog-capsules {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+}
+
+.se-uninst-name {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: end;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font: 800 var(--se-fs-2xl)/1.2 var(--se-font), sans-serif;
+  color: var(--se-text-strong);
+  text-shadow: 0 2px 14px var(--se-black-60);
+}
+
+[data-se-uninst] .DialogBodyText > div:not(.se-uninst):not(#se-none) {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: start;
+  font: 500 var(--se-fs-md)/1.45 var(--se-font), sans-serif !important;
+  color: var(--se-text-muted) !important;
+  text-shadow: 0 1px 8px var(--se-black-50);
+}
+
+/* ---------- Drive card ---------- */
+
+.se-uninst-disk {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  column-gap: var(--se-space-3);
+  row-gap: var(--se-space-2);
+  margin-top: var(--se-space-4);
+  padding: var(--se-space-3) var(--se-space-4) var(--se-space-3) var(--se-space-3);
+  border-radius: var(--se-radius-md);
+  background: var(--se-surface-2);
+  box-shadow: var(--se-edge);
+}
+
+.se-uninst-disk[hidden] {
+  display: none;
+}
+
+.se-uninst-disk > :not(.se-uninst-glyph) {
+  grid-column: 2;
+  min-width: 0;
+}
+
+.se-uninst-glyph {
+  grid-column: 1;
+  grid-row: 1 / span 4;
+  align-self: start;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--se-radius-sm);
+  background: var(--se-hairline);
+  box-shadow: var(--se-edge);
+  color: var(--se-text-muted);
+}
+
+.se-uninst svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.se-uninst svg .d {
+  fill: currentColor;
+  fill-opacity: .3;
+  stroke: none;
+}
+
+.se-uninst-disk-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--se-space-2);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.se-uninst-frees {
+  font: 700 var(--se-fs-md)/1.3 var(--se-font), sans-serif;
+  color: var(--se-text-strong);
+}
+
+.se-uninst-drive {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font: 600 var(--se-fs-base)/1.3 var(--se-font), sans-serif;
+  color: var(--se-text-muted);
+}
+
+.se-uninst-path {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 500 var(--se-fs-sm)/1.3 var(--se-font), sans-serif;
+  color: var(--se-text-faint);
+}
+
+.se-uninst-bar {
+  display: flex;
+  gap: var(--se-space-half);
+  height: 6px;
+  margin-top: var(--se-space-half);
+  overflow: hidden;
+  border-radius: var(--se-radius-pill);
+  background: var(--se-white-07);
+}
+
+.se-uninst-bar > i {
+  flex: none;
+  width: var(--w, 0%);
+  height: 100%;
+  /* Segments share one flex row, so their widths snap (no layout animation) */
+}
+
+.se-uninst-bar-other {
+  border-radius: var(--se-radius-pill) 0 0 var(--se-radius-pill);
+  background: var(--se-white-25);
+}
+
+/* This game's share: the part that goes */
+.se-uninst-bar-game {
+  border-radius: 0 var(--se-radius-pill) var(--se-radius-pill) 0;
+  background: repeating-linear-gradient(-45deg, var(--se-white-50) 0 4px, var(--se-white-25) 4px 8px);
+}
+
+.se-uninst-caption {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--se-space-3);
+  font: 600 var(--se-fs-sm)/1.3 var(--se-font), sans-serif;
+  color: var(--se-text-muted);
+  white-space: nowrap;
+}
+
+.se-uninst-after {
+  margin-left: auto;
+  color: var(--se-text-dim);
+}
+
+.se-uninst-disk [hidden] {
+  display: none;
+}
+
+/* ---------- Footer ---------- */
+
+[data-se-uninst] .DialogFooter:not(#se-none) {
+  margin-top: var(--se-space-5) !important;
+}
+
+/* Uninstall gets a bin. Steam's own ::before (hidden theme-wide) is reused for it. */
+[data-se-uninst] .DialogFooter .DialogButton.Primary:not(#se-none)::before {
+  content: "" !important;
+  position: static !important;
+  display: inline-block !important;
+  width: 16px !important;
+  height: 16px !important;
+  margin: calc(-1 * var(--se-space-half)) var(--se-space-2) 0 calc(-1 * var(--se-space-1)) !important;
+  vertical-align: middle;
+  opacity: 1 !important;
+  background: currentColor !important;
+  -webkit-mask: var(--uninst-i-trash) center / contain no-repeat;
+  mask: var(--uninst-i-trash) center / contain no-repeat;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-uninst-bar > i {
+    transition: none !important;
+  }
+}

@@ -1,0 +1,195 @@
+/* arkada.txt — список друзей и чат, в виде приложения Windows 11.
+ * Эта часть Steam старше остальных и до сих пор размечена читаемыми классами без хеша
+ * (.friend, .chatWindow, .msg…), поэтому хрупких селекторов здесь нет вовсе.
+ * Окно: фон Mica, шапка с аватаром прямо на нём; список друзей и групповые чаты — слои с обводкой
+ * и зазором 8px, как в главном окне. Цвета состояний друга (в сети, в игре, отошёл) тема не меняет:
+ * они несут смысл. */
+
+@import url("./base.css");
+
+:root {
+  --arkada-gap: 8px;
+  --arkada-layer: color-mix(in srgb, white 4%, transparent);
+  --arkada-layer-edge: inset 0 0 0 1px var(--dt-separator);
+}
+
+.friendsui-container { color: var(--dt-label-2); }
+html.MillenniumWindow_FriendsList body,
+html.MillenniumWindow_FriendChatWindow body,
+html.friendsui-container body { background: var(--arkada-window-bg); }
+
+/* ───────── Шапка: аватар, имя, избранные друзья ───────── */
+.friendListHeaderContainer {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.title-area-highlight,
+.singleWindowFocusBar { background: none !important; }
+.currentUserContainer {
+  border-bottom-color: transparent !important;
+  background: none !important;
+}
+/* Цветное «свечение» статуса за аватаром — декор Steam, в Windows 11 его нет */
+.currentUserContainer > svg { display: none; }
+.currentUserContainer .personaName,
+.currentUserContainer .playerName { color: var(--dt-label) !important; }
+
+/* Избранные друзья: плитки со скруглением и мягким наведением */
+.quickAccessFriend {
+  border-radius: var(--arkada-r-control);
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out) !important;
+}
+.quickAccessFriend:hover { background-color: var(--dt-fill) !important; }
+.playerNameQuickAccessContainer { color: var(--dt-label-2); }
+
+/* «Друзья» + поиск + заявки: строка над списком, без серой плашки и капса */
+.socialTabSearchContainer { background: none !important; }
+.friendTab.socialListTab,
+.friendTab.socialListTab.activeTab {
+  border-radius: var(--arkada-r-control) var(--arkada-r-control) 0 0;
+  background: none !important;
+  box-shadow: none !important;
+}
+.friendTab .tabLabel,
+.groupChatSectionTitle {
+  font-family: var(--dt-font-text) !important;
+  font-size: var(--dt-size-body) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  color: var(--dt-label) !important;
+}
+.friendSearchInput,
+.TabSearchButton input {
+  border-radius: var(--arkada-r-control) !important;
+  background: var(--dt-fill) !important;
+  box-shadow: inset 0 0 0 1px var(--dt-edge) !important;
+}
+.searchIconButton,
+.friendRequestButton,
+.addFriendButton,
+.createChatRoomButton,
+.SortByRecent,
+.ToggleGroupChatList {
+  border-radius: var(--arkada-r-control);
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out);
+}
+.searchIconButton:hover,
+.friendRequestButton:hover,
+.addFriendButton:hover,
+.createChatRoomButton:hover,
+.SortByRecent:hover { background-color: var(--dt-fill) !important; }
+.requestsNumber { text-transform: none !important; }
+
+/* ───────── Список друзей — слой ───────── */
+.FriendsListContent {
+  margin: 0 var(--arkada-gap);
+  background: transparent !important;
+}
+.friendlistListContainer {
+  border-radius: var(--arkada-r-block);
+  background: var(--arkada-layer) !important;
+  box-shadow: var(--arkada-layer-edge);
+}
+.friendGroup.onlineFriends,
+.friendGroup.offlineFriends,
+.friendGroup { background: transparent !important; }
+
+/* Заголовки групп: «Непрочитанные сообщения», «В сети», игры — Caption, полужирный, без капса */
+.groupName,
+.friendGroup .groupName {
+  font-family: var(--dt-font-text) !important;
+  font-size: var(--dt-size-caption) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  color: var(--dt-label-3) !important;
+}
+.groupHeaderContainer { background: none !important; box-shadow: none !important; }
+
+/* Строки друзей — как ListView в WinUI */
+.friend:not(.quickAccessFriend) {
+  margin-inline: 4px;
+  border-radius: var(--arkada-r-control);
+  transition: background-color var(--dt-dur-press) var(--dt-ease-out) !important;
+}
+.friend:hover { background-color: var(--dt-fill) !important; }
+.friend.Friend_ContextMenuActive { background-color: var(--dt-fill-2) !important; }
+.SteamPlayerGroupFooterLabel { color: var(--dt-label-3); }
+
+/* Групповые чаты — второй слой снизу */
+.FriendsListChatSection {
+  margin-top: var(--arkada-gap);
+  border-radius: var(--arkada-r-block);
+  background: var(--arkada-layer) !important;
+  box-shadow: var(--arkada-layer-edge);
+}
+.friendsListSectionTitle,
+.chatSectionTitle {
+  background: none !important;
+  box-shadow: inset 0 -1px 0 var(--dt-separator) !important;
+}
+.chatRoomListContainer { background: none !important; }
+.ChatRoomListGroupItem {
+  margin-inline: 4px;
+  border-radius: var(--arkada-r-control);
+  transition: background-color var(--dt-dur-press) var(--dt-ease-out);
+}
+.ChatRoomListGroupItem:hover { background-color: var(--dt-fill) !important; }
+
+.friendListFooter {
+  background: none !important;
+  box-shadow: inset 0 1px 0 var(--dt-separator);
+}
+
+/* ───────── Чат ───────── */
+.chatWindow { background: transparent !important; }
+.ChatTabs,
+.chatWindow .titleBarContainer,
+.chatTabSetContainer { background: transparent !important; }
+.chatTab {
+  border-radius: var(--arkada-r-control) var(--arkada-r-control) 0 0;
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out);
+}
+.chatTab:hover { background-color: var(--dt-fill) !important; }
+.chatTab.ActiveTab,
+.chatTab.activeTab { background-color: var(--arkada-layer) !important; box-shadow: inset 0 -2px 0 var(--arkada-accent); }
+
+/* Лента сообщений — слой, поле ввода — внизу на том же слое */
+.ChatRoomGroupDialog_contents,
+.chatHistoryAndMembers,
+.chatHistoryContainer {
+  background: var(--arkada-layer) !important;
+}
+.chatWindow .chatEntry {
+  background-color: transparent !important;
+  box-shadow: inset 0 1px 0 var(--dt-separator);
+  transition-duration: var(--dt-dur-base) !important;
+  transition-timing-function: var(--dt-ease-out) !important;
+}
+.chatWindow .chatEntry textarea {
+  border-radius: var(--arkada-r-control) !important;
+  background: var(--dt-fill) !important;
+  box-shadow: inset 0 0 0 1px var(--dt-edge), inset 0 -1px 0 var(--dt-label-3) !important;
+}
+.chatWindow .chatEntry textarea:focus {
+  box-shadow: inset 0 0 0 1px var(--dt-edge), inset 0 -2px 0 var(--arkada-accent) !important;
+}
+.chatSubmitButton {
+  border-radius: var(--arkada-r-control) !important;
+  background: var(--arkada-accent) !important;
+}
+.msg { border-radius: var(--arkada-r-control); }
+.msg:hover { background-color: var(--dt-fill) !important; }
+.speakerName { font-weight: 600; }
+.ChatSpeaker .speakerTimeStamp,
+.timestamp { color: var(--dt-label-3) !important; }
+.chatRoomMemberList,
+.ChatRoomMemberList { background: transparent !important; }
+
+/* Приглашение в игру внутри чата — карточка */
+.msg.ChatMessageInvite {
+  border: 1px solid var(--dt-edge);
+  border-radius: var(--arkada-r-block);
+  background: var(--dt-fill) !important;
+}

@@ -1,0 +1,334 @@
+/* Continues millennium.css (in order, see client/loader.js): . */
+
+/* Quick CSS: the editor on the page */
+.MillenniumSettings [data-se-mill-page="quickcss"] .DialogBody[data-se-qc] > :not(.se-qc) {
+  display: none !important;
+}
+
+.se-qc {
+  --se-qc-font: 13px/22px var(--se-font-mono);
+  display: flex;
+  flex-direction: column;
+  height: var(--se-fill-h, 520px);
+  margin-top: var(--se-space-4);
+  overflow: hidden;
+  border-radius: var(--se-radius-lg);
+  background: var(--se-field);
+  outline: 1px solid var(--se-hairline);
+  outline-offset: -1px;
+  transition: box-shadow var(--se-dur) ease-out;
+}
+
+.se-qc:focus-within {
+  outline-color: var(--se-accent-line);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--se-accent) 10%, transparent);
+}
+
+.se-qc-bar,
+.se-qc-foot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  background: var(--se-sidebar);
+  color: var(--se-text-muted);
+}
+
+/* The bar, one row: the file's name and its save-state tag, then the tools */
+.se-qc-bar {
+  height: 52px;
+  gap: var(--se-space-3);
+  padding: 0 var(--se-space-3) 0 var(--se-space-4);
+  box-shadow: var(--se-rule-bottom);
+  font: 600 var(--se-fs-sm) var(--se-font);
+}
+
+.se-qc-name {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--se-space-2);
+}
+
+.se-qc-file {
+  font: 700 var(--se-fs-md) / 1 var(--se-font-mono) !important;
+  color: var(--se-text-strong);
+}
+
+.se-qc-state {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--se-space-1);
+  height: 20px;
+  padding: 0 var(--se-space-2);
+  border-radius: var(--se-radius-xs);
+  background: var(--se-hairline);
+  font: 700 var(--se-fs-xs) / 1 var(--se-font);
+  color: var(--se-text-dim);
+}
+
+.se-qc-state i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--se-text-faint);
+}
+
+.se-qc-state[data-state="saved"] {
+  background: color-mix(in srgb, var(--se-running) 14%, transparent);
+  color: color-mix(in srgb, var(--se-running), var(--se-white) 25%);
+}
+
+.se-qc-state[data-state="saving"] {
+  background: var(--se-accent-tint);
+  color: var(--se-accent-hover);
+}
+
+.se-qc-state[data-state="saved"] i {
+  background: var(--se-running);
+}
+
+.se-qc-state[data-state="saving"] i {
+  background: var(--se-accent);
+}
+
+.se-qc-state[data-state="error"] {
+  background: color-mix(in srgb, var(--se-danger) 18%, transparent);
+  color: var(--se-danger-text);
+}
+
+.se-qc-state[data-state="error"] i {
+  background: var(--se-danger);
+}
+
+.se-qc-tools {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--se-space-2);
+}
+
+.se-qc-tools [hidden] {
+  display: none;
+}
+
+.se-qc-sep {
+  width: 1px;
+  height: 20px;
+  background: var(--se-divider);
+}
+
+.se-qc-watch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--se-space-2);
+  font: 600 var(--se-fs-base) var(--se-font);
+  color: var(--se-text-dim);
+}
+
+.se-msw {
+  all: unset;
+  position: relative;
+  flex: none;
+  width: 40px;
+  height: 22px;
+  border-radius: var(--se-radius-pill);
+  background: var(--se-selected);
+  cursor: pointer;
+}
+
+/* The hit area out to 32 px (a 22 px switch); the look stays as drawn */
+.se-msw::before {
+  content: '';
+  position: absolute;
+  inset: -5px;
+}
+
+.se-msw::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--se-text-muted);
+  transition: transform var(--se-dur) ease-out, background-color var(--se-dur) ease-out;
+}
+
+.se-msw[data-on] {
+  background: var(--se-accent);
+}
+
+.se-msw[data-on]::after {
+  transform: translateX(18px);
+  background: var(--se-bg-ink);
+}
+
+.se-msw:focus-visible {
+  outline: var(--se-focus-outline);
+  outline-offset: var(--se-focus-offset);
+}
+
+.se-qc-main {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow: hidden;
+}
+
+/* An empty file: a quiet note in the middle of the editor (clicks go through to it) */
+.se-qc-empty {
+  position: absolute;
+  inset: 0;
+  z-index: var(--se-z-raised);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--se-space-2);
+  padding: var(--se-space-5);
+  pointer-events: none;
+  text-align: center;
+}
+
+.se-qc-empty[hidden] {
+  display: none;
+}
+
+.se-qc-empty b {
+  font: 800 var(--se-fs-lg) / 1.2 var(--se-font);
+  color: var(--se-text-strong);
+}
+
+.se-qc-empty > span:last-child {
+  max-width: 52ch;
+  font: 500 var(--se-fs-base) / 1.5 var(--se-font);
+  color: var(--se-text-muted);
+}
+
+.se-qc-cur {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 22px;
+  background: var(--se-white-04);
+  pointer-events: none;
+}
+
+.se-qc-cur[hidden] {
+  display: none;
+}
+
+.se-qc-gutter {
+  position: relative;
+  z-index: var(--se-z-raised);
+  flex: none;
+  width: 52px;
+  margin: 0;
+  padding: var(--se-space-3) var(--se-space-3) var(--se-space-3) 0;
+  box-sizing: border-box;
+  text-align: right;
+  font: var(--se-qc-font) !important;
+  color: var(--se-text-faint);
+  user-select: none;
+  background: none;
+  border: 0;
+  overflow: visible;
+}
+
+.se-qc-code {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.se-qc-hl,
+.se-qc-ta {
+  margin: 0;
+  padding: var(--se-space-3) var(--se-space-4) var(--se-space-3) var(--se-space-4);
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 0;
+  font: var(--se-qc-font) !important;
+  letter-spacing: 0;
+  tab-size: 2;
+  white-space: pre;
+  word-wrap: normal;
+  overflow-wrap: normal;
+  text-transform: none;
+}
+
+.se-qc-hl {
+  position: absolute;
+  left: 0;
+  top: 0;
+  min-width: 100%;
+  pointer-events: none;
+  color: var(--se-text);
+  background: none;
+  overflow: visible;
+}
+
+.se-qc-ta {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  resize: none;
+  outline: 0;
+  overflow: auto;
+  background: transparent;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  caret-color: var(--se-accent);
+}
+
+/* The theme's `* { font-family }` would set the coloured spans in the UI font, so the colours
+   drift off the text area's monospace glyphs (and the selection under them). */
+.se-qc-hl * {
+  font: inherit !important;
+}
+
+/* The text area's own text stays invisible when selected: only the highlight layer shows. */
+.se-qc-ta::selection {
+  background: color-mix(in srgb, var(--se-accent) 24%, transparent);
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.se-qc-hl .c {
+  color: #808a96;
+  font-style: italic;
+}
+
+.se-qc-hl .s {
+  color: var(--se-accent);
+}
+
+.se-qc-hl .p {
+  color: #c7a8ff;
+}
+
+.se-qc-hl .v {
+  color: #f2b679;
+}
+
+.se-qc-hl .u {
+  color: var(--se-text-muted);
+}
+
+.se-qc-foot {
+  height: 30px;
+  gap: var(--se-space-4);
+  padding: 0 var(--se-space-3);
+  box-shadow: var(--se-rule-top);
+  font: 500 var(--se-fs-sm) var(--se-font);
+}
+
+.se-qc-pos {
+  margin-left: auto;
+}

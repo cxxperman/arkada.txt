@@ -1,0 +1,329 @@
+/*
+ * Game Properties (html[data-se-props]): icons, the sidebar, the game header and what every
+ * page shares. Its parts, listed right after it:
+ * - game-properties-install.css  General, Updates, Installed Files, Game Versions & Betas
+ * - game-properties-extras.css   Controller, DLC, Workshop, Game Recording, Privacy, Customization
+ * Settings styles load in order: layout, controls, pages, storage, search, game-properties
+ * (with its parts game-properties-install, game-properties-extras), spacing.
+ */
+
+/* Game Properties (client/settings/dialog/ propsPage / propsSidebar) */
+:root {
+  --se-ic-pgen: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.75%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cg fill=%22%23000%22 fill-opacity=%22.32%22 stroke=%22none%22%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%223.5%22/%3E%3C/g%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%223.5%22/%3E%3Cpath d=%22M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1%22/%3E%3C/svg%3E");
+  --se-ic-pfolder: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.75%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cg fill=%22%23000%22 fill-opacity=%22.32%22 stroke=%22none%22%3E%3Cpath d=%22M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z%22/%3E%3C/g%3E%3Cpath d=%22M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z%22/%3E%3C/svg%3E");
+  --se-ic-pbranch: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.75%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cg fill=%22%23000%22 fill-opacity=%22.32%22 stroke=%22none%22%3E%3Ccircle cx=%226%22 cy=%226%22 r=%222.5%22/%3E%3Ccircle cx=%2218%22 cy=%228%22 r=%222.5%22/%3E%3C/g%3E%3Ccircle cx=%226%22 cy=%226%22 r=%222.5%22/%3E%3Ccircle cx=%226%22 cy=%2218%22 r=%222.5%22/%3E%3Ccircle cx=%2218%22 cy=%228%22 r=%222.5%22/%3E%3Cpath d=%22M6 8.5v7M18 10.5c0 4-6 3-11 6%22/%3E%3C/svg%3E");
+  --se-ic-pdlc: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.75%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cg fill=%22%23000%22 fill-opacity=%22.32%22 stroke=%22none%22%3E%3Crect x=%223%22 y=%228%22 width=%2218%22 height=%2213%22 rx=%222%22/%3E%3C/g%3E%3Crect x=%223%22 y=%228%22 width=%2218%22 height=%2213%22 rx=%222%22/%3E%3Cpath d=%22M12 8v13M3 12h18M12 8c-2-4-6-4-6-1.5S10 8 12 8zM12 8c2-4 6-4 6-1.5S14 8 12 8z%22/%3E%3C/svg%3E");
+  --se-ic-pworkshop: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.75%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cg fill=%22%23000%22 fill-opacity=%22.32%22 stroke=%22none%22%3E%3Cpath d=%22M14.5 6.5l3 3-8 8H6.5v-3z%22/%3E%3C/g%3E%3Cpath d=%22M14.5 6.5l3 3-8 8H6.5v-3z%22/%3E%3Cpath d=%22M13 8l3 3M16.5 3.5l4 4%22/%3E%3C/svg%3E");
+  --se-ic-pcustom: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.75%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cg fill=%22%23000%22 fill-opacity=%22.32%22 stroke=%22none%22%3E%3Crect x=%223%22 y=%224%22 width=%2218%22 height=%2216%22 rx=%222.5%22/%3E%3C/g%3E%3Crect x=%223%22 y=%224%22 width=%2218%22 height=%2216%22 rx=%222.5%22/%3E%3Ccircle cx=%229%22 cy=%229.5%22 r=%221.8%22/%3E%3Cpath d=%22M4 18l5.5-5.5 4 4 2.5-2.5 4.5 4.5%22/%3E%3C/svg%3E");
+  --se-ic-pcompat: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.75%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cg fill=%22%23000%22 fill-opacity=%22.32%22 stroke=%22none%22%3E%3Crect x=%224%22 y=%224%22 width=%2216%22 height=%2216%22 rx=%223%22/%3E%3C/g%3E%3Crect x=%224%22 y=%224%22 width=%2216%22 height=%2216%22 rx=%223%22/%3E%3Cpath d=%22M9 9h6v6H9zM9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2%22/%3E%3C/svg%3E");
+  --se-ic-pshield: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.75%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cg fill=%22%23000%22 fill-opacity=%22.32%22 stroke=%22none%22%3E%3Cpath d=%22M12 3l8 3v5c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z%22/%3E%3C/g%3E%3Cpath d=%22M12 3l8 3v5c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z%22/%3E%3Cpath d=%22M9 12l2 2 4-4%22/%3E%3C/svg%3E");
+}
+
+[data-se-icon="pgen"],
+[data-se-row="pgen"] {
+  --se-ic: var(--se-ic-pgen);
+}
+
+[data-se-icon="pfolder"],
+[data-se-row="pfolder"] {
+  --se-ic: var(--se-ic-pfolder);
+}
+
+[data-se-icon="pbranch"],
+[data-se-row="pbranch"] {
+  --se-ic: var(--se-ic-pbranch);
+}
+
+[data-se-icon="pdlc"],
+[data-se-row="pdlc"] {
+  --se-ic: var(--se-ic-pdlc);
+}
+
+[data-se-icon="pworkshop"],
+[data-se-row="pworkshop"] {
+  --se-ic: var(--se-ic-pworkshop);
+}
+
+[data-se-icon="pcustom"],
+[data-se-row="pcustom"] {
+  --se-ic: var(--se-ic-pcustom);
+}
+
+[data-se-icon="pcompat"],
+[data-se-row="pcompat"] {
+  --se-ic: var(--se-ic-pcompat);
+}
+
+[data-se-icon="pbackup"],
+[data-se-row="pbackup"] {
+  --se-ic: var(--se-icon-archive); /* a backup: the game boxed away */
+}
+
+[data-se-icon="pshield"],
+[data-se-row="pshield"] {
+  --se-ic: var(--se-ic-pshield);
+}
+
+[data-se-row="lang"] {
+  --se-ic: var(--se-icon-globe);
+}
+
+[data-se-row="bgdl"] {
+  --se-ic: var(--se-icon-pause);
+}
+
+[data-se-row="wsorder"] {
+  --se-ic: var(--se-icon-list-ordered);
+}
+
+[data-se-row="wsenable"] {
+  --se-ic: var(--se-icon-power);
+}
+
+[data-se-row="wscoll"] {
+  --se-ic: var(--se-icon-folder);
+}
+
+[data-se-icon="pshortcut"] {
+  --se-ic: var(--se-icon-link);
+}
+
+[data-se-row="vr"] {
+  --se-ic: var(--se-icon-vr);
+}
+
+[data-se-row="sortname"] {
+  --se-ic: var(--se-icon-tag);
+}
+
+[data-se-row="recset"] {
+  --se-ic: var(--se-icon-settings);
+}
+
+[data-se-row="hide"] {
+  --se-ic: var(--se-icon-eye-off);
+}
+
+[data-se-row="private"] {
+  --se-ic: var(--se-icon-lock);
+}
+
+/*
+ * The window's head band: the sidebar's cover card and name, and the page's top padding, share
+ * one height, so the page list starts level with the page title
+ */
+[data-se-props] .PagedSettingsDialog {
+  --se-props-cover-h: 97px; /* the wide cover (920:430) across the 248px sidebar, less its padding */
+  --se-props-head: 208px; /* the cover, a gap, "Properties" and a two-line name, with the sidebar's padding */
+}
+
+[data-se-props] .CFTLX2wIKOK3hNV-fS7_V {
+  padding-top: var(--se-props-head) !important; /* beats layout.css's page padding (same reach) */
+}
+
+/*
+ * Sidebar: the game's wide cover as a card, "Properties" and the name under it, in a fixed height
+ * (the band less the sidebar's top padding and the title's bottom margin, layout.css)
+ */
+._2rjVTGz8aLvqOdz5v2gq5C[data-se-ptitle] {
+  position: relative;
+  display: flex !important; /* beats Steam's block title (sp.css PagedSettingsDialog_Title) */
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: var(--se-space-1);
+  height: calc(var(--se-props-head) - var(--se-space-5) - var(--se-space-3)) !important; /* beats layout.css's auto title height */
+  min-height: 0 !important; /* beats Steam's title height (sp.css) */
+  padding: 0 var(--se-space-2) !important; /* beats Steam's title padding (sp.css) */
+  box-sizing: border-box;
+  overflow: hidden;
+  font: 700 var(--se-fs-md)/1.3 var(--se-font) !important; /* beats Steam's title font (sp.css) */
+  color: var(--se-text);
+}
+
+/* No cover: the label and name sit at the band's foot, over the page list */
+._2rjVTGz8aLvqOdz5v2gq5C[data-se-ptitle]:not([data-se-cover]) {
+  justify-content: flex-end;
+}
+
+/* With a cover the label and name sit right under it */
+._2rjVTGz8aLvqOdz5v2gq5C[data-se-cover] {
+  padding-top: calc(var(--se-props-cover-h) + var(--se-space-3)) !important; /* beats the title padding above */
+}
+
+._2rjVTGz8aLvqOdz5v2gq5C[data-se-cover]::after {
+  content: '';
+  position: absolute;
+  inset: 0 var(--se-space-2) auto;
+  height: var(--se-props-cover-h);
+  border-radius: var(--se-radius-sm);
+  background: var(--se-props-cover) center / cover no-repeat;
+  box-shadow: 0 0 0 1px var(--se-hairline), var(--se-shadow-md);
+}
+
+._2rjVTGz8aLvqOdz5v2gq5C[data-se-ptitle]::before {
+  content: 'Properties';
+  font: var(--se-label-font);
+  letter-spacing: var(--se-label-spacing);
+  text-transform: uppercase;
+  color: var(--se-label-color);
+}
+
+/* Sidebar: Steam gives Properties pages no icons, so each item draws ours; the current page gets the accent bar */
+[data-se-props] ._1-vlriAtKYDViAEunue4VO[data-se-icon]:not(:has(._1rD8X96FdnksZLvRRlEiCR))::before {
+  content: '' !important;
+  display: block !important;
+  position: static !important;
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  opacity: 1 !important;
+  background: var(--se-text-muted);
+  -webkit-mask: var(--se-ic) center / 18px 18px no-repeat;
+  mask: var(--se-ic) center / 18px 18px no-repeat;
+}
+
+[data-se-props] ._1-vlriAtKYDViAEunue4VO[data-se-icon]:hover::before {
+  background: var(--se-text-strong);
+}
+
+[data-se-props] ._1-vlriAtKYDViAEunue4VO._2DpXjzK3WWsOtUWUrcuOG7[data-se-icon]::before {
+  background: var(--se-accent);
+}
+
+html:is([data-se-settings], [data-se-props], [data-se-mill]) ._1-vlriAtKYDViAEunue4VO._2DpXjzK3WWsOtUWUrcuOG7::after {
+  content: '';
+  position: absolute;
+  left: -14px;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--se-accent);
+}
+
+/*
+ * The header (props-header.js): the game's hero art across the window's top, behind the sidebar
+ * and the page, fixed while the page scrolls over it; the head band (above) sits over its foot.
+ */
+[data-se-props] .PagedSettingsDialog:has(> .se-phead-art) {
+  position: relative;
+  background: var(--se-bg);
+}
+
+[data-se-props] .PagedSettingsDialog:has(> .se-phead-art) > :not(.se-phead-art) {
+  position: relative;
+  z-index: var(--se-z-raised);
+}
+
+[data-se-props] .PagedSettingsDialog:has(> .se-phead-art) :is(.OX7USkJ5dDP_icD00Gal6, .CFTLX2wIKOK3hNV-fS7_V) {
+  background: transparent !important; /* beats layout.css's page fill and Steam's column fill (sp.css): the art shows */
+}
+
+/* The sidebar keeps its colour, thinned over the art so it reads through */
+[data-se-props] .PagedSettingsDialog:has(> .se-phead-art) ._2kwFFHckg8jvnwJfg9-la8 {
+  background: linear-gradient(color-mix(in srgb, var(--se-sidebar) 72%, transparent), var(--se-sidebar) calc(var(--se-props-head) + 40px)) !important; /* beats layout.css's sidebar fill (same reach) */
+}
+
+.se-phead-art {
+  position: absolute;
+  inset: 0 0 auto;
+  height: calc(var(--se-props-head) + 40px);
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask: linear-gradient(#000 35%, transparent);
+  mask: linear-gradient(#000 35%, transparent);
+}
+
+/* A scrim at its head keeps the window buttons legible */
+.se-phead-art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, var(--se-black-60), transparent 32%);
+}
+
+.se-phead-hero {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+}
+
+/* The page under the header keeps a readable width when the window is wide */
+[data-se-props] .CFTLX2wIKOK3hNV-fS7_V > .DialogContent_InnerWidth:not(#se-none) {
+  max-width: 880px !important; /* beats layout.css's settings-wide 100% (same selector) */
+  margin: 0 auto;
+}
+
+/* Rows never squeeze below their content when the page is taller than the window */
+[data-se-props] .DialogBody [data-se-c] {
+  flex-shrink: 0 !important;
+}
+
+/*
+ * Options' controls: up to 340px, and a long drop-down choice wraps to a second line instead of
+ * being cut off ("Use global setting: Let Steam decide when to update"). No percentage cap: the
+ * column is sized by its content, so a percentage halves the control (buttons under their text).
+ */
+[data-se-props] .DialogBody [data-se-c]:not([data-se-art]) ._1aw7cA3mAZfWt8idAlVJWi {
+  max-width: 340px;
+  min-width: 0;
+}
+
+[data-se-props] .DialogBody [data-se-c] ._1aw7cA3mAZfWt8idAlVJWi :is(.DialogDropDown, .v8oJcDOQF6xmlVTw4VhOr):not(#se-none):not(#se-dd) {
+  height: auto !important; /* beats controls.css's fixed 34px drop-down (same reach) */
+  min-height: var(--se-control-h) !important; /* beats controls.css's 34px floor (same reach) */
+  padding-block: var(--se-space-2) !important; /* beats controls.css's 0 block padding (same reach) */
+}
+
+[data-se-props] .DialogBody [data-se-c] ._1aw7cA3mAZfWt8idAlVJWi .DialogDropDown_CurrentDisplay > * {
+  white-space: normal;
+  line-height: 1.3;
+}
+
+/*
+ * A row whose control Steam puts under its label (Updates › Background Downloads): the
+ * label and description text on the left, the control on the right, like every other row
+ */
+.CFTLX2wIKOK3hNV-fS7_V [data-se-c] ._2tALpM7z8naXJ35Pp5fNAG > ._1aw7cA3mAZfWt8idAlVJWi:has(> ._2o2fXzn99OddeqZMjbDuxQ > :nth-child(2)) {
+  display: contents !important;
+}
+
+.CFTLX2wIKOK3hNV-fS7_V [data-se-c] ._2tALpM7z8naXJ35Pp5fNAG > ._1aw7cA3mAZfWt8idAlVJWi:has(> ._2o2fXzn99OddeqZMjbDuxQ > :nth-child(2)) > ._2o2fXzn99OddeqZMjbDuxQ {
+  display: contents !important;
+}
+
+.CFTLX2wIKOK3hNV-fS7_V [data-se-c] ._2tALpM7z8naXJ35Pp5fNAG > ._1aw7cA3mAZfWt8idAlVJWi:has(> ._2o2fXzn99OddeqZMjbDuxQ > :nth-child(2)) > ._2o2fXzn99OddeqZMjbDuxQ > :not(:last-child) {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  margin: var(--se-space-half) 0 0 !important;
+  padding: 0 !important;
+  font: 500 var(--se-fs-base)/1.4 var(--se-font) !important;
+  color: var(--se-text-muted) !important;
+}
+
+.CFTLX2wIKOK3hNV-fS7_V [data-se-c] ._2tALpM7z8naXJ35Pp5fNAG > ._1aw7cA3mAZfWt8idAlVJWi:has(> ._2o2fXzn99OddeqZMjbDuxQ > :nth-child(2)) > ._2o2fXzn99OddeqZMjbDuxQ > :last-child {
+  grid-column: 2 !important;
+  grid-row: 1 / span 2 !important;
+  align-self: center;
+  max-width: 340px;
+}
+
+/* Thin progress bar (cloud space, disk): the fill is --f of the track, scaled */
+.se-pbar {
+  position: relative;
+  height: 6px;
+  border-radius: var(--se-radius-pill);
+  background: var(--se-hover);
+  overflow: hidden;
+}
+
+.se-pbar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--se-accent);
+  transform: scaleX(var(--f, 0));
+  transform-origin: left;
+}

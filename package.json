@@ -6,7 +6,13 @@
   "license": "MIT",
   "scripts": {
     "build": "node tools/build.js && node plugin/build.js",
+    "build:se": "node tools/build-se.js",
+    "package": "node tools/package.js",
+    "steam": "node tools/steam-classes.js && node tools/build.js",
+    "check:steam": "node tools/check.js --steam --offline",
     "check": "node tools/build.js --check && node plugin/build.js --check && node tools/check.js",
-    "test": "node tools/build.js --check && node plugin/build.js --check && node tools/check.js && node test/plugin.test.js"
+    "test": "node tools/build.js --check && node plugin/build.js --check && node tools/check.js && node test/patches.test.js && node test/modules.test.js && node test/plugin.test.js",
+    "upstream": "node tools/upstream.js",
+    "upstream:check": "node tools/upstream.js --check"
   }
 }

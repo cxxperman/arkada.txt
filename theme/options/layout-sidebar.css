@@ -1,0 +1,128 @@
+/* Сгенерировано tools/build.js из theme/src/options/layout-sidebar.css и steam-classes.json (клиент 1794536281, 2026-11-13). Руками не править. */
+/* Настройка темы «Раскладка: боковая панель». Только главное окно (affects ^Steam$), только CSS.
+ *
+ * Шапка Steam — две строки: TitleBar (меню, кнопки аккаунта и окна) и SuperNavBar (назад/вперёд и вкладки).
+ * Вторая строка уходит в вертикальную панель слева, шапка становится в одну строку. Панель стоит
+ * абсолютно внутри OuterFrame — общей рамки окна, где лежат и шапка, и содержимое, и нижняя панель;
+ * содержимое и нижняя панель сдвигаются вправо на ширину панели.
+ *
+ * Вкладки в SuperNav идут подряд: Магазин, Библиотека, Сообщество, Профиль и, если включён, Консоль.
+ * Значки подбираются по порядку (:nth-child(… of …)). У Steam, где вкладки «Сообщество» нет
+ * (так бывает в некоторых регионах), значки после «Библиотеки» сдвинутся на одну — подписи останутся верными. */
+
+:root {
+  --arkada-rail: 88px;
+  --arkada-icon-store: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 8h14l-1.2 11.2a1.5 1.5 0 0 1-1.5 1.3H7.7a1.5 1.5 0 0 1-1.5-1.3z'/%3E%3Cpath d='M9 10V7a3 3 0 0 1 6 0v3'/%3E%3C/svg%3E");
+  --arkada-icon-library: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4' y='4' width='6.5' height='6.5' rx='1.6'/%3E%3Crect x='13.5' y='4' width='6.5' height='6.5' rx='1.6'/%3E%3Crect x='4' y='13.5' width='6.5' height='6.5' rx='1.6'/%3E%3Crect x='13.5' y='13.5' width='6.5' height='6.5' rx='1.6'/%3E%3C/svg%3E");
+  --arkada-icon-community: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='8.5' r='3.2'/%3E%3Cpath d='M3.5 19.5c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5'/%3E%3Ccircle cx='16.5' cy='9.5' r='2.6'/%3E%3Cpath d='M16 14.6c2.3 0 4 1.5 4.5 4.4'/%3E%3C/svg%3E");
+  --arkada-icon-profile: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8.5' r='3.8'/%3E%3Cpath d='M4.8 20c.9-3.8 3.7-5.8 7.2-5.8s6.3 2 7.2 5.8'/%3E%3C/svg%3E");
+  --arkada-icon-console: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7.5 7.5h9a4.5 4.5 0 0 1 4.4 5.4l-.8 3.9a2.2 2.2 0 0 1-3.8 1l-2-2.3h-4.6l-2 2.3a2.2 2.2 0 0 1-3.8-1l-.8-3.9a4.5 4.5 0 0 1 4.4-5.4z'/%3E%3Cpath d='M8 10.5v3M6.5 12h3'/%3E%3C/svg%3E");
+}
+
+/* Рамка окна — опора для панели */
+._3mz8wQ6Q44B8P7pzPP4Iyw { position: relative; }
+
+/* Сама панель: вторая строка шапки, поставленная вертикально */
+._3mz8wQ6Q44B8P7pzPP4Iyw ._3Z3ohQ8-1NKnCZkbS6fvy {
+  position: absolute;
+  z-index: 20;
+  top: 32px; /* высота TitleBar у Steam */
+  bottom: 0;
+  inset-inline-start: 0;
+  width: var(--arkada-rail);
+  height: auto;
+  min-height: 0;
+  padding: 8px 6px;
+  box-sizing: border-box;
+  background: transparent; /* панель лежит прямо на фоне окна (Mica), как NavigationView в WinUI */
+  box-shadow: none;
+  -webkit-app-region: no-drag;
+}
+._3mz8wQ6Q44B8P7pzPP4Iyw ._1rDh5rXSFZJOqCa4UpnI4z,
+._3mz8wQ6Q44B8P7pzPP4Iyw ._1_yS5UP7el0aN4vntx3dx {
+  margin-inline-start: var(--arkada-rail);
+}
+
+/* Две стрелки — в одной строке сверху, вкладки — столбиком под ними */
+._3mz8wQ6Q44B8P7pzPP4Iyw ._3Z3ohQ8-1NKnCZkbS6fvy ._2D64jIEK7wpUR_NlObDW76 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-auto-rows: min-content;
+  align-content: start;
+  justify-items: center;
+  row-gap: 4px;
+  height: auto;
+}
+._3mz8wQ6Q44B8P7pzPP4Iyw ._3Z3ohQ8-1NKnCZkbS6fvy ._25lBLzuVeYAUG279up4xP8,
+._3mz8wQ6Q44B8P7pzPP4Iyw ._3Z3ohQ8-1NKnCZkbS6fvy ._25lBLzuVeYAUG279up4xP8:first-child {
+  box-sizing: content-box;
+  margin-bottom: 8px;
+  padding: 6px;
+}
+._3mz8wQ6Q44B8P7pzPP4Iyw ._3Z3ohQ8-1NKnCZkbS6fvy ._7AlhCx3XGzBeIrQaCneUD,
+._3mz8wQ6Q44B8P7pzPP4Iyw ._3Z3ohQ8-1NKnCZkbS6fvy ._7AlhCx3XGzBeIrQaCneUD:first-child,
+._3mz8wQ6Q44B8P7pzPP4Iyw ._3Z3ohQ8-1NKnCZkbS6fvy ._7AlhCx3XGzBeIrQaCneUD:last-child {
+  grid-column: 1 / -1;
+  justify-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  height: auto;
+  padding: 8px 2px 7px;
+  border-radius: var(--arkada-r-control);
+  font-size: var(--dt-size-micro);
+  font-weight: 600;
+  text-align: center;
+  -webkit-app-region: no-drag;
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out), transform var(--dt-dur-fast) var(--dt-ease-out);
+}
+._3mz8wQ6Q44B8P7pzPP4Iyw ._3Z3ohQ8-1NKnCZkbS6fvy ._7AlhCx3XGzBeIrQaCneUD:hover:not(._2cO0HdvLEGAdhosLekWsmo) { background-color: var(--dt-fill); }
+._3mz8wQ6Q44B8P7pzPP4Iyw ._3Z3ohQ8-1NKnCZkbS6fvy ._7AlhCx3XGzBeIrQaCneUD:active:not(._2cO0HdvLEGAdhosLekWsmo) { background-color: var(--dt-fill-press); transition-duration: var(--dt-dur-press); }
+._3mz8wQ6Q44B8P7pzPP4Iyw ._3Z3ohQ8-1NKnCZkbS6fvy ._7AlhCx3XGzBeIrQaCneUD._1gqEjB5QsKT_NftD1dEsdZ:not(._2cO0HdvLEGAdhosLekWsmo) {
+  position: relative;
+  background-color: var(--dt-fill-2);
+}
+
+/* Значок над подписью */
+._3mz8wQ6Q44B8P7pzPP4Iyw ._3Z3ohQ8-1NKnCZkbS6fvy ._7AlhCx3XGzBeIrQaCneUD::before {
+  content: "";
+  width: 22px;
+  height: 22px;
+  flex: none;
+  background-color: currentColor;
+  color: var(--dt-label-2);
+  -webkit-mask: var(--arkada-icon, var(--arkada-icon-store)) center / contain no-repeat;
+  transition: background-color var(--dt-dur-fast) var(--dt-ease-out);
+}
+._3mz8wQ6Q44B8P7pzPP4Iyw ._3Z3ohQ8-1NKnCZkbS6fvy ._7AlhCx3XGzBeIrQaCneUD:hover::before,
+._3mz8wQ6Q44B8P7pzPP4Iyw ._3Z3ohQ8-1NKnCZkbS6fvy ._7AlhCx3XGzBeIrQaCneUD._1gqEjB5QsKT_NftD1dEsdZ::before { color: var(--dt-label); }
+._3mz8wQ6Q44B8P7pzPP4Iyw ._3Z3ohQ8-1NKnCZkbS6fvy ._7AlhCx3XGzBeIrQaCneUD:nth-child(1 of ._7AlhCx3XGzBeIrQaCneUD) { --arkada-icon: var(--arkada-icon-store); }
+._3mz8wQ6Q44B8P7pzPP4Iyw ._3Z3ohQ8-1NKnCZkbS6fvy ._7AlhCx3XGzBeIrQaCneUD:nth-child(2 of ._7AlhCx3XGzBeIrQaCneUD) { --arkada-icon: var(--arkada-icon-library); }
+._3mz8wQ6Q44B8P7pzPP4Iyw ._3Z3ohQ8-1NKnCZkbS6fvy ._7AlhCx3XGzBeIrQaCneUD:nth-child(3 of ._7AlhCx3XGzBeIrQaCneUD) { --arkada-icon: var(--arkada-icon-community); }
+._3mz8wQ6Q44B8P7pzPP4Iyw ._3Z3ohQ8-1NKnCZkbS6fvy ._7AlhCx3XGzBeIrQaCneUD:nth-child(4 of ._7AlhCx3XGzBeIrQaCneUD) { --arkada-icon: var(--arkada-icon-profile); }
+._3mz8wQ6Q44B8P7pzPP4Iyw ._3Z3ohQ8-1NKnCZkbS6fvy ._7AlhCx3XGzBeIrQaCneUD:nth-child(5 of ._7AlhCx3XGzBeIrQaCneUD) { --arkada-icon: var(--arkada-icon-console); }
+
+/* Подпись: в одну строку, длинное имя профиля обрезается. Заливку и полоску несёт сама вкладка, а не подпись
+ * (в шапке их несёт подпись) — класс подписи повторён, чтобы перевесить :hover и .Selected из основной темы */
+._3mz8wQ6Q44B8P7pzPP4Iyw ._3Z3ohQ8-1NKnCZkbS6fvy ._7AlhCx3XGzBeIrQaCneUD ._19axKcqYRuaJ8vdYKYmtTQ._19axKcqYRuaJ8vdYKYmtTQ {
+  position: static;
+  height: auto;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/* Полоска выбранной вкладки — слева, вертикальная */
+._3mz8wQ6Q44B8P7pzPP4Iyw ._3Z3ohQ8-1NKnCZkbS6fvy ._7AlhCx3XGzBeIrQaCneUD._1gqEjB5QsKT_NftD1dEsdZ:not(._2cO0HdvLEGAdhosLekWsmo) ._19axKcqYRuaJ8vdYKYmtTQ::after {
+  position: absolute;
+  inset-inline-start: -6px;
+  top: 50%;
+  width: 3px;
+  height: 18px;
+  margin: -9px 0 0;
+  animation: none;
+}

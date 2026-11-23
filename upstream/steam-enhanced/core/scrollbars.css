@@ -1,0 +1,43 @@
+/*
+ * Auto-hiding overlay scrollbars across all client windows.
+ */
+*::-webkit-scrollbar {
+  width: 10px !important;
+  height: 10px !important;
+  background: transparent !important;
+}
+
+*::-webkit-scrollbar-track,
+*::-webkit-scrollbar-track-piece,
+*::-webkit-scrollbar-corner {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+*::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+*::-webkit-scrollbar-thumb {
+  min-height: 40px;
+  border: 3px solid transparent !important;
+  border-radius: var(--se-radius-pill) !important;
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+[data-se-scrolling]::-webkit-scrollbar-thumb {
+  background: var(--se-white-18) padding-box !important;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--se-white-25) padding-box !important;
+}
+
+*::-webkit-scrollbar-thumb:active {
+  background: var(--se-white-40) padding-box !important;
+}

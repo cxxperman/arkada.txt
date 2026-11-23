@@ -1,0 +1,243 @@
+/*
+ * Continues millennium.css (in order, see client/loader.js): Millennium Settings › Logs.
+ *
+ * The sources as tabs, a toolbar, and the open log as a table (`.se-logv`, drawn by
+ * millennium-logs.js). Millennium's own viewer stays mounted beneath it, hidden: it holds the logs.
+ * The page fills the window and keeps still; the table scrolls inside itself.
+ */
+.MillenniumSettings .CFTLX2wIKOK3hNV-fS7_V[data-se-mill-page="logs"]:not(#se-none):not(#se-p2) {
+  overflow-y: hidden !important;
+}
+
+.MillenniumSettings [data-se-lock]:not(#se-none):not(#se-p2) {
+  overflow: hidden !important;
+}
+
+.MillenniumSettings [data-se-mill-page="logs"] .DialogBody[data-se-logv] > :not(.se-logv):not(#se-none):not(#se-p2) {
+  display: none !important;
+}
+
+.se-logv {
+  display: flex;
+  flex-direction: column;
+  gap: var(--se-space-3);
+  margin-top: var(--se-space-4);
+  font-family: var(--se-font);
+}
+
+/* Sources */
+.se-logv-tabs {
+  position: relative;
+  display: flex;
+  gap: var(--se-space-1);
+  padding: var(--se-space-1);
+  overflow-x: auto;
+  border-radius: var(--se-radius-ml);
+  background: var(--se-field);
+  box-shadow: var(--se-edge);
+  scrollbar-width: none;
+}
+
+.se-logv-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.se-logv-tabs button {
+  all: unset;
+  box-sizing: border-box;
+  flex: 1 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--se-space-2);
+  height: var(--se-control-h);
+  padding: 0 var(--se-space-3);
+  border-radius: var(--se-radius-md);
+  color: var(--se-text-muted);
+  font: 600 var(--se-fs-base) / 1 var(--se-font);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--se-dur) var(--se-ease), color var(--se-dur) var(--se-ease);
+}
+
+.se-logv-tabs button:hover {
+  background: var(--se-surface);
+  color: var(--se-text);
+}
+
+.se-logv-tabs button[data-on] {
+  background: var(--se-surface-2);
+  box-shadow: var(--se-edge);
+  color: var(--se-text-strong);
+}
+
+.se-logv-tabs button:focus-visible {
+  outline: var(--se-focus-outline);
+  outline-offset: -2px;
+}
+
+.se-logv-tabs b {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 var(--se-space-1);
+  box-sizing: border-box;
+  border-radius: var(--se-radius-xs);
+  font: 700 var(--se-fs-xs) / 18px var(--se-font);
+  text-align: center;
+}
+
+.se-logv-tabs b[data-k="error"] {
+  background: color-mix(in srgb, var(--se-danger) 18%, transparent);
+  color: var(--se-danger-text);
+}
+
+.se-logv-tabs b[data-k="warning"] {
+  background: var(--se-gold-surface);
+  color: var(--se-gold-text);
+}
+
+/* Toolbar: search, level, then text size and copy */
+.se-logv-tools {
+  display: flex;
+  align-items: center;
+  gap: var(--se-space-2);
+}
+
+.MillenniumSettings .se-logv-tools .se-mfilter {
+  width: 260px;
+  margin-left: 0;
+}
+
+.se-logv-icons {
+  display: flex;
+  gap: var(--se-space-half);
+  margin-left: auto;
+}
+
+/* The log: a table that reaches the window's foot (--se-logv-h), its line count underneath */
+.se-logv-panel {
+  display: flex;
+  flex-direction: column;
+  height: var(--se-logv-h, 420px);
+  overflow: hidden;
+  border-radius: var(--se-radius-lg);
+  background: var(--se-surface);
+  box-shadow: var(--se-edge);
+}
+
+.se-logv-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: max-content max-content minmax(0, 1fr) max-content;
+  align-content: start;
+  column-gap: var(--se-space-3);
+  overflow: auto;
+  font-size: var(--se-logv-font, 13px);
+  user-select: text;
+}
+
+.se-logv-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  align-items: baseline;
+  padding: var(--se-space-1) var(--se-space-4);
+  border-bottom: 1px solid color-mix(in srgb, var(--se-hairline) 60%, transparent);
+  line-height: 1.5;
+}
+
+.se-logv-row:hover {
+  background: color-mix(in srgb, var(--se-text) 3%, transparent);
+}
+
+.se-logv-row[data-lv="warning"] {
+  background: color-mix(in srgb, var(--se-warning) 5%, transparent);
+}
+
+.se-logv-row[data-lv="error"] {
+  background: color-mix(in srgb, var(--se-danger) 8%, transparent);
+}
+
+.se-logv-row[data-head] {
+  position: sticky;
+  top: 0;
+  z-index: var(--se-z-raised);
+  padding-top: var(--se-space-3);
+  padding-bottom: var(--se-space-2);
+  border-bottom: 1px solid var(--se-hairline);
+  background: var(--se-surface);
+  font: var(--se-label-font);
+  letter-spacing: var(--se-label-spacing);
+  text-transform: uppercase;
+  color: var(--se-label-color);
+  user-select: none;
+}
+
+.se-logv-row[data-head] > :last-child {
+  text-align: right;
+}
+
+.se-logv-time,
+.se-logv-where {
+  font-family: var(--se-font-mono);
+  font-size: .9em;
+  color: var(--se-text-muted);
+  white-space: nowrap;
+}
+
+.se-logv-where {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: right;
+}
+
+.se-logv-lv {
+  display: inline-block;
+  padding: var(--se-space-half) var(--se-space-2);
+  border-radius: var(--se-radius-xs);
+  background: var(--se-hairline);
+  font: 700 var(--se-fs-2xs) / 1 var(--se-font);
+  font-style: normal;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--se-text-dim);
+}
+
+.se-logv-lv[data-lv="warning"] {
+  background: var(--se-gold-surface);
+  color: var(--se-gold-text);
+}
+
+.se-logv-lv[data-lv="error"] {
+  background: color-mix(in srgb, var(--se-danger) 18%, transparent);
+  color: var(--se-danger-text);
+}
+
+.se-logv-msg {
+  min-width: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--se-text);
+}
+
+.se-logv-empty {
+  grid-column: 1 / -1;
+  padding: var(--se-space-7) var(--se-space-4);
+  text-align: center;
+  font: 500 var(--se-fs-base) / 1.4 var(--se-font);
+  color: var(--se-text-muted);
+}
+
+.se-logv-foot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 var(--se-space-4);
+  border-top: 1px solid var(--se-hairline);
+  font: 500 var(--se-fs-sm) / 1 var(--se-font);
+  font-variant-numeric: tabular-nums;
+  color: var(--se-text-muted);
+}
