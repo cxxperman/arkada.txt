@@ -1,4 +1,4 @@
-// Arkada plugin for Millennium, version 0.2.0. Built by plugin/build.js from plugin/src — do not edit by hand.
+// Arkada plugin for Millennium, version 0.2.1. Built by plugin/build.js from plugin/src — do not edit by hand.
 // Runs inside the Steam client and tells the dev.txt hub on this PC (ws://127.0.0.1:42080/hub) what Steam is doing,
 // sends Steam's notifications to Kapsula on this PC (ws://127.0.0.1:42071) and shows the size on disk on a game's page.
 // Nothing goes to the internet. Steam's own notifications are left as they were (Kapsula may ask to hide one it shows).
@@ -1877,7 +1877,7 @@ let PluginEntryPointMain = function () {
       },
       "./version.js": function (module, exports, require) {
         // Written by build.js from plugin.json. Do not edit by hand.
-        module.exports = "0.2.0";
+        module.exports = "0.2.1";
       },
       "./index.js": function (module, exports, require) {
         // Arkada plugin for Millennium: the entry point Millennium calls inside the Steam client.

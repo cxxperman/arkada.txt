@@ -1,0 +1,27 @@
+Steam Enhanced, client/friends/dock/ui.js: the Friends dock folds to its rail on windows of 1600 px
+and under (was 1400).
+
+Why. With the dock open (~290 px), the game list (~300 px) and the left rail (60 px), a 1600×900
+window or a 1920×1080 screen at 125 % scale (1536 px of window) left the page ~890-945 px: the game
+page's play bar wrapped its stats onto a second line, its links did not fit, the Home board went to
+its narrow layout. A full HD window at 100 % (1920) keeps the open dock.
+
+What. DOCK_FOLD_AT 1400 → 1600. Nothing else changes: opening the dock by hand on a small window
+still holds it open until the window crosses the breakpoint, and the saved choice is only changed on
+a big window.
+
+--- a/client/friends/dock/ui.js
++++ b/client/friends/dock/ui.js
+@@ -123,11 +123,11 @@
+ 
+   /*
+-   * Small windows (1400 px and under) fold the dock to its rail (client/shared/window-fold.js).
++   * Small windows (1600 px and under) fold the dock to its rail (client/shared/window-fold.js).
+    * Expanding it there holds it open until the window crosses the breakpoint; the saved
+    * choice is only changed on a big window, and comes back once the window grows again.
+    */
+-  const DOCK_FOLD_AT = 1400;
++  const DOCK_FOLD_AT = 1600;
+   const savedMode = () => store.get('se-fdock', 'open');
+   const foldedMode = () => (live.fold.held ? 'open' : 'rail');
+   live.fold = SE.windowFold(DOCK_FOLD_AT, () => {

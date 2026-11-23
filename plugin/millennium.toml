@@ -9,7 +9,7 @@
 [plugin]
 id = "arkada"
 name = "Arkada"
-version = "0.2.0"
+version = "0.2.1"
 author = "dev.txt"
 description = "Tells the other dev.txt apps on this PC what Steam is doing, sends Steam notifications to Kapsula, shows the size on disk of a game and adds Share to store pages. Nothing leaves the computer."
 

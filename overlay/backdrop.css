@@ -80,6 +80,23 @@
   background: var(--arkada-tint);
 }
 
+/* Every window but the main one (chats, the friends list window, dialogs: properties, settings,
+   About, downloads, screenshots…): a light tint lets the main window's tiles and text show through
+   and run into the messages. They get a solid ground (90 %, in every mode): the material is only a
+   hint at the edge of it. It is laid on the root, so it covers the whole window whatever the window's
+   first child is, and once: the frame and their ground are clear, panels are plain layers over it.
+   MillenniumWindow_MainSteamWindow is Millennium's mark of the main window; menus (ContextMenuPopup)
+   keep their own panel. */
+:root:root[data-arkada-backdrop]:not(.MillenniumWindow_MainSteamWindow, .ContextMenuPopup) {
+  --arkada-solid: color-mix(in srgb, var(--dt-bg) 90%, transparent);
+  --se-bg: transparent;
+  background: var(--arkada-solid) !important;
+}
+
+:root:root[data-arkada-backdrop]:not(.MillenniumWindow_MainSteamWindow, .ContextMenuPopup) body > div:first-child {
+  background: transparent;
+}
+
 /* ───────── Steam's own grounds ─────────
  * Wrapper ForceOpaqueBackground (black under the whole main window), AppDetailsTransitionGroup
  * (under every library page), the game page's Body ScrollContainer (a grey ground, or a radial

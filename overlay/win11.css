@@ -340,3 +340,70 @@ html[data-arkada-motion='reduced'] :is(.MainPanel, .AppActivityDay, .PartnerEven
 ._2r4TK4BAuU-J4FuF_O7v_5 img:not(#ark) {
   background-color: var(--arkada-layer-2);
 }
+/* ───────── Smaller windows: 1920×1080, 1366×768, 125–150 % scale ─────────
+ * The theme was laid out on a 3440 px screen; on a 16:9 one the page is 860–1250 px wide. Like
+ * Windows 11's adaptive apps, what does not fit folds away whole (into a menu, out of a row) instead
+ * of wrapping onto a second line or being cut mid-word. The Friends dock folds to its rail at
+ * 1600 px (patches/0009), Home's collection cards keep 160 px (patches/0008). */
+
+/* The game page's links. Steam lays them out itself (sp.js, CalculateLinkPositions): on a window under
+   1200 px tall one row, the links that do not fit folded into "⋯" (3 rows on a taller one). It adds up
+   the links' widths against the row's box, not counting the "Overview" tab drawn before them (their
+   ::before) nor the gaps between them, so on a 1920×1080 window the last link it kept wrapped onto a
+   second row under the others. And their CSS hid a folded link with display: none: measured again
+   (on any change of the links) it was 0 px wide, "fitted", and came back, so the row overflowed.
+   Here a folded link is hidden but keeps its width, out of the row; the tabs have no gaps (each tab's
+   padding spaces them); the Overview tab has a fixed width, and on a one-row window the row is one
+   line whose box gives Steam that much less room, half on each side: what Steam keeps plus the
+   Overview tab fits exactly where the row stands, centred as before. */
+._3-V8vjmrwuJM6Ws3tsjFJj .DgVQapkBmhAW6oPY5rPZo:not(#se-none):not(#ark) {
+  --arkada-tab-overview: 88px;
+  column-gap: 0 !important;
+}
+
+@media (max-height: 1199.98px) {
+  ._3-V8vjmrwuJM6Ws3tsjFJj .DgVQapkBmhAW6oPY5rPZo:not(#se-none):not(#ark) {
+    flex-wrap: nowrap !important;
+    margin-inline: calc(var(--arkada-tab-overview) / 2) !important;
+  }
+}
+
+._3-V8vjmrwuJM6Ws3tsjFJj .DgVQapkBmhAW6oPY5rPZo:not(#ark)::before {
+  box-sizing: border-box;
+  justify-content: center;
+  width: var(--arkada-tab-overview);
+  padding: 0;
+}
+
+._3-V8vjmrwuJM6Ws3tsjFJj ._7k4qmaN8SUMvv6u-L81uk[style*="opacity: 0"]:not(#se-none):not(#ark) {
+  display: inline-flex !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  visibility: hidden;
+}
+
+/* The play bar's stats keep one row: a stat that does not fit after the others is left out whole
+   (it wraps onto a second row, which is clipped), not drawn on a second line that doubles the bar */
+._3Yf8b2v5oOD8Wqsxu04ar._1U7LKpx70kEsz3jJwAFOi- ._1mDAVT4sTzFRwJtlKCw2Ws:not(#se-none):not(#ark) {
+  flex-wrap: wrap !important;
+  min-width: 0;
+  max-height: 44px; /* a stat: 43 px */
+  overflow: clip;
+  overflow-clip-margin: 6px;
+}
+
+/* A friend's game status in the friends list: one line ending in "…" (Steam's label is a flex box,
+   which cut the text off mid-letter) */
+.friendsContainer .friend ._2Ri005Wg_uXDTa71kdRbcN:not(#ark) {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* The Friends rail's section names ("Избранное") stay inside the 60 px rail, with "…" */
+.se-fd-raillabel:not(#ark) {
+  max-width: calc(var(--se-fd-rail, 60px) - 8px);
+}
