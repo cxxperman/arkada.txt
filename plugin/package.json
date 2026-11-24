@@ -1,6 +1,6 @@
 {
   "name": "arkada-plugin",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "private": true,
   "description": "Arkada plugin for Millennium: Steam → the dev.txt hub",
   "license": "MIT",

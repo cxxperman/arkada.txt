@@ -327,6 +327,7 @@ end
 
 -- hwnd key → { want = "mode:kind", path = "backdrop" | "accent" }
 local patched = {}
+local menuCleared = {} -- menu/Supernav hwnds whose leftover blur was cleared once (see the "skip" branch)
 
 local function undo_all()
   local n = 0
@@ -370,6 +371,12 @@ local function run(mode, only_new)
           undo(hwnd, rec.path)
           patched[key] = nil
           logger:info(string.format("hwnd %s: %s, backdrop taken off", hex(key), why))
+        elseif why == "menu" and not menuCleared[key] then
+          -- Steam keeps menu windows alive and reuses them, so one patched by an older backend (or before a
+          -- restart of this Lua state) still carries its blur: clear it once per window, whatever we remember
+          menuCleared[key] = true
+          pcall(undo, hwnd, "blur")                     -- accent off (+ system backdrop to auto)
+          if MODERN then pcall(undo, hwnd, "backdrop") end -- frame extension off
         end
       elseif rec and rec.want == mode .. ":" .. kind then
         result.kept = result.kept + 1

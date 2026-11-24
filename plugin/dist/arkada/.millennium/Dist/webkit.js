@@ -1,4 +1,4 @@
-// Arkada plugin for Millennium, version 0.2.1: the part Millennium runs in Steam's store pages.
+// Arkada plugin for Millennium, version 0.2.2: the part Millennium runs in Steam's store pages.
 // Built by plugin/build.js from plugin/src — do not edit by hand. Adds «Поделиться» to a game's page; nothing goes to the internet.
 const MILLENNIUM_IS_CLIENT_MODULE = !1, pluginName = "arkada";
 (window.PLUGIN_LIST ||= {})[pluginName] ||= {}, window.MILLENNIUM_SIDEBAR_NAVIGATION_PANELS ||= {};

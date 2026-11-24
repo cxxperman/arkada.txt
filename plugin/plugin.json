@@ -3,7 +3,7 @@
   "name": "arkada",
   "common_name": "Arkada",
   "description": "Tells the other dev.txt apps on this PC what Steam is doing, sends Steam notifications to Kapsula, shows the size on disk of a game and adds Share to store pages. Nothing leaves the computer.",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "useBackend": true,
   "backendType": "lua",
   "webkitApiVersion": "2.0.0"

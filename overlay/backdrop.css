@@ -97,6 +97,57 @@
   background: transparent;
 }
 
+/* A menu's window (ContextMenuPopup: "… Menu", "… Supernav") is bigger than its panel, for the
+   panel's shadow: outside the panel it stays clear, root, body and frame, should it ever be marked
+   (plugin/src/steam.js leaves menus unmarked) */
+:root:root[data-arkada-backdrop].ContextMenuPopup,
+:root:root[data-arkada-backdrop].ContextMenuPopup body,
+:root:root[data-arkada-backdrop].ContextMenuPopup body > div:first-child {
+  background: transparent !important;
+}
+
+/* ───────── What floats over the page: a solid ground of its own ─────────
+ * The chat docked in the main window, menus and dropdowns drawn in the page, the bell's panel, hover
+ * cards and mini profiles, tooltips, the dock's flyouts, the filters, the drag tray, modals: with
+ * their ground clear (--se-bg above) the page behind them read through. Their tokens are laid again
+ * on the panel itself, from a ground of 92 %: the panel's own fill (whichever token it takes, --se-bg,
+ * --se-sidebar, --se-surface, --se-hover, --se-panel-bg) and its rows and fields over it are solid,
+ * while the boxes that only make room for a shadow (transparent !important in their CSS) stay clear.
+ * Their shadow and edge are Fluent's already (--se-shadow-pop, --se-panel-shadow: overlay/tokens.css).
+ *   .se-layer-page > *        the theme's panels drawn in the window (client/shared/popup-layer.js):
+ *                             its menus, the downloads card, hover cards placed in the page
+ *   .se-menu .se-mn .se-dlc   the theme's menus (Settings, the stage's settings, the picker), the downloads card
+ *   .multiChatDialog          the chat docked in the main window (client/friends/friends-dock-chat.css)
+ *   .se-fd-*                  the friends dock's flyouts, cards and the folded chat's chip
+ *   contextMenu (PP7L…)       Steam's menu box drawn in the page (the library's and the friends' menus)
+ *   NotificationsMenu (_1Ug…) the bell's panel
+ *   DropDown, Combobox…       Steam's dropdown (EDl_…) and the combobox's list (_29AJ…)
+ *   AdvancedSearchPane (Woh0…), .se-filters-panel   the game list's filters
+ *   AppPortraitHover, miniProfile, AppDetailsHover, [data-se-fh-host], .se-hs-fcard   hover cards
+ *   TextToolTip, ToolTipCustom, the recording tooltips, .se-tip, .se-tip-label, .se-ach-tip   tooltips
+ *   ModalPosition_Content     a dialog over the page; FloatingConfirmation, the browser bar's
+ *   .se-gd-tray, .se-col-chip, the Library Manager (.MillenniumDesktopSidebar[data-se-lmx], .se-lmx-results)
+ * The window's ground, the page and Home's and the game page's layers are not here: they stay clear. */
+:root:root[data-arkada-backdrop] :is(
+  .se-layer-page > *, .se-menu, .se-mn, .se-dlc,
+  .se-fdock .multiChatDialog, .se-fd-fly, .se-fd-card, .se-fd-chat-chip,
+  .PP7LM0Ow1K5qkR8WElLpt, ._1UgM1Pm8SbTWX7_2f-crGt,
+  .EDl_mzaY3WxkgmYVD8W4d, ._29AJUo6aKT93gX24N5WFj_, .Woh0kBQCmatzC1daBX9i6, .se-filters-panel,
+  ._2sGn0cBsD44TjnUIh-lx9d, ._2QPdq7GZ_03AD1ioPixVXW, ._38FqIwZQKW6BlRyzN66pi6, [data-se-fh-host], .se-hs-fcard,
+  ._2FxbHJzYoH024ko7zqcJOf, ._3XGRklQrZMakU2xaYB0cLD, .JB3vz2k1En56vQbe0XtOZ, ._2ytunPfeSrGLnjLfJzcZYH, ._1JVxK7k1dVGT-XnDTUFrIC,
+  .se-tip, .se-tip-label, .se-ach-tip,
+  .ModalPosition_Content, .FloatingConfirmation,
+  .se-gd-tray, .se-col-chip, .MillenniumDesktopSidebar[data-se-lmx], .se-lmx-results
+):not(#ark) {
+  --se-bg: color-mix(in srgb, var(--dt-bg) 92%, transparent);
+  --se-sidebar: var(--se-bg);
+  --se-surface: color-mix(in srgb, var(--se-bg), white 3.5%);
+  --se-surface-2: color-mix(in srgb, var(--se-bg), white 6%);
+  --se-hover: color-mix(in srgb, var(--se-bg), white 7%);
+  --se-selected: color-mix(in srgb, var(--se-bg), white 8%);
+  --se-panel-bg: color-mix(in srgb, var(--dt-raised) 92%, transparent);
+}
+
 /* ───────── Steam's own grounds ─────────
  * Wrapper ForceOpaqueBackground (black under the whole main window), AppDetailsTransitionGroup
  * (under every library page), the game page's Body ScrollContainer (a grey ground, or a radial
