@@ -166,6 +166,8 @@ function checkI18n(dir) {
   const texts = [];
   (function walk(d) { for (const f of fs.readdirSync(d)) { const p = path.join(d, f); if (fs.statSync(p).isDirectory()) walk(p); else if (f.endsWith('.js')) texts.push(fs.readFileSync(p, 'utf8')); } })(path.join(up, 'client'));
   (function walk(d) { for (const f of fs.readdirSync(d)) { const p = path.join(d, f); if (fs.statSync(p).isDirectory()) walk(p); else if (f.endsWith('.js')) texts.push(fs.readFileSync(p, 'utf8')); } })(path.join(up, 'core'));
+  // compat/: their cards for other plugins (the How Long To Beat card, which Arkada's plugin feeds)
+  (function walk(d) { for (const f of fs.readdirSync(d)) { const p = path.join(d, f); if (fs.statSync(p).isDirectory()) walk(p); else if (f.endsWith('.js')) texts.push(fs.readFileSync(p, 'utf8')); } })(path.join(up, 'compat'));
   const code = texts.join('\n').replace(/\\(['"`])/g, '$1').replace(/&amp;/g, '&');
   const stale = Object.keys(dict.EXACT).filter(k => !code.includes(k));
   const probes = dict.PATTERNS.map(p => p[2]).filter(p => p && !code.includes(p));

@@ -37,7 +37,7 @@ function browserLikeWebSocket(Base) {
 }
 
 function makePage(o) {
-  const calls = { urls: [], accepted: 0, unregistered: 0, ran: [], opened: [], backend: [], chat: [], chatOpened: [], tests: [], properties: [], folders: 0 };
+  const calls = { urls: [], accepted: 0, unregistered: 0, ran: [], opened: [], backend: [], chat: [], chatOpened: [], tests: [], properties: [], folders: 0, browser: [] };
   const log = [], ipc = [];
   const listeners = { game: new Set(), download: new Set(), popup: new Set() };
   const listen = set => cb => { set.add(cb); return { unregister() { set.delete(cb); calls.unregistered++; } }; };
@@ -84,6 +84,7 @@ function makePage(o) {
     MILLENNIUM_API: {}, SP_REACT: {},
     MILLENNIUM_BACKEND_IPC: { postMessage: (...a) => ipc.push(a) },
     NotificationStore: new NotificationStore(),
+    App: { m_CurrentUser: { strSteamID: '76561198000000009' } },
     appStore: { GetAppOverviewByAppID: id => (names[id] ? { appid: id, display_name: names[id] } : null) },
     SteamUIStore: { RunningApps: [], WindowStore: { MainWindowInstance: { m_history: history } } },
     SteamClient: {
@@ -92,6 +93,7 @@ function makePage(o) {
       URL: { ExecuteSteamURL: url => { calls.urls.push(url); } },
       Apps: { RunGame: (...a) => { calls.ran.push(a); }, OpenAppSettingsDialog: (id, page) => { calls.properties.push([id, page]); } },
       WebChat: { ShowFriendChatDialog: id => { calls.chatOpened.push(id); } },
+      System: { OpenInSystemBrowser: url => { calls.browser.push(url); } },
       // The library folders as Steam reports them (uint64 sizes come as strings)
       InstallFolder: { GetInstallFolders: () => { calls.folders++; return Promise.resolve([
         { strFolderPath: 'D:\\SteamLibrary', strDriveName: 'D:', strUserLabel: 'Игры', vecApps: [

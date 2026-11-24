@@ -1,6 +1,6 @@
 {
   "name": "arkada.txt",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "private": true,
   "description": "Arkada: тема и плагин dev.txt для клиента Steam (через Millennium)",
   "license": "MIT",

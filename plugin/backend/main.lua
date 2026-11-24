@@ -1,9 +1,11 @@
 --[[
   Arkada plugin for Millennium: the backend, run by Millennium's Lua host (LuaJIT).
 
-  One job: ask Windows for the system backdrop under the windows of the Steam client, so that the
+  Two jobs. Here: ask Windows for the system backdrop under the windows of the Steam client, so that the
   theme can let the desktop show through. The frontend (plugin/src/backdrop.js) calls
   ApplyBackdrop(mode) with "mica", "acrylic" or "off"; nothing here runs by itself.
+  And How Long To Beat (arkada_hltb.lua, GetHltbData and HltbSetup at the end of this file): the only
+  part of the backend that goes to the internet, and only while its setting is on.
 
     Windows 11 22H2 and later (build 22621+), the documented way:
       DWMWA_USE_IMMERSIVE_DARK_MODE (20) = TRUE    the dark variant of the material
@@ -448,9 +450,42 @@ function ApplyBackdrop(...)
   return json.encode(result)
 end
 
+-- ───────── How Long To Beat (arkada_hltb.lua) ─────────
+-- Loaded in a pcall: if that module cannot load, the window backdrop above still works.
+local hltb_ok, hltb = pcall(require, "arkada_hltb")
+if not hltb_ok then logger:error("How Long To Beat is not available: " .. tostring(hltb)); hltb = nil end
+
+-- GetHltbData(app_id, fallback_name, force_refresh) → JSON, the same call and reply as the HLTB for Steam
+-- plugin (Steam Enhanced's card asks it so, positionally; the frontend with these names, which Millennium
+-- hands over in the same order). See arkada_hltb.lua.
+function GetHltbData(app_id, fallback_name, force_refresh)
+  if type(app_id) == "table" then app_id, fallback_name, force_refresh = app_id.app_id, app_id.fallback_name, app_id.force_refresh end
+  if not hltb then return json.encode({ success = false, error = "not available" }) end
+  local ok, result = pcall(hltb.get, app_id, fallback_name, force_refresh == true)
+  if not ok then logger:error("GetHltbData: " .. tostring(result)); result = { success = false, error = tostring(result) } end
+  return json.encode(result)
+end
+
+-- HltbSetup({ on, steam_user_id }): the frontend switches the feature on or off (plugin/src/hltb.js). Each
+-- argument is recognised by what it is, as in read_args: a boolean is the switch, a string of digits the user.
+function HltbSetup(...)
+  local on, user = false, nil
+  local function take(v)
+    if type(v) == "boolean" then on = v
+    elseif type(v) == "string" and v:match("^%d+$") then user = v
+    elseif type(v) == "table" then take(v.on); take(v.steam_user_id)
+    end
+  end
+  for i = 1, select("#", ...) do take(select(i, ...)) end
+  if not hltb then return json.encode({ success = false, error = "not available" }) end
+  local ok, result = pcall(hltb.setup, on, user)
+  if not ok then logger:error("HltbSetup: " .. tostring(result)); result = { success = false, error = tostring(result) } end
+  return json.encode(result)
+end
+
 local function on_load()
   logger:info(string.format("Arkada backend loaded: Windows build %d, %s path; %s", BUILD,
-    MODERN and "DWMWA_SYSTEMBACKDROP_TYPE" or "accent blur (build < 22621)", NOTICE))
+    MODERN and "DWMWA_SYSTEMBACKDROP_TYPE" or "accent blur (build < 22621)", NOTICE .. (hltb and ("; " .. hltb.NOTICE) or "")))
   millennium.ready()
 end
 

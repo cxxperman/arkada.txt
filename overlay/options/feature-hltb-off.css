@@ -1,0 +1,13 @@
+/*
+ * Theme setting (skin.json Conditions): «Время прохождения (HowLongToBeat)», Выкл. Tells the Arkada plugin
+ * to stop asking howlongtobeat.com (plugin/src/features.js reads --arkada-hltb, plugin/src/hltb.js is stopped
+ * and switches the backend off), and hides the stat it drew without Steam Enhanced at once. Steam Enhanced's
+ * own card is left alone: with the backend off it asks the HLTB for Steam plugin instead, if that one is on.
+ */
+:root:root {
+  --arkada-hltb: off;
+}
+
+[data-arkada-hltb] {
+  display: none !important;
+}

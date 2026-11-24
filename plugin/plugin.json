@@ -2,8 +2,8 @@
   "$schema": "https://raw.githubusercontent.com/SteamClientHomebrew/Millennium/main/src/system/plugin-schema.json",
   "name": "arkada",
   "common_name": "Arkada",
-  "description": "Tells the other dev.txt apps on this PC what Steam is doing, sends Steam notifications to Kapsula, shows the size on disk of a game and adds Share to store pages. Nothing leaves the computer.",
-  "version": "0.2.2",
+  "description": "Tells the other dev.txt apps on this PC what Steam is doing, sends Steam notifications to Kapsula, shows the size on disk and How Long To Beat times of a game, Dota 2 statistics on profiles and adds Share to store pages. Only How Long To Beat (howlongtobeat.com) and Dota 2 statistics (api.opendota.com) go to the internet, each while its setting is on.",
+  "version": "0.3.0",
   "useBackend": true,
   "backendType": "lua",
   "webkitApiVersion": "2.0.0"

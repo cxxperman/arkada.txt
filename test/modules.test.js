@@ -3,7 +3,9 @@
 //   features.js  the theme's switches turn the features on and off
 //   kapsula.js   the messages Kapsula gets are the ones of its own plugin (a fake WebSocket stands for Kapsula)
 //   pages.js + disksize.js   the size on disk on a game's page of the library (fake DOM, fake Steam)
+//   hltb.js      How Long To Beat on a game's page: the backend switched on and asked once per game (fake backend)
 //   share.js     «Поделиться» on a store page (fake DOM)
+//   dota.js      Dota 2 statistics on a community profile (fake OpenDota)
 //   steam.js     the calls these features add (friends list, chat, flags, classes, sizes)
 //   node test/modules.test.js
 'use strict';
@@ -14,6 +16,8 @@ const { createFeatures, STORAGE_KEY: FEATURES_KEY } = src('features.js');
 const { createKapsula } = src('kapsula.js');
 const { createPages } = src('pages.js');
 const { createDiskSize, formatSize, describe } = src('disksize.js');
+const { createHltb, formatHours, timesOf, describe: describeHltb } = src('hltb.js');
+const { createDota, accountOf, rankName, matches } = src('dota.js');
 const { createShare, gameOf, unwrap, friendsWord, messageFor } = src('share.js');
 const { createSteam } = src('steam.js');
 const TOKENS = src('tokens.js');
@@ -352,7 +356,150 @@ async function testSteamCalls() {
   ok(eq(steam.readFlags(['kapsula', 'disk-size', 'share']), { kapsula: 'off', 'disk-size': 'on', share: null }), 'readFlags: what the main window\'s theme says, null where it says nothing');
   const sizes = await steam.installedSizes();
   ok(sizes.get(570) && sizes.get(570).total === 44040192000 && sizes.get(570).drive === 'D:', 'installedSizes: the sizes Steam reports for its library folders, as numbers', sizes.get(570));
+  ok(steam.openInBrowser('https://howlongtobeat.com/game/1') && !steam.openInBrowser('javascript:alert(1)') && eq(page.calls.browser, ['https://howlongtobeat.com/game/1']), 'openInBrowser: https links only, in the system browser', page.calls.browser);
+  ok(steam.currentUserId() === '76561198000000009', 'currentUserId: the SteamID64 of the user signed in');
+  const answer = page.window.Millennium.callServerMethod;
+  page.window.Millennium.callServerMethod = () => new Promise(() => { });
+  const raced = await Promise.race([steam.callBackend('GetHltbData', {}, 30), sleep(200).then(() => 'late')]);
+  page.window.Millennium.callServerMethod = answer;
+  ok(raced === null, 'callBackend: a backend that does not answer gives null after as long as it is told (here 30 ms)', raced);
   steam.dispose();
+}
+
+// ───────── hltb.js ─────────
+async function testHltb() {
+  console.log('pages.js + hltb.js');
+  ok(formatHours(6) === '6 ч' && formatHours(6.7) === '6,7 ч' && formatHours(123.4) === '123 ч' && formatHours(0) === '' && formatHours(null) === '',
+    'hours in Russian: 6 ч, 6,7 ч, 123 ч; none → nothing', [formatHours(6), formatHours(6.7), formatHours(123.4)]);
+  const reply = { success: true, data: { game_id: 2224, game_name: 'Dark Souls', comp_main: 42.5, comp_plus: 60, comp_100: 105 }, fromCache: false, isStale: false };
+  const t = timesOf(JSON.stringify(JSON.stringify(reply)));
+  ok(t && t.gameId === 2224 && eq(t.stages.map(s => s.hours), [42.5, 60, 105]), 'the reply of GetHltbData is read, even wrapped twice in JSON', t);
+  ok(timesOf(JSON.stringify({ success: false, error: 'off' })) === null && timesOf(JSON.stringify({ success: true, data: { searched_name: 'X' } })) === null && timesOf('{bad') === null,
+    'the backend is off, HLTB does not know the game, a broken reply → nothing to show');
+  ok(describeHltb(t).split('\n')[0] === 'Основной сюжет: 42,5 ч' && describeHltb(t).includes('Всё на 100%: 105 ч') && describeHltb(t).includes('howlongtobeat.com'), 'the tooltip names the stages and says where the times come from', describeHltb(t));
+
+  const { page, main, steam } = libraryPage();
+  const asked = [];
+  const answers = { 570: reply, 730: { success: true, data: { searched_name: 'Counter-Strike 2' }, fromCache: false } };
+  const s = Object.assign({}, steam, {
+    callBackend: (m, a, wait) => { asked.push([m, a, wait]); return Promise.resolve(m === 'GetHltbData' ? JSON.stringify(answers[a.app_id] || { success: false }) : JSON.stringify({ success: true, on: a.on })); },
+    openInBrowser: url => { page.calls.browser.push(url); return true; },
+  });
+  const pages = createPages({ steam });
+  const cls = steam.classes('GameStatsSection');
+  const h = createHltb({ steam: s, pages });
+  await sleep(10);
+  ok(asked[0] && eq(asked[0].slice(0, 2), ['HltbSetup', { on: true, steam_user_id: '76561198000000009' }]) && asked[0][2] >= 60000, 'on start the backend is switched on, with the signed-in user for HLTB\'s import of the library', asked[0]);
+  ok(!asked.some(c => c[0] === 'GetHltbData') && !pages.watching(), 'library home: HLTB is not asked, no DOM watcher');
+  const section = drawGamePage(main, cls);
+  page.steam.route('/library/app/570');
+  await sleep(30);
+  const stat = () => section.querySelector('[data-arkada-hltb]');
+  const gets = () => asked.filter(c => c[0] === 'GetHltbData');
+  ok(eq(gets().map(c => c[1]), [{ app_id: 570, fallback_name: 'Dota 2', force_refresh: false }]), 'a game\'s page: the backend is asked once for this game, with its name in the library', gets());
+  ok(stat() && stat().textContent === 'Время прохождения42,5 ч · 60 ч · 105 ч' && stat().className.startsWith(cls.GameStat), 'without Steam Enhanced: one more stat in Steam\'s row, «Время прохождения» 42,5 ч · 60 ч · 105 ч', stat() && stat().textContent);
+  if (stat()) stat().click();
+  ok(eq(page.calls.browser, ['https://howlongtobeat.com/game/2224']), 'a click opens the game\'s page on howlongtobeat.com in the browser', page.calls.browser);
+  for (let i = 0; i < 20; i++) main.document.body.appendChild(main.document.createElement('div'));
+  await sleep(20);
+  ok(gets().length === 1 && section.querySelectorAll('[data-arkada-hltb]').length === 1, 'the page keeps changing → still one stat, the backend is not asked again');
+  page.steam.route('/library/app/730');
+  await sleep(20);
+  ok(!main.document.querySelector('[data-arkada-hltb]') && gets().length === 2, 'a game HLTB does not know → no stat');
+  page.steam.route('/library/app/570');
+  await sleep(20);
+  ok(main.document.querySelector('[data-arkada-hltb]') && gets().length === 2, 'back on the first game → its stat again, from memory');
+  main.__seHltb = { createCard() { } };
+  main.document.body.appendChild(main.document.createElement('div'));
+  await sleep(20);
+  ok(!main.document.querySelector('[data-arkada-hltb]'), 'Steam Enhanced is in the window → its own card shows the times, ours goes');
+  h.stop();
+  await sleep(10);
+  ok(eq(asked[asked.length - 1].slice(0, 2), ['HltbSetup', { on: false, steam_user_id: '' }]) && observing() === 0, 'switched off → the backend is switched off too (no more requests), no watcher', asked[asked.length - 1]);
+  pages.stop();
+  steam.dispose();
+}
+
+// ───────── dota.js ─────────
+function profilePage(href, steamid) {
+  const win = makeDomWindow(href || 'https://steamcommunity.com/id/someone/');
+  if (steamid !== null) win.g_rgProfileData = { steamid: steamid || '76561198047011640', personaname: 'someone' };
+  const col = win.document.createElement('div'); col.className = 'profile_rightcol';
+  const other = win.document.createElement('div'); other.className = 'profile_badges';
+  col.appendChild(other);
+  return { win, col, other };
+}
+function opendota(over) {
+  const asked = [];
+  const data = Object.assign({
+    'players/86745912': { profile: { account_id: 86745912, personaname: 'ceo mindset', plus: true }, rank_tier: 63, leaderboard_rank: null },
+    'players/86745912/wl': { win: 1952, lose: 1193 },
+    'players/86745912/wl?date=365': { win: 29, lose: 16 },
+    'players/86745912/heroes': [{ hero_id: 109, games: 122, win: 73 }, { hero_id: 11, games: 167, win: 115 }, { hero_id: 1, games: 3, win: 0 }, { hero_id: 2, games: 50, win: 20 }],
+    'players/86745912/peers': [{ account_id: 1, personaname: 'Cr1t-', with_games: 1375, with_win: 853, avatar: 'https://avatars.steamstatic.com/a.jpg' }],
+    heroes: [{ id: 11, name: 'npc_dota_hero_nevermore', localized_name: 'Shadow Fiend' }, { id: 109, name: 'npc_dota_hero_terrorblade', localized_name: 'Terrorblade' }, { id: 2, name: 'npc_dota_hero_axe', localized_name: 'Axe' }],
+  }, over || {});
+  const fetch = url => {
+    const path = url.replace('https://api.opendota.com/api/', '');
+    asked.push(path);
+    return Promise.resolve(path in data ? { ok: true, status: 200, json: () => Promise.resolve(data[path]) } : { ok: false, status: 404 });
+  };
+  return { fetch, asked };
+}
+
+async function testDota() {
+  console.log('dota.js');
+  ok(accountOf('76561198047011640') === 86745912 && accountOf('123') === null && accountOf(null) === null, 'SteamID64 → Dota\'s account id (its lower 32 bits)');
+  ok(rankName(63) === 'Властелин 3' && rankName(80, 70) === 'Титан · №70 в таблице лидеров' && rankName(0) === '' && rankName(null) === '', 'ranks in Russian: Властелин 3, Титан with its place, none when not calibrated');
+  ok(matches(1) === '1 матч' && matches(3) === '3 матча' && matches(11) === '11 матчей' && matches(1375) === '1 375 матчей', '1 матч, 3 матча, 11 матчей, 1 375 матчей', [matches(1375)]);
+
+  const { win, col, other } = profilePage();
+  const od = opendota();
+  const storage = memStorage();
+  const d = createDota({ win, storage, fetch: od.fetch, tokens: TOKENS });
+  win.document.body.appendChild(col);
+  await sleep(30);
+  const card = () => win.document.getElementById('arkada-dota');
+  ok(card() && card().parentNode === col && col.childNodes[0] === card() && col.childNodes[1] === other, 'the card is at the top of the profile\'s right column');
+  ok(eq(od.asked.slice().sort(), ['heroes', 'players/86745912', 'players/86745912/heroes', 'players/86745912/peers', 'players/86745912/wl', 'players/86745912/wl?date=365']), 'six requests to OpenDota, all for this player (from Steam\'s own g_rgProfileData)', od.asked);
+  const text = card() ? card().textContent : '';
+  ok(text.includes('Властелин 3') && text.includes('3 145матчей всего') && text.includes('62,1%побед') && text.includes('45за последний год'), 'rank, matches, win rate, the last year', text);
+  const who = card() ? card().querySelectorAll('.arkada-dota-part')[0].querySelectorAll('.arkada-dota-who').map(n => n.textContent) : [];
+  ok(eq(who, ['Shadow Fiend167 матчей', 'Terrorblade122 матча', 'Axe50 матчей']), 'the three most played heroes, by games, with their names from OpenDota', who);
+  ok(card() && card().querySelector('.arkada-dota-pic').src === 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nevermore.png', 'hero pictures from Valve\'s CDN');
+  ok(text.includes('Cr1t-1 375 матчей') && card().querySelector('.arkada-dota-link').href === 'https://www.opendota.com/players/86745912', 'teammates, and a link to the player on OpenDota', text);
+  ok(win.document.querySelectorAll('#arkada-dota-style').length === 1 && observing() === 0, 'one style sheet; the watcher is gone once the card is in');
+  d.stop();
+  ok(!card() && !win.document.getElementById('arkada-dota-style'), 'stop() takes the card and its style away');
+
+  // The same profile again: from the page's storage, no request
+  const again = profilePage();
+  const od2 = opendota();
+  const d2 = createDota({ win: again.win, storage, fetch: od2.fetch, tokens: TOKENS });
+  again.win.document.body.appendChild(again.col);
+  await sleep(30);
+  ok(again.win.document.getElementById('arkada-dota') && od2.asked.length === 0, 'the same profile within 6 hours → from the page\'s storage, OpenDota is not asked');
+  d2.stop();
+
+  // No matches (never played, or hidden): nothing on the page
+  const none = profilePage(null, '76561197960265729');
+  const od3 = opendota({ 'players/1': { profile: { account_id: 1, personaname: 'x' }, rank_tier: null }, 'players/1/wl': { win: 0, lose: 0 }, 'players/1/wl?date=365': { win: 0, lose: 0 }, 'players/1/heroes': [], 'players/1/peers': [] });
+  const d3 = createDota({ win: none.win, storage: memStorage(), fetch: od3.fetch, tokens: TOKENS });
+  none.win.document.body.appendChild(none.col);
+  await sleep(30);
+  ok(!none.win.document.getElementById('arkada-dota') && observing() === 0, 'a player with no open matches → no card, no watcher');
+  d3.stop();
+
+  // The setting is off, or not a profile's own page: OpenDota is not asked at all
+  const off = profilePage();
+  off.win.computed['--arkada-dota'] = ' off';
+  const od4 = opendota();
+  createDota({ win: off.win, storage: memStorage(), fetch: od4.fetch, tokens: TOKENS }).stop();
+  const sub = profilePage('https://steamcommunity.com/id/someone/games/?tab=all');
+  const od5 = opendota();
+  createDota({ win: sub.win, storage: memStorage(), fetch: od5.fetch, tokens: TOKENS }).stop();
+  await sleep(10);
+  ok(od4.asked.length === 0 && od5.asked.length === 0, '«Статистика Dota 2» → Выкл, or a subpage of the profile → no request to OpenDota');
 }
 
 // ───────── startpage.js ─────────
@@ -391,7 +538,7 @@ async function testStartPage() {
 }
 
 (async () => {
-  for (const t of [testWatch, testFeatures, testKapsula, testDiskSize, testShare, testSteamCalls, testStartPage]) {
+  for (const t of [testWatch, testFeatures, testKapsula, testDiskSize, testHltb, testShare, testDota, testSteamCalls, testStartPage]) {
     try { await t(); } catch (e) { failed++; console.log('  FAIL  ' + t.name + ': ' + (e && e.stack || e)); }
   }
   console.log('\n' + passed + ' passed, ' + failed + ' failed');

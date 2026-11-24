@@ -5,11 +5,17 @@
 // theme (features.js, tab «Arkada» of the theme's settings):
 //   kapsula     Steam's notifications to the Kapsula island (kapsula.js) — instead of the Kapsula plugin
 //   disk-size   the size on disk on a game's page (disksize.js, on pages.js) — instead of Size on Disk
+//   hltb        How Long To Beat on a game's page (hltb.js, on pages.js; the requests in the Lua backend,
+//               arkada_hltb.lua) — instead of HLTB for Steam
 //   start page  the main window opens on the library's Home (startpage.js), not on the store
 //   share       «Поделиться» on a store page: its button lives in the page (webkit.js, share.js); the client's
 //               part here only answers it (arkadaShare below) — instead of Steam Share
-// Nothing here talks to the internet: the connections are ws://127.0.0.1:42080/hub, the dev.txt hub
-// on this PC, and ws://127.0.0.1:42071, Kapsula on this PC.
+//   dota        Dota 2 statistics on a community profile, from api.opendota.com: lives in the page as well
+//               (webkit.js, dota.js) — instead of Dota 2 Stats
+// This part talks to nothing outside the PC: its connections are ws://127.0.0.1:42080/hub, the dev.txt hub
+// on this PC, and ws://127.0.0.1:42071, Kapsula on this PC. Only two features go to the internet, each
+// while its setting is on: How Long To Beat (the backend asks howlongtobeat.com and Steam's store API for the
+// game's English name) and Dota 2 statistics (the profile page asks api.opendota.com).
 'use strict';
 const { connect } = require('./hub-client.js');
 const { createArkada } = require('./core.js');
@@ -19,6 +25,7 @@ const { createFeatures } = require('./features.js');
 const { createKapsula } = require('./kapsula.js');
 const { createPages } = require('./pages.js');
 const { createDiskSize } = require('./disksize.js');
+const { createHltb } = require('./hltb.js');
 const { createStartPage } = require('./startpage.js');
 
 const VERSION = require('./version.js'); // written by build.js from plugin.json
@@ -73,6 +80,10 @@ exports.default = async function () {
       'disk-size': () => {
         if (!pages) pages = createPages({ steam });
         return createDiskSize({ steam, pages });
+      },
+      hltb: () => {
+        if (!pages) pages = createPages({ steam });
+        return createHltb({ steam, pages });
       },
     },
   });

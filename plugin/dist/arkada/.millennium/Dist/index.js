@@ -1,7 +1,8 @@
-// Arkada plugin for Millennium, version 0.2.2. Built by plugin/build.js from plugin/src — do not edit by hand.
+// Arkada plugin for Millennium, version 0.3.0. Built by plugin/build.js from plugin/src — do not edit by hand.
 // Runs inside the Steam client and tells the dev.txt hub on this PC (ws://127.0.0.1:42080/hub) what Steam is doing,
-// sends Steam's notifications to Kapsula on this PC (ws://127.0.0.1:42071) and shows the size on disk on a game's page.
-// Nothing goes to the internet. Steam's own notifications are left as they were (Kapsula may ask to hide one it shows).
+// sends Steam's notifications to Kapsula on this PC (ws://127.0.0.1:42071) and shows the size on disk and How Long To Beat on a game's page.
+// Only How Long To Beat goes to the internet (its backend asks howlongtobeat.com), and only while its setting is on.
+// Steam's own notifications are left as they were (Kapsula may ask to hide one it shows).
 const MILLENNIUM_IS_CLIENT_MODULE = !0, pluginName = "arkada";
 (window.PLUGIN_LIST ||= {})[pluginName] ||= {}, window.MILLENNIUM_SIDEBAR_NAVIGATION_PANELS ||= {};
 let PluginEntryPointMain = function () {
@@ -809,12 +810,12 @@ let PluginEntryPointMain = function () {
           }
           // [K] Millennium.callServerMethod(plugin, method, kwargs) — how Millennium's own `callable` reaches a Lua
           //     backend (the size-on-disk and HLTB plugins on this PC call it so). → a Promise of the reply, or null
-          //     when there is no backend or it does not answer within 5 s.
-          function callBackend(method, args) {
+          //     when there is no backend or it does not answer within waitMs (5 s unless said: HLTB may need a minute).
+          function callBackend(method, args, waitMs) {
             return new Promise(resolve => {
               let done = false;
               const finish = v => { if (!done) { done = true; clearTimeout(timer); resolve(v === undefined ? null : v); } };
-              const timer = setTimeout(() => finish(null), 5000);
+              const timer = setTimeout(() => finish(null), Number(waitMs) > 0 ? Number(waitMs) : 5000);
               try {
                 const m = win.Millennium;
                 if (!m || typeof m.callServerMethod !== 'function') return finish(null);
@@ -988,6 +989,17 @@ let PluginEntryPointMain = function () {
             return false;
           }
 
+          // [S] SteamClient.System.OpenInSystemBrowser(url) — the client opens outside links with it. Only https links
+          function openInBrowser(url) {
+            if (typeof url !== 'string' || !/^https:\/\/[^\s]+$/.test(url)) return false;
+            try { const s = client() && client().System; if (s && typeof s.OpenInSystemBrowser === 'function') { s.OpenInSystemBrowser(url); return true; } } catch (e) { }
+            return steamUrl('steam://openurl_external/' + url);
+          }
+          // [K] App.m_CurrentUser.strSteamID — the SteamID64 of the user signed in (the HLTB plugin reads it so). '' if unknown
+          function currentUserId() {
+            try { const id = win.App && win.App.m_CurrentUser && win.App.m_CurrentUser.strSteamID; return /^\d{5,20}$/.test(String(id || '')) ? String(id) : ''; } catch (e) { return ''; }
+          }
+
           function dispose() {
             windowListeners.clear();
             toastListeners.clear();
@@ -1003,7 +1015,7 @@ let PluginEntryPointMain = function () {
             appName, watchGames, watchDownloads, watchDownloadOverview, watchToasts, toastsHooked, friendCounts, launch, openLibrary, acceptInvite, applyTheme,
             readBackdrop, markBackdrop, watchWindows, watchShown, patchWindowOpen, callBackend,
             friend, openChat, sendChat, dismissInvite, testToast, pluginRunning, friendsList,
-            readFlags, mainWindow, watchRoute, currentRoute, navigate, classes, installedSizes, openLocalFiles, dispose,
+            readFlags, mainWindow, watchRoute, currentRoute, navigate, classes, installedSizes, openLocalFiles, openInBrowser, currentUserId, dispose,
           };
         }
 
@@ -1577,6 +1589,182 @@ let PluginEntryPointMain = function () {
 
         module.exports = { createDiskSize, formatSize, describe, ROUTE, ATTR };
       },
+      "./hltb.js": function (module, exports, require) {
+        // Arkada, How Long To Beat: on a game's page in the library, how long the game takes to beat — main story,
+        // main story with extras, everything (100%) — from howlongtobeat.com. Instead of the HLTB for Steam plugin;
+        // the requests to HLTB, their cache and the name matching live in the Lua backend (plugin/backend/arkada_hltb.lua,
+        // based on that plugin's code, MIT).
+        //
+        //   const h = createHltb({ steam, pages });
+        //   h.stop();
+        //
+        // Two ways it is shown:
+        //   - with the Steam Enhanced theme (Arkada's theme is built on it), its own card «Время прохождения» on the
+        //     game's page draws the times: it asks the backend GetHltbData itself (compat/hltb-for-steam, which our
+        //     patches/0010 makes ask the plugin "arkada" first). This module then only switches the backend on;
+        //   - without it, one more stat in Steam's stats row, next to «Размер на диске», drawn with Steam's own classes
+        //     as disksize.js does: «Время прохождения» «12 ч · 20 ч · 35 ч», the names in its tooltip, a click opens
+        //     the game's page on howlongtobeat.com in the browser.
+        // The backend does nothing while the feature is off (HltbSetup { on: false }): no request leaves the PC.
+        //
+        // Cost: the page is watched only on a game's page (pages.js); each game is asked of the backend once per
+        // ASK_MS in this session (the backend keeps the answers on disk for days); nothing reads layout.
+        'use strict';
+
+        const ROUTE = /^\/library\/app\/(\d+)(?:\/|$)/;
+        const ATTR = 'data-arkada-hltb';
+        const ASK_MS = 60 * 60 * 1000;
+        const RETRY_MS = 60 * 1000;
+        const WAIT_MS = 90000; // the backend may first have to find HLTB's endpoint: several requests
+        const NBSP = ' ';
+        const STAGES = [['comp_main', 'Основной сюжет'], ['comp_plus', 'Сюжет и дополнительное'], ['comp_100', 'Всё на 100%']];
+
+        // 6 → "6 ч", 6.7 → "6,7 ч", 123.4 → "123 ч"
+        function formatHours(h) {
+          const n = Number(h);
+          if (!isFinite(n) || n <= 0) return '';
+          const s = n >= 100 ? String(Math.round(n)) : (Math.round(n * 10) / 10).toFixed(1).replace(/\.0$/, '').replace('.', ',');
+          return s + NBSP + 'ч';
+        }
+
+        // The reply of GetHltbData (a JSON string, maybe wrapped once more by Millennium) → the times, or null
+        function timesOf(reply) {
+          let r = reply;
+          for (let i = 0; i < 3 && typeof r === 'string'; i++) { try { r = JSON.parse(r); } catch (e) { return null; } }
+          if (!r || r.success !== true || !r.data || r.data.game_id == null) return null;
+          const out = { gameId: r.data.game_id, name: String(r.data.game_name || ''), stages: [] };
+          for (const [k, label] of STAGES) if (typeof r.data[k] === 'number' && r.data[k] > 0) out.stages.push({ label, hours: r.data[k] });
+          return out.stages.length ? out : null;
+        }
+
+        function describe(t) {
+          const lines = t.stages.map(s => s.label + ': ' + formatHours(s.hours));
+          lines.push('По данным howlongtobeat.com' + (t.name ? ' («' + t.name + '»)' : '') + '. Нажмите, чтобы открыть страницу игры');
+          return lines.join('\n');
+        }
+
+        const SVG = 'http://www.w3.org/2000/svg';
+        // A clock, drawn for Arkada in the stroke of Steam's stat icons (currentColor, 1.5 px at 24)
+        function clockIcon(doc) {
+          const svg = doc.createElementNS(SVG, 'svg');
+          svg.setAttribute('viewBox', '0 0 24 24');
+          svg.setAttribute('fill', 'none');
+          svg.setAttribute('aria-hidden', 'true');
+          for (const [tag, attrs] of [
+            ['circle', { cx: '12', cy: '12', r: '8.25', stroke: 'currentColor', 'stroke-width': '1.5' }],
+            ['path', { d: 'M12 7.5V12l3 2', stroke: 'currentColor', 'stroke-width': '1.5', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }],
+          ]) {
+            const el = doc.createElementNS(SVG, tag);
+            for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+            svg.appendChild(el);
+          }
+          return svg;
+        }
+
+        function createHltb(o) {
+          const steam = o.steam, pages = o.pages;
+          const now = o.now || (() => Date.now());
+          const known = new Map(); // appId → { times, at, retryAt }
+          const asking = new Set();
+          let stopped = false, last = null;
+
+          // The backend works only while the feature is on; the user's id lets HLTB match the library by its import
+          const setup = on => Promise.resolve(steam.callBackend('HltbSetup', { on, steam_user_id: on ? steam.currentUserId() || '' : '' }, WAIT_MS)).catch(() => null);
+          setup(true);
+
+          function ask(appId) {
+            if (asking.has(appId)) return;
+            asking.add(appId);
+            Promise.resolve(steam.callBackend('GetHltbData', { app_id: appId, fallback_name: steam.appName(appId) || '', force_refresh: false }, WAIT_MS))
+              .then(r => r, () => null)
+              .then(r => {
+                asking.delete(appId);
+                if (stopped) return;
+                const t = r === null ? undefined : timesOf(r);
+                if (t === undefined) known.set(appId, Object.assign(known.get(appId) || { times: null }, { at: 0, retryAt: now() + RETRY_MS })); // no answer: again in a minute
+                else known.set(appId, { times: t, at: now(), retryAt: 0 });
+                if (last) draw(last);
+              });
+          }
+
+          function remove(doc) {
+            try { for (const el of Array.from(doc.querySelectorAll('[' + ATTR + ']'))) el.remove(); } catch (e) { }
+          }
+
+          function build(doc, cls, appId, t) {
+            const box = doc.createElement('div');
+            box.className = [cls.GameStat, cls.LastPlayed, 'Panel'].filter(Boolean).join(' ');
+            box.setAttribute(ATTR, appId + ':' + t.stages.map(s => s.hours).join('/'));
+            box.setAttribute('role', 'link');
+            box.setAttribute('tabindex', '0');
+            box.title = describe(t);
+            box.style.order = '2';
+            box.style.cursor = 'pointer';
+            const icon = doc.createElement('div');
+            icon.className = [cls.GameStatIcon, cls.PlaytimeIcon].filter(Boolean).join(' ');
+            icon.appendChild(clockIcon(doc));
+            const right = doc.createElement('div');
+            right.className = cls.GameStatRight || '';
+            const label = doc.createElement('div');
+            label.className = cls.PlayBarLabel || '';
+            label.textContent = 'Время прохождения';
+            const value = doc.createElement('div');
+            value.className = [cls.PlayBarDetailLabel, cls.LastPlayedInfo].filter(Boolean).join(' ');
+            value.textContent = t.stages.map(s => formatHours(s.hours)).join(' · ');
+            right.appendChild(label);
+            right.appendChild(value);
+            box.appendChild(icon);
+            box.appendChild(right);
+            const open = e => { if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return; e.preventDefault(); steam.openInBrowser('https://howlongtobeat.com/game/' + encodeURIComponent(t.gameId)); };
+            box.addEventListener('click', open);
+            box.addEventListener('keydown', open);
+            return box;
+          }
+
+          function draw(ctx) {
+            const doc = ctx.doc, appId = Number(ctx.match[1]);
+            // Steam Enhanced draws its own card with these times: nothing of ours on the page
+            if (ctx.win && ctx.win.__seHltb) { if (doc.querySelector('[' + ATTR + ']')) remove(doc); return; }
+            const cls = steam.classes('GameStatsSection');
+            if (!cls || !cls.GameStatsSection) return;
+            const section = doc.querySelector('.' + cls.GameStatsSection);
+            if (!section) return;
+            const k = known.get(appId), t = k && k.times;
+            const key = t ? appId + ':' + t.stages.map(s => s.hours).join('/') : '';
+            const here = section.querySelector('[' + ATTR + ']');
+            if (here && here.getAttribute(ATTR) === key) return;
+            remove(doc);
+            if (key) section.appendChild(build(doc, cls, appId, t));
+          }
+
+          const off = pages.add({
+            route: ROUTE,
+            update(ctx) {
+              if (stopped) return;
+              last = ctx;
+              const appId = Number(ctx.match[1]);
+              if (!appId) return;
+              if (!(ctx.win && ctx.win.__seHltb)) {
+                const k = known.get(appId), t = now();
+                if (!k || (k.retryAt ? t >= k.retryAt : t - k.at >= ASK_MS)) ask(appId);
+              }
+              draw(ctx);
+            },
+            leave(ctx) { last = null; if (ctx && ctx.doc) remove(ctx.doc); },
+          });
+
+          return {
+            stop() {
+              if (stopped) return;
+              stopped = true;
+              try { off(); } catch (e) { }
+              setup(false);
+            },
+          };
+        }
+
+        module.exports = { createHltb, formatHours, timesOf, describe, ROUTE, ATTR };
+      },
       "./kapsula.js": function (module, exports, require) {
         // Arkada, the Kapsula module: Steam's pop-up notifications and the current download go to the Kapsula island
         // on this PC, exactly as the Kapsula plugin for Millennium sends them — the same address, the same messages —
@@ -1877,7 +2065,7 @@ let PluginEntryPointMain = function () {
       },
       "./version.js": function (module, exports, require) {
         // Written by build.js from plugin.json. Do not edit by hand.
-        module.exports = "0.2.2";
+        module.exports = "0.3.0";
       },
       "./index.js": function (module, exports, require) {
         // Arkada plugin for Millennium: the entry point Millennium calls inside the Steam client.
@@ -1887,11 +2075,17 @@ let PluginEntryPointMain = function () {
         // theme (features.js, tab «Arkada» of the theme's settings):
         //   kapsula     Steam's notifications to the Kapsula island (kapsula.js) — instead of the Kapsula plugin
         //   disk-size   the size on disk on a game's page (disksize.js, on pages.js) — instead of Size on Disk
+        //   hltb        How Long To Beat on a game's page (hltb.js, on pages.js; the requests in the Lua backend,
+        //               arkada_hltb.lua) — instead of HLTB for Steam
         //   start page  the main window opens on the library's Home (startpage.js), not on the store
         //   share       «Поделиться» on a store page: its button lives in the page (webkit.js, share.js); the client's
         //               part here only answers it (arkadaShare below) — instead of Steam Share
-        // Nothing here talks to the internet: the connections are ws://127.0.0.1:42080/hub, the dev.txt hub
-        // on this PC, and ws://127.0.0.1:42071, Kapsula on this PC.
+        //   dota        Dota 2 statistics on a community profile, from api.opendota.com: lives in the page as well
+        //               (webkit.js, dota.js) — instead of Dota 2 Stats
+        // This part talks to nothing outside the PC: its connections are ws://127.0.0.1:42080/hub, the dev.txt hub
+        // on this PC, and ws://127.0.0.1:42071, Kapsula on this PC. Only two features go to the internet, each
+        // while its setting is on: How Long To Beat (the backend asks howlongtobeat.com and Steam's store API for the
+        // game's English name) and Dota 2 statistics (the profile page asks api.opendota.com).
         'use strict';
         const { connect } = require('./hub-client.js');
         const { createArkada } = require('./core.js');
@@ -1901,6 +2095,7 @@ let PluginEntryPointMain = function () {
         const { createKapsula } = require('./kapsula.js');
         const { createPages } = require('./pages.js');
         const { createDiskSize } = require('./disksize.js');
+        const { createHltb } = require('./hltb.js');
         const { createStartPage } = require('./startpage.js');
 
         const VERSION = require('./version.js'); // written by build.js from plugin.json
@@ -1955,6 +2150,10 @@ let PluginEntryPointMain = function () {
               'disk-size': () => {
                 if (!pages) pages = createPages({ steam });
                 return createDiskSize({ steam, pages });
+              },
+              hltb: () => {
+                if (!pages) pages = createPages({ steam });
+                return createHltb({ steam, pages });
               },
             },
           });

@@ -416,6 +416,9 @@
     'Ready to play': 'Готово к запуску', 'Updated': 'Обновлено', 'Screenshot saved': 'Скриншот сохранён', 'Gift received': 'Получен подарок', 'New item': 'Новый предмет',
     'Trade offer': 'Предложение обмена', 'Comment': 'Комментарий', 'Steam Family': 'Семья Steam', 'Battery low': 'Низкий заряд', 'Needs attention': 'Требует внимания',
     'Steam overlay': 'Оверлей Steam', 'Game mastered': 'Игра пройдена на 100%', 'Tray menu': 'Меню в трее',
+
+    // compat/hltb-for-steam/ (the How Long To Beat card; Arkada's plugin gives it the times)
+    'How long to beat': 'Время прохождения', 'Main': 'Сюжет', '+ Extras': '+ доп.', 'Completionist': 'На 100%',
   };
 
   /* ---------- Strings with numbers or names ---------- */
@@ -474,6 +477,12 @@
     [new RegExp(`^Comments · ${N}$`), (m) => `Комментарии · ${m[1]}`, 'Comments · ${'],
     [/^Added (.+)$/, (m) => `Добавлено ${ago(m[1])}`, 'Added ${'],
     [/^(.+)View full size$/, (m) => `${m[1]}Открыть в полном размере`, 'View full size'],
+
+    // The How Long To Beat card (compat/hltb-for-steam/): «6,7 ч», «Вы: 37 ч», «3 ч до конца сюжета», «5× от времени на 100%»
+    [new RegExp(`^${N}h$`), (m) => `${ru(m[1])} ч`, '}h${you'],
+    [new RegExp(`^You: ${N} h$`), (m) => `Вы: ${ru(m[1])} ч`, 'You: ${fmt(played)} h'],
+    [/^to (the main story|main \+ extras|completionist)$/, (m) => ({ 'the main story': 'до конца сюжета', 'main + extras': 'до сюжета с дополнительным', completionist: 'до 100%' })[m[1]], '</b> to ${esc(goalName(k))}'],
+    [/^the (main story|main \+ extras|completionist) time$/, (m) => ({ 'main story': 'от времени сюжета', 'main + extras': 'от времени сюжета с дополнительным', completionist: 'от времени на 100%' })[m[1]], ' the ${esc(goalName(vals.length - 1))} time'],
 
     // Downloads (header/downloads-card.js, dialogs/)
     [new RegExp(`^${N} min left$`), (m) => `Осталось ${m[1]} мин`, ' min left'],

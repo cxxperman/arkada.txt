@@ -1,0 +1,12 @@
+/*
+ * Theme setting (skin.json Conditions): «Статистика Dota 2», Выкл. The card lives in the community profile
+ * page (plugin/src/dota.js, the plugin's webkit script): it is hidden here at once, and the script reads
+ * --arkada-dota on the page's <html> and does not ask OpenDota at all.
+ */
+:root:root {
+  --arkada-dota: off;
+}
+
+#arkada-dota {
+  display: none !important;
+}

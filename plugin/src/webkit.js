@@ -1,9 +1,11 @@
 // Arkada plugin for Millennium: the entry point of its webkit script, which Millennium runs in the pages of
-// the Steam store and community (.millennium/Dist/webkit.js, built by build.js). Only «Поделиться» lives
-// here (share.js); it does anything only on a game's page of the store. Its friends list and messages go
-// through the plugin's part in the client (index.js, arkadaShare), reached with Millennium's callable.
+// the Steam store and community (.millennium/Dist/webkit.js, built by build.js). Two features live here:
+//   «Поделиться» (share.js) on a game's page of the store; its friends list and messages go through the
+//   plugin's part in the client (index.js, arkadaShare), reached with Millennium's callable;
+//   Dota 2 statistics (dota.js) on a profile of the community, asked of api.opendota.com by the page itself.
 'use strict';
 const { createShare } = require('./share.js');
+const { createDota } = require('./dota.js');
 
 const PLUGIN = 'arkada';
 const TOKENS = require('./tokens.js'); // the dev.txt tokens, written by build.js from theme/tokens.css
@@ -23,7 +25,14 @@ function bridge(win) {
 
 exports.default = async function () {
   try { if (typeof window[SLOT] === 'function') window[SLOT](); } catch (e) { }
-  if (!/^(store\.steampowered\.com)$/i.test(String(window.location && window.location.hostname))) return; // community pages: nothing to do
-  const share = createShare({ win: window, call: bridge(window), tokens: TOKENS });
-  window[SLOT] = () => { window[SLOT] = null; share.stop(); };
+  const host = String(window.location && window.location.hostname).toLowerCase();
+  let part = null;
+  if (host === 'store.steampowered.com') part = createShare({ win: window, call: bridge(window), tokens: TOKENS });
+  else if (host === 'steamcommunity.com') {
+    let storage = null;
+    try { storage = window.localStorage; } catch (e) { /* closed: every visit asks OpenDota */ }
+    part = createDota({ win: window, storage, tokens: TOKENS });
+  }
+  if (!part) return;
+  window[SLOT] = () => { window[SLOT] = null; part.stop(); };
 };

@@ -371,12 +371,12 @@ function createSteam(win) {
   }
   // [K] Millennium.callServerMethod(plugin, method, kwargs) — how Millennium's own `callable` reaches a Lua
   //     backend (the size-on-disk and HLTB plugins on this PC call it so). → a Promise of the reply, or null
-  //     when there is no backend or it does not answer within 5 s.
-  function callBackend(method, args) {
+  //     when there is no backend or it does not answer within waitMs (5 s unless said: HLTB may need a minute).
+  function callBackend(method, args, waitMs) {
     return new Promise(resolve => {
       let done = false;
       const finish = v => { if (!done) { done = true; clearTimeout(timer); resolve(v === undefined ? null : v); } };
-      const timer = setTimeout(() => finish(null), 5000);
+      const timer = setTimeout(() => finish(null), Number(waitMs) > 0 ? Number(waitMs) : 5000);
       try {
         const m = win.Millennium;
         if (!m || typeof m.callServerMethod !== 'function') return finish(null);
@@ -550,6 +550,17 @@ function createSteam(win) {
     return false;
   }
 
+  // [S] SteamClient.System.OpenInSystemBrowser(url) — the client opens outside links with it. Only https links
+  function openInBrowser(url) {
+    if (typeof url !== 'string' || !/^https:\/\/[^\s]+$/.test(url)) return false;
+    try { const s = client() && client().System; if (s && typeof s.OpenInSystemBrowser === 'function') { s.OpenInSystemBrowser(url); return true; } } catch (e) { }
+    return steamUrl('steam://openurl_external/' + url);
+  }
+  // [K] App.m_CurrentUser.strSteamID — the SteamID64 of the user signed in (the HLTB plugin reads it so). '' if unknown
+  function currentUserId() {
+    try { const id = win.App && win.App.m_CurrentUser && win.App.m_CurrentUser.strSteamID; return /^\d{5,20}$/.test(String(id || '')) ? String(id) : ''; } catch (e) { return ''; }
+  }
+
   function dispose() {
     windowListeners.clear();
     toastListeners.clear();
@@ -565,7 +576,7 @@ function createSteam(win) {
     appName, watchGames, watchDownloads, watchDownloadOverview, watchToasts, toastsHooked, friendCounts, launch, openLibrary, acceptInvite, applyTheme,
     readBackdrop, markBackdrop, watchWindows, watchShown, patchWindowOpen, callBackend,
     friend, openChat, sendChat, dismissInvite, testToast, pluginRunning, friendsList,
-    readFlags, mainWindow, watchRoute, currentRoute, navigate, classes, installedSizes, openLocalFiles, dispose,
+    readFlags, mainWindow, watchRoute, currentRoute, navigate, classes, installedSizes, openLocalFiles, openInBrowser, currentUserId, dispose,
   };
 }
 

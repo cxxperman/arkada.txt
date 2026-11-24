@@ -1,0 +1,43 @@
+Steam Enhanced, compat/hltb-for-steam/hltb-for-steam.js: the How Long To Beat card asks the Arkada
+plugin first, then the HLTB plugins it knew.
+
+Why. Arkada does what the HLTB for Steam plugin did (plugin/backend/arkada_hltb.lua): its backend
+answers GetHltbData with the same arguments and the same reply. The card only knew the names
+hltb-for-steam and hltb-for-millennium, so with Arkada alone it stayed empty.
+
+What. findHltbBackend tries "arkada", then the plugin it would have tried, then the other one, and
+takes the first that answers. While Arkada's setting «Время прохождения» is off its backend answers
+{ success: false, error: "off" } at once, so the card goes on to the HLTB plugins as before. The
+card's markup, its data and its refresh are not changed.
+
+--- a/compat/hltb-for-steam/hltb-for-steam.js
++++ b/compat/hltb-for-steam/hltb-for-steam.js
+@@ -83,15 +83,20 @@
+     async function findHltbBackend(appid, name) {
+       const preferred = activePlugin ??
+         (document.getElementById(STORE_PLUGIN) && !document.getElementById(LOCAL_PLUGIN)
+           ? STORE_PLUGIN
+           : LOCAL_PLUGIN);
+-
+-      try {
+-        return { plugin: preferred, result: await requestHltb(preferred, appid, name) };
+-      } catch {
+-        if (destroyed) return null;
+-        const fallback = preferred === LOCAL_PLUGIN ? STORE_PLUGIN : LOCAL_PLUGIN;
+-        return { plugin: fallback, result: await requestHltb(fallback, appid, name) };
+-      }
++      // Arkada: its plugin first (it answers "off" at once while its setting is off), then the HLTB plugins
++      const fallback = preferred === LOCAL_PLUGIN ? STORE_PLUGIN : LOCAL_PLUGIN;
++      const order = [...new Set(['arkada', preferred, fallback])];
++      let error;
++      for (const plugin of order) {
++        if (destroyed) return null;
++        try {
++          return { plugin, result: await requestHltb(plugin, appid, name) };
++        } catch (e) {
++          error = e;
++        }
++      }
++      throw error;
+     }
+ 
