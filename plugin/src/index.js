@@ -12,10 +12,15 @@
 //               part here only answers it (arkadaShare below) — instead of Steam Share
 //   dota        Dota 2 statistics on a community profile, from api.opendota.com: lives in the page as well
 //               (webkit.js, dota.js) — instead of Dota 2 Stats
+//   prices, game-info, hide-owned, wishlist-sum, market   what the Augmented Steam and SteamDB extensions
+//               add to the store and the community, in the pages too (webkit.js); the client's part here
+//               only answers «Об игре» with the library's hours and date (arkadaGame below)
 // This part talks to nothing outside the PC: its connections are ws://127.0.0.1:42080/hub, the dev.txt hub
-// on this PC, and ws://127.0.0.1:42071, Kapsula on this PC. Only two features go to the internet, each
-// while its setting is on: How Long To Beat (the backend asks howlongtobeat.com and Steam's store API for the
-// game's English name) and Dota 2 statistics (the profile page asks api.opendota.com).
+// on this PC, and ws://127.0.0.1:42071, Kapsula on this PC. The features that go to the internet do it from
+// the backend or the pages, each while its setting is on: How Long To Beat (the backend asks howlongtobeat.com
+// and Steam's store API for the game's English name), IsThereAnyDeal (the backend, only with the user's key),
+// Dota 2 statistics (the profile page asks api.opendota.com), the wishlist's sum (api.steampowered.com) and
+// the market prices (steamcommunity.com/market).
 'use strict';
 const { connect } = require('./hub-client.js');
 const { createArkada } = require('./core.js');
@@ -55,6 +60,18 @@ exports.arkadaShare = {
       catch (e) { out.push({ id, sent: false, error: String(e && e.message || e) }); }
     }
     return JSON.stringify(out);
+  },
+};
+
+// Called by a game's page in the store (webkit.js, gameinfo.js): MILLENNIUM_API.callable("arkada", "frontend:arkadaGame.info").
+// appid → JSON { owned, minutes, minutesTwoWeeks, lastPlayed, purchased } from the library of this client, or null
+exports.arkadaGame = {
+  info(appid) {
+    if (!current) throw new Error('not running');
+    let id = appid;
+    if (id && typeof id === 'object') id = id.appid;
+    if (!/^\d{1,10}$/.test(String(id))) throw new Error('bad request');
+    return JSON.stringify(current.appPlaytime(Number(id)));
   },
 };
 

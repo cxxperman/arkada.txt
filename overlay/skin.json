@@ -2,7 +2,7 @@
   "name": "Arkada",
   "description": "arkada.txt™ — клиент Steam на токенах dev.txt: цвета, скругления, шрифт Segoe UI Variable и движение, что в Kapsula, Aura и core.txt. Основано на Steam Enhanced by NVHT (MIT).",
   "author": "dev.txt",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "tags": [
     "Dark",
     "Fluent",
@@ -240,6 +240,86 @@
               ".*"
             ],
             "src": "arkada/options/feature-dota-off.css"
+          }
+        }
+      }
+    },
+    "Цены в магазине (SteamDB, IsThereAnyDeal)": {
+      "tab": "Arkada",
+      "description": "На странице игры в магазине — ссылки на историю цен в SteamDB и на IsThereAnyDeal. С личным ключом IsThereAnyDeal (бесплатный, isthereanydeal.com/apps/my; вводится в самой карточке) — ещё самая низкая цена сейчас в других магазинах и исторический минимум: плагин спрашивает api.isthereanydeal.com не чаще раза в 6 часов на игру, ключ хранит только на этом компьютере (папка Steam, millennium/arkada-itad.json). Без ключа в интернет ничего не уходит. Нужен плагин Arkada.",
+      "default": "Вкл",
+      "values": {
+        "Вкл": {},
+        "Выкл": {
+          "TargetCss": {
+            "affects": [
+              ".*"
+            ],
+            "src": "arkada/options/feature-prices-off.css"
+          }
+        }
+      }
+    },
+    "Об игре в магазине": {
+      "tab": "Arkada",
+      "description": "На странице игры в магазине — сколько вы в неё играли, когда запускали и с какого дня она на вашем аккаунте (из библиотеки клиента Steam, без сети), и ссылки на SteamDB, PCGamingWiki и ProtonDB. Нужен плагин Arkada.",
+      "default": "Вкл",
+      "values": {
+        "Вкл": {},
+        "Выкл": {
+          "TargetCss": {
+            "affects": [
+              ".*"
+            ],
+            "src": "arkada/options/feature-game-info-off.css"
+          }
+        }
+      }
+    },
+    "Скрывать купленное и игнорируемое": {
+      "tab": "Arkada",
+      "description": "В списках магазина — поиск, метки, жанры, распродажи, рекомендации — не видно игр, которые у вас уже есть или которые вы скрыли. Steam сам помечает такие игры в списках, Arkada их только прячет: без сети. На странице игры (её DLC) и в списке желаемого ничего не скрывается. Выключение действует со следующей открытой страницы. Нужен плагин Arkada.",
+      "default": "Вкл",
+      "values": {
+        "Вкл": {},
+        "Выкл": {
+          "TargetCss": {
+            "affects": [
+              ".*"
+            ],
+            "src": "arkada/options/feature-hide-owned-off.css"
+          }
+        }
+      }
+    },
+    "Сумма списка желаемого": {
+      "tab": "Arkada",
+      "description": "В списке желаемого — сколько стоят все игры из него сейчас, со скидками и без, и сколько из них со скидкой. Цены — открытый Web API Steam (api.steampowered.com) в вашем регионе, не чаще раза в 30 минут. Нужен плагин Arkada.",
+      "default": "Вкл",
+      "values": {
+        "Вкл": {},
+        "Выкл": {
+          "TargetCss": {
+            "affects": [
+              ".*"
+            ],
+            "src": "arkada/options/feature-wishlist-sum-off.css"
+          }
+        }
+      }
+    },
+    "Цены инвентаря и итоги рынка": {
+      "tab": "Arkada",
+      "description": "В инвентаре сообщества — цена каждого предмета на Торговой площадке и стоимость инвентаря открытой игры; в истории операций рынка — сколько всего куплено и продано (по кнопке). Цены спрашиваются у Торговой площадки Steam по одной, не чаще раза в 1,5 секунды, и хранятся сутки; ничего не покупается и не выставляется. Нужен плагин Arkada.",
+      "default": "Вкл",
+      "values": {
+        "Вкл": {},
+        "Выкл": {
+          "TargetCss": {
+            "affects": [
+              ".*"
+            ],
+            "src": "arkada/options/feature-market-off.css"
           }
         }
       }

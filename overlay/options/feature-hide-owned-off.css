@@ -1,0 +1,7 @@
+/*
+ * Theme setting (skin.json Conditions): «Скрывать купленное и игнорируемое», Выкл. The store's pages (plugin/src/hideowned.js) read --arkada-hide-owned on their <html> when they open and then
+ * do not hide anything: a page already open keeps its rows hidden until it is opened again.
+ */
+:root:root {
+  --arkada-hide-owned: off;
+}

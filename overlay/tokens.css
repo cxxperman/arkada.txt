@@ -94,12 +94,17 @@ html:root {
      says mica or acrylic (options/backdrop-*.css); the plugin reads it, arkada/backdrop.css draws it */
   --arkada-backdrop: off;
   /* For the Arkada plugin: its features that replace separate plugins, each switched off by its setting in the
-     tab «Arkada» (options/feature-*-off.css); the plugin reads them (plugin/src/features.js, plugin/src/share.js, plugin/src/dota.js) */
+     tab «Arkada» (options/feature-*-off.css); the plugin reads them (plugin/src/features.js, and in the store and community pages plugin/src/web.js) */
   --arkada-kapsula: on;
   --arkada-disk-size: on;
   --arkada-hltb: on;
   --arkada-share: on;
   --arkada-dota: on;
+  --arkada-prices: on;
+  --arkada-game-info: on;
+  --arkada-hide-owned: on;
+  --arkada-wishlist-sum: on;
+  --arkada-market: on;
   /* For the Arkada plugin: the main window opens on the library's Home (on) or wherever Steam opens it
      (off: options/start-library-off.css, setting «Начальная страница»); plugin/src/startpage.js reads it */
   --arkada-start-library: on;

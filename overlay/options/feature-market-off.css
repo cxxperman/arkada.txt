@@ -1,0 +1,14 @@
+/*
+ * Theme setting (skin.json Conditions): «Цены инвентаря и итоги рынка», Выкл. The prices live in the community's inventory and market history pages (plugin/src/inventory.js,
+ * plugin/src/markethistory.js): they are hidden here at once, and the pages, reading --arkada-market on their
+ * <html>, ask the market nothing.
+ */
+:root:root {
+  --arkada-market: off;
+}
+
+#arkada-inventory-value,
+.arkada-inv-price,
+#arkada-market-history {
+  display: none !important;
+}

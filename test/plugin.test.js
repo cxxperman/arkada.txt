@@ -301,6 +301,12 @@ async function main() {
   let refused = false;
   try { await share.send(JSON.stringify({ ids: [], text: 'x' })); } catch (e) { refused = true; }
   ok(refused, 'arkadaShare.send with nobody to send to is refused');
+  const gameApi = page.window.PLUGIN_LIST.arkada.arkadaGame;
+  const info = gameApi && JSON.parse(gameApi.info('570'));
+  ok(info && info.owned === true && info.minutes === 0 && JSON.parse(gameApi.info('999999')) === null, 'the plugin exports arkadaGame.info for «Об игре»: a game of the library → its record, another → null', info);
+  let badGame = false;
+  try { gameApi.info('x'); } catch (e) { badGame = true; }
+  ok(badGame, 'arkadaGame.info with no game number is refused');
   // Kapsula switched on in the theme: the module starts and tries its port (nobody there: it waits quietly)
   page.popupRoot.computed['--arkada-kapsula'] = 'on';
   await sleep(2300);

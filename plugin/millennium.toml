@@ -9,14 +9,14 @@
 [plugin]
 id = "arkada"
 name = "Arkada"
-version = "0.3.0"
+version = "0.4.0"
 author = "dev.txt"
-description = "Tells the other dev.txt apps on this PC what Steam is doing, sends Steam notifications to Kapsula, shows the size on disk and How Long To Beat times of a game, Dota 2 statistics on profiles and adds Share to store pages. Only How Long To Beat (howlongtobeat.com) and Dota 2 statistics (api.opendota.com) go to the internet, each while its setting is on."
+description = "Tells the other dev.txt apps on this PC what Steam is doing, sends Steam notifications to Kapsula, shows the size on disk and How Long To Beat times of a game, Dota 2 statistics on profiles, adds Share, prices (SteamDB, IsThereAnyDeal with your own key), your playtime and links to store pages, hides owned games in store lists, sums wishlists, prices inventories and totals the market history. What goes to the internet, and where, is said for each feature in its setting."
 
 [backend]
-# The Lua backend (window backdrop, see backend/main.lua; How Long To Beat, backend/arkada_hltb*.lua); Millennium runs it from the packed file
+# The Lua backend (window backdrop, see backend/main.lua; How Long To Beat, backend/arkada_hltb*.lua; IsThereAnyDeal, backend/arkada_itad.lua); Millennium runs it from the packed file
 entry = "backend/main.lua"
-sources = ["backend/main.lua", "backend/arkada_hltb.lua", "backend/arkada_hltb_ids.lua"]
+sources = ["backend/main.lua", "backend/arkada_hltb.lua", "backend/arkada_hltb_ids.lua", "backend/arkada_itad.lua"]
 
 [frontend]
 entry = "src/star.mjs"

@@ -1,0 +1,11 @@
+/*
+ * Theme setting (skin.json Conditions): «Об игре в магазине», Выкл. The card lives in a game's store page (plugin/src/gameinfo.js): it is hidden here at once, and the page,
+ * reading --arkada-game-info on its <html>, does not ask the client for the game's hours.
+ */
+:root:root {
+  --arkada-game-info: off;
+}
+
+#arkada-game-info {
+  display: none !important;
+}

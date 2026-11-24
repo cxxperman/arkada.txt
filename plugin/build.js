@@ -2,7 +2,7 @@
 //   dist/arkada/plugin.json
 //   dist/arkada/.millennium/Dist/index.js    the client part (SharedJSContext), entry src/index.js
 //   dist/arkada/.millennium/Dist/webkit.js   the part Millennium runs in store and community pages, entry src/webkit.js
-//   dist/arkada/backend/…                 backend/ as it is: the Lua backend (main.lua, arkada_hltb*.lua), LICENSE-dwmx, LICENSE-hltb
+//   dist/arkada/backend/…                 backend/ as it is: the Lua backend (main.lua, arkada_hltb*.lua, arkada_itad.lua), LICENSE-dwmx, LICENSE-hltb
 // The wrapper around the code is the one Millennium's own bundler writes (and the Kapsula plugin uses);
 // the modules of src/ are put inside it as they are, so the build needs nothing but Node.
 // It also writes three small modules of src/ from other files of the repository (not edited by hand):
@@ -20,7 +20,8 @@ const here = __dirname;
 const meta = JSON.parse(fs.readFileSync(path.join(here, 'plugin.json'), 'utf8'));
 const MODULES = ['hub-client.js', 'core.js', 'steam-snapshot.js', 'steam.js', 'backdrop.js', 'features.js', 'watch.js', 'pages.js',
   'disksize.js', 'hltb.js', 'kapsula.js', 'startpage.js', 'version.js', 'index.js']; // index.js is the entry
-const WEBKIT_MODULES = ['watch.js', 'share.js', 'dota.js', 'tokens.js', 'webkit.js']; // webkit.js is the entry
+const WEBKIT_MODULES = ['watch.js', 'web.js', 'share.js', 'dota.js', 'prices.js', 'gameinfo.js', 'hideowned.js', 'wishlist.js',
+  'inventory.js', 'markethistory.js', 'tokens.js', 'webkit.js']; // webkit.js is the entry
 
 // The version lives in plugin.json; the code reads it from this small generated file (so does the .star build)
 const versionJs = `// Written by build.js from plugin.json. Do not edit by hand.
@@ -73,7 +74,7 @@ function bundle() {
   return `// Arkada plugin for Millennium, version ${meta.version}. Built by plugin/build.js from plugin/src — do not edit by hand.
 // Runs inside the Steam client and tells the dev.txt hub on this PC (ws://127.0.0.1:42080/hub) what Steam is doing,
 // sends Steam's notifications to Kapsula on this PC (ws://127.0.0.1:42071) and shows the size on disk and How Long To Beat on a game's page.
-// Only How Long To Beat goes to the internet (its backend asks howlongtobeat.com), and only while its setting is on.
+// Only How Long To Beat goes to the internet from here (its backend asks howlongtobeat.com), and only while its setting is on.
 // Steam's own notifications are left as they were (Kapsula may ask to hide one it shows).
 const MILLENNIUM_IS_CLIENT_MODULE = !0, pluginName = ${JSON.stringify(meta.name)};
 (window.PLUGIN_LIST ||= {})[pluginName] ||= {}, window.MILLENNIUM_SIDEBAR_NAVIGATION_PANELS ||= {};
@@ -84,7 +85,7 @@ let PluginEntryPointMain = function () {
 ${mods}
     };
 ${loader}
-    // Everything index.js exports: default (the entry) and arkadaShare (called from the store pages)
+    // Everything index.js exports: default (the entry), arkadaShare and arkadaGame (called from the store pages)
     Object.assign(exports, load("./index.js"));
     Object.defineProperty(exports, "__esModule", { value: !0 });
     return exports;
@@ -104,8 +105,10 @@ ${loader}
 function webkitBundle() {
   const mods = moduleTable(WEBKIT_MODULES);
   return `// Arkada plugin for Millennium, version ${meta.version}: the part Millennium runs in Steam's store pages.
-// Built by plugin/build.js from plugin/src — do not edit by hand. Adds «Поделиться» to a game's page of the store (nothing goes to the
-// internet) and Dota 2 statistics to a community profile (asked of api.opendota.com, only while its setting is on).
+// Built by plugin/build.js from plugin/src — do not edit by hand. On a game's page of the store: «Поделиться», «Об игре» (from the client)
+// and «Цены» (a SteamDB link; IsThereAnyDeal through the plugin's backend, only with the user's own key); the store's lists without owned
+// games; the sum of a wishlist (api.steampowered.com); on the community: Dota 2 statistics (api.opendota.com), inventory prices and
+// market history totals (steamcommunity.com/market). Each only on its pages and only while its setting is on.
 const MILLENNIUM_IS_CLIENT_MODULE = !1, pluginName = ${JSON.stringify(meta.name)};
 (window.PLUGIN_LIST ||= {})[pluginName] ||= {}, window.MILLENNIUM_SIDEBAR_NAVIGATION_PANELS ||= {};
 let PluginEntryPointMain = function () {

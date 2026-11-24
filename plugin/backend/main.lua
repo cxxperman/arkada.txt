@@ -483,6 +483,25 @@ function HltbSetup(...)
   return json.encode(result)
 end
 
+-- ───────── IsThereAnyDeal (arkada_itad.lua) ─────────
+-- Called by a game's page in the store (plugin/src/prices.js, through Millennium.callServerMethod). Loaded in a
+-- pcall as HLTB is: without it the rest still works. Nothing is asked of IsThereAnyDeal without the user's key.
+local itad_ok, itad = pcall(require, "arkada_itad")
+if not itad_ok then logger:error("IsThereAnyDeal is not available: " .. tostring(itad)); itad = nil end
+
+local function itad_call(name, fn, ...)
+  if not itad then return json.encode({ success = false, error = "not available" }) end
+  local ok, result = pcall(fn, ...)
+  if not ok then logger:error(name .. ": " .. tostring(result)); result = { success = false, error = "failed" } end
+  return json.encode(result)
+end
+-- ItadPrices({ appid, country }) → JSON, see arkada_itad.lua
+function ItadPrices(...) return itad_call("ItadPrices", itad and itad.prices, ...) end
+-- ItadKey({ key }) → JSON { success, hasKey }; an empty key removes it
+function ItadKey(...) return itad_call("ItadKey", itad and itad.set_key, ...) end
+-- ItadState() → JSON { success, hasKey }
+function ItadState(...) return itad_call("ItadState", itad and itad.state, ...) end
+
 local function on_load()
   logger:info(string.format("Arkada backend loaded: Windows build %d, %s path; %s", BUILD,
     MODERN and "DWMWA_SYSTEMBACKDROP_TYPE" or "accent blur (build < 22621)", NOTICE .. (hltb and ("; " .. hltb.NOTICE) or "")))

@@ -1,7 +1,7 @@
-// Arkada plugin for Millennium, version 0.3.0. Built by plugin/build.js from plugin/src — do not edit by hand.
+// Arkada plugin for Millennium, version 0.4.0. Built by plugin/build.js from plugin/src — do not edit by hand.
 // Runs inside the Steam client and tells the dev.txt hub on this PC (ws://127.0.0.1:42080/hub) what Steam is doing,
 // sends Steam's notifications to Kapsula on this PC (ws://127.0.0.1:42071) and shows the size on disk and How Long To Beat on a game's page.
-// Only How Long To Beat goes to the internet (its backend asks howlongtobeat.com), and only while its setting is on.
+// Only How Long To Beat goes to the internet from here (its backend asks howlongtobeat.com), and only while its setting is on.
 // Steam's own notifications are left as they were (Kapsula may ask to hide one it shows).
 const MILLENNIUM_IS_CLIENT_MODULE = !0, pluginName = "arkada";
 (window.PLUGIN_LIST ||= {})[pluginName] ||= {}, window.MILLENNIUM_SIDEBAR_NAVIGATION_PANELS ||= {};
@@ -463,6 +463,20 @@ let PluginEntryPointMain = function () {
             try { const o = win.appStore && win.appStore.GetAppOverviewByAppID && win.appStore.GetAppOverviewByAppID(id); if (o && o.display_name) return String(o.display_name); } catch (e) { }
             try { const a = friendsApp().AppInfoStore.GetAppInfo(id); if (a && a.name) return String(a.name); } catch (e) { }
             return '';
+          }
+
+          // [S] appStore.GetAppOverviewByAppID(id) — the library's own record of a game (seen in SharedJSContext):
+          //     minutes_playtime_forever, minutes_playtime_last_two_weeks, rt_last_time_played, rt_purchased_time (when
+          //     the licence came to the account, seconds). null: not in the library. Nothing goes to the network
+          function appPlaytime(appId) {
+            const id = Number(appId);
+            if (!(id > 0)) return null;
+            try {
+              const o = win.appStore && win.appStore.GetAppOverviewByAppID && win.appStore.GetAppOverviewByAppID(id);
+              if (!o) return null;
+              const n = v => Math.max(0, Number(v) || 0);
+              return { owned: true, minutes: n(o.minutes_playtime_forever), minutesTwoWeeks: n(o.minutes_playtime_last_two_weeks), lastPlayed: n(o.rt_last_time_played), purchased: n(o.rt_purchased_time) };
+            } catch (e) { return null; }
           }
 
           // ───────── Games ─────────
@@ -1012,7 +1026,7 @@ let PluginEntryPointMain = function () {
           }
 
           return {
-            appName, watchGames, watchDownloads, watchDownloadOverview, watchToasts, toastsHooked, friendCounts, launch, openLibrary, acceptInvite, applyTheme,
+            appName, appPlaytime, watchGames, watchDownloads, watchDownloadOverview, watchToasts, toastsHooked, friendCounts, launch, openLibrary, acceptInvite, applyTheme,
             readBackdrop, markBackdrop, watchWindows, watchShown, patchWindowOpen, callBackend,
             friend, openChat, sendChat, dismissInvite, testToast, pluginRunning, friendsList,
             readFlags, mainWindow, watchRoute, currentRoute, navigate, classes, installedSizes, openLocalFiles, openInBrowser, currentUserId, dispose,
@@ -2065,7 +2079,7 @@ let PluginEntryPointMain = function () {
       },
       "./version.js": function (module, exports, require) {
         // Written by build.js from plugin.json. Do not edit by hand.
-        module.exports = "0.3.0";
+        module.exports = "0.4.0";
       },
       "./index.js": function (module, exports, require) {
         // Arkada plugin for Millennium: the entry point Millennium calls inside the Steam client.
@@ -2082,10 +2096,15 @@ let PluginEntryPointMain = function () {
         //               part here only answers it (arkadaShare below) — instead of Steam Share
         //   dota        Dota 2 statistics on a community profile, from api.opendota.com: lives in the page as well
         //               (webkit.js, dota.js) — instead of Dota 2 Stats
+        //   prices, game-info, hide-owned, wishlist-sum, market   what the Augmented Steam and SteamDB extensions
+        //               add to the store and the community, in the pages too (webkit.js); the client's part here
+        //               only answers «Об игре» with the library's hours and date (arkadaGame below)
         // This part talks to nothing outside the PC: its connections are ws://127.0.0.1:42080/hub, the dev.txt hub
-        // on this PC, and ws://127.0.0.1:42071, Kapsula on this PC. Only two features go to the internet, each
-        // while its setting is on: How Long To Beat (the backend asks howlongtobeat.com and Steam's store API for the
-        // game's English name) and Dota 2 statistics (the profile page asks api.opendota.com).
+        // on this PC, and ws://127.0.0.1:42071, Kapsula on this PC. The features that go to the internet do it from
+        // the backend or the pages, each while its setting is on: How Long To Beat (the backend asks howlongtobeat.com
+        // and Steam's store API for the game's English name), IsThereAnyDeal (the backend, only with the user's key),
+        // Dota 2 statistics (the profile page asks api.opendota.com), the wishlist's sum (api.steampowered.com) and
+        // the market prices (steamcommunity.com/market).
         'use strict';
         const { connect } = require('./hub-client.js');
         const { createArkada } = require('./core.js');
@@ -2125,6 +2144,18 @@ let PluginEntryPointMain = function () {
               catch (e) { out.push({ id, sent: false, error: String(e && e.message || e) }); }
             }
             return JSON.stringify(out);
+          },
+        };
+
+        // Called by a game's page in the store (webkit.js, gameinfo.js): MILLENNIUM_API.callable("arkada", "frontend:arkadaGame.info").
+        // appid → JSON { owned, minutes, minutesTwoWeeks, lastPlayed, purchased } from the library of this client, or null
+        exports.arkadaGame = {
+          info(appid) {
+            if (!current) throw new Error('not running');
+            let id = appid;
+            if (id && typeof id === 'object') id = id.appid;
+            if (!/^\d{1,10}$/.test(String(id))) throw new Error('bad request');
+            return JSON.stringify(current.appPlaytime(Number(id)));
           },
         };
 
@@ -2182,7 +2213,7 @@ let PluginEntryPointMain = function () {
       modules[name](module, module.exports, load);
       return module.exports;
     }
-    // Everything index.js exports: default (the entry) and arkadaShare (called from the store pages)
+    // Everything index.js exports: default (the entry), arkadaShare and arkadaGame (called from the store pages)
     Object.assign(exports, load("./index.js"));
     Object.defineProperty(exports, "__esModule", { value: !0 });
     return exports;

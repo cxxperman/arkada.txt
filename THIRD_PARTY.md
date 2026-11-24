@@ -135,3 +135,14 @@ SOFTWARE.
 Данные: How Long To Beat — <https://howlongtobeat.com>, OpenDota — <https://www.opendota.com>. Ни Arkada, ни эти плагины с ними не связаны.
 
 Steam и логотип Steam — товарные знаки Valve Corporation. Ни Arkada, ни Steam Enhanced не связаны с Valve и не одобрены ею.
+
+## Augmented Steam и расширение SteamDB — только идеи, без кода
+
+Модули `plugin/src/prices.js`, `gameinfo.js`, `hideowned.js`, `wishlist.js`, `inventory.js`, `markethistory.js` (и бэкенд `plugin/backend/arkada_itad.lua`) делают то, что умеют браузерные расширения **Augmented Steam** (<https://github.com/IsThereAnyDeal/AugmentedSteam>, GPL-3.0) и **SteamDB** (<https://steamdb.info/extension/>): цены и исторический минимум, история цен, время в игре на странице магазина, ссылки на SteamDB, PCGamingWiki и ProtonDB, скрытие купленного, сумма списка желаемого, цены инвентаря, итоги истории рынка. Код этих расширений не взят ни строчкой и не открывался для переноса: Arkada под MIT, а код под GPL в неё копировать нельзя. Из них известно только, какие функции бывают полезны. Всё написано для Arkada заново на открытых интерфейсах:
+
+- цены в других магазинах — **IsThereAnyDeal API v2** (<https://docs.isthereanydeal.com/>): `POST /lookup/id/shop/61/v1` и `POST /games/overview/v2`, с **личным ключом пользователя** (его приложение на <https://isthereanydeal.com/apps/my/>). Условия API IsThereAnyDeal: ссылки на предложения передаются как есть (`itad.link`), на карточке сказано, что цены — от IsThereAnyDeal и что Arkada с ним не связана;
+- сумма списка желаемого — открытый Web API Steam (`IWishlistService/GetWishlist`, `IStoreBrowseService/GetItems`), которым пользуется сама страница;
+- цены инвентаря и итоги рынка — запросы Торговой площадки Steam, которыми пользуются её же страницы (`market/priceoverview`, `market/myhistory/render`);
+- скрытие купленного — пометки самого магазина Steam (`.ds_collapse_flag`, `.ds_owned`, `.ds_ignored`);
+- время в игре и дата на аккаунте — библиотека клиента Steam (`appStore.GetAppOverviewByAppID`);
+- SteamDB, PCGamingWiki, ProtonDB — только ссылки, без запросов.

@@ -1,0 +1,11 @@
+/*
+ * Theme setting (skin.json Conditions): «Сумма списка желаемого», Выкл. The card lives in the wishlist page (plugin/src/wishlist.js): it is hidden here at once, and the page,
+ * reading --arkada-wishlist-sum on its <html>, does not ask Steam's Web API at all.
+ */
+:root:root {
+  --arkada-wishlist-sum: off;
+}
+
+#arkada-wishlist-sum {
+  display: none !important;
+}

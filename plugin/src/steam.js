@@ -26,6 +26,20 @@ function createSteam(win) {
     return '';
   }
 
+  // [S] appStore.GetAppOverviewByAppID(id) — the library's own record of a game (seen in SharedJSContext):
+  //     minutes_playtime_forever, minutes_playtime_last_two_weeks, rt_last_time_played, rt_purchased_time (when
+  //     the licence came to the account, seconds). null: not in the library. Nothing goes to the network
+  function appPlaytime(appId) {
+    const id = Number(appId);
+    if (!(id > 0)) return null;
+    try {
+      const o = win.appStore && win.appStore.GetAppOverviewByAppID && win.appStore.GetAppOverviewByAppID(id);
+      if (!o) return null;
+      const n = v => Math.max(0, Number(v) || 0);
+      return { owned: true, minutes: n(o.minutes_playtime_forever), minutesTwoWeeks: n(o.minutes_playtime_last_two_weeks), lastPlayed: n(o.rt_last_time_played), purchased: n(o.rt_purchased_time) };
+    } catch (e) { return null; }
+  }
+
   // ───────── Games ─────────
   function watchGames(cb) {
     // [?] Games already running when the plugin loads. If this is not there, a game started before Steam
@@ -573,7 +587,7 @@ function createSteam(win) {
   }
 
   return {
-    appName, watchGames, watchDownloads, watchDownloadOverview, watchToasts, toastsHooked, friendCounts, launch, openLibrary, acceptInvite, applyTheme,
+    appName, appPlaytime, watchGames, watchDownloads, watchDownloadOverview, watchToasts, toastsHooked, friendCounts, launch, openLibrary, acceptInvite, applyTheme,
     readBackdrop, markBackdrop, watchWindows, watchShown, patchWindowOpen, callBackend,
     friend, openChat, sendChat, dismissInvite, testToast, pluginRunning, friendsList,
     readFlags, mainWindow, watchRoute, currentRoute, navigate, classes, installedSizes, openLocalFiles, openInBrowser, currentUserId, dispose,
