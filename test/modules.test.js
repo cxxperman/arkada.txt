@@ -13,6 +13,7 @@
 //   wishlist.js  the sum of a wishlist (fake Steam Web API)
 //   inventory.js the market prices of an inventory (fake priceoverview, 429)
 //   markethistory.js  the totals of the market history (fake myhistory/render)
+//   browserfix.js  a stale manager of the main window's browser view hands its work to the current one
 //   steam.js     the calls these features add (friends list, chat, flags, classes, sizes)
 //   node test/modules.test.js
 'use strict';
@@ -36,6 +37,7 @@ const { createMarketHistory, rowsOf, totals } = src('markethistory.js');
 const { createSteam } = src('steam.js');
 const TOKENS = src('tokens.js');
 const { createStartPage, STORAGE_KEY: START_KEY } = src('startpage.js');
+const { createBrowserFix } = src('browserfix.js');
 const { makeDomWindow, observing } = require('./fake-dom.js');
 const { makePage } = require('./fake-steam.js');
 
@@ -551,6 +553,51 @@ async function testStartPage() {
   ok(a.s.moved.length === 0 && g.state() === 'gave up', 'no theme answer for a while → gives up, and later never moves the page under the user');
 }
 
+// ───────── browserfix.js ─────────
+async function testBrowserFix() {
+  console.log('browserfix.js');
+  // Steam's manager, as much of it as the fix touches: each one listens to the router and loads into its own view
+  class Manager {
+    constructor(name, routes, log) { this.name = name; this.log = log; this.waiting = 0; this.m_URL = name + ':blank'; routes.push((l, a) => this.SyncWithNewRouterEvent(l, a)); }
+    SyncWithNewRouterEvent(l) { if (!l.startsWith('/browser')) this.LoadURL('tracking:' + l); }
+    LoadURL(u) { this.log.push(this.name + ' ' + u); this.m_URL = u; }
+    Reload() { this.log.push(this.name + ' reload'); }
+    GetLastActiveTab() { return this.name; }
+    StartWaitingForHistoryCallback() { this.waiting++; }
+    ShowURL(u) { this.StartWaitingForHistoryCallback(); this.LoadURL(u); }
+    get DisplayURL() { return this.m_URL; }
+  }
+  const routes = [], log = [], win = {};
+  const route = l => routes.forEach(fn => fn(l));
+  const first = new Manager('first', routes, log);
+  win.MainWindowBrowserManager = first;
+  const fix = createBrowserFix({ win, everyMs: 10 });
+  ok(fix.state() === 'on', 'the manager is there → its class is patched at once');
+  route('/library/home');
+  ok(eq(log, ['first tracking:/library/home']), 'one manager: Steam works as it did', log);
+  const second = new Manager('second', routes, log);
+  win.MainWindowBrowserManager = second;
+  const clickStore = first.ShowURL.bind(first); // what Steam's header kept from before the second manager came
+  log.length = 0;
+  route('/library/collections');
+  ok(eq(log, ['second tracking:/library/collections']), 'the first manager became stale: it no longer follows the router, the current one does', log);
+  log.length = 0;
+  clickStore('https://store.steampowered.com/');
+  ok(eq(log, ['second https://store.steampowered.com/']) && second.waiting === 1, 'a click on «Магазин» through the stale manager loads the store into the current view (which expects the change)', log);
+  first.Reload();
+  ok(log[1] === 'second reload' && first.GetLastActiveTab() === 'second' && first.DisplayURL === 'https://store.steampowered.com/', "reload, the active tab and the address of the stale one are the current one's", [log, first.DisplayURL]);
+  ok(second.DisplayURL === 'https://store.steampowered.com/' && second.GetLastActiveTab() === 'second', 'the current manager runs its own code');
+  const again = createBrowserFix({ win, everyMs: 10 });
+  ok(again.state() === 'patched before', 'a second copy of the plugin does not patch the class twice');
+  fix.stop();
+  log.length = 0;
+  route('/library/home');
+  ok(eq(log, ['first tracking:/library/home', 'second tracking:/library/home']) && Manager.prototype.LoadURL.toString().includes('this.log.push') && !Object.prototype.hasOwnProperty.call(Manager.prototype, '__arkadaBrowserFix'), "stop() puts Steam's class back as it was", log);
+  const none = createBrowserFix({ win: {}, everyMs: 10, limitMs: 40 });
+  await sleep(80);
+  ok(none.state() === 'gave up', 'no main window manager → it stops looking');
+}
+
 // ───────── web.js: what the store and community modules share ─────────
 async function testWeb() {
   console.log('web.js');
@@ -869,7 +916,7 @@ async function testMarketHistory() {
 }
 
 (async () => {
-  for (const t of [testWatch, testFeatures, testKapsula, testDiskSize, testHltb, testShare, testDota, testWeb, testPrices, testGameInfo, testHideOwned, testWishlist, testInventory, testMarketHistory, testSteamCalls, testStartPage]) {
+  for (const t of [testWatch, testFeatures, testKapsula, testDiskSize, testHltb, testShare, testDota, testWeb, testPrices, testGameInfo, testHideOwned, testWishlist, testInventory, testMarketHistory, testSteamCalls, testStartPage, testBrowserFix]) {
     try { await t(); } catch (e) { failed++; console.log('  FAIL  ' + t.name + ': ' + (e && e.stack || e)); }
   }
   console.log('\n' + passed + ' passed, ' + failed + ' failed');

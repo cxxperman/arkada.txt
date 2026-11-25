@@ -1,4 +1,4 @@
-// Arkada plugin for Millennium, version 0.4.0: the part Millennium runs in Steam's store pages.
+// Arkada plugin for Millennium, version 0.4.1: the part Millennium runs in Steam's store pages.
 // Built by plugin/build.js from plugin/src — do not edit by hand. On a game's page of the store: «Поделиться», «Об игре» (from the client)
 // and «Цены» (a SteamDB link; IsThereAnyDeal through the plugin's backend, only with the user's own key); the store's lists without owned
 // games; the sum of a wishlist (api.steampowered.com); on the community: Dota 2 statistics (api.opendota.com), inventory prices and

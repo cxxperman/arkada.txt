@@ -3,7 +3,7 @@
   "name": "arkada",
   "common_name": "Arkada",
   "description": "Tells the other dev.txt apps on this PC what Steam is doing, sends Steam notifications to Kapsula, shows the size on disk and How Long To Beat times of a game, Dota 2 statistics on profiles, adds Share, prices (SteamDB, IsThereAnyDeal with your own key), your playtime and links to store pages, hides owned games in store lists, sums wishlists, prices inventories and totals the market history. What goes to the internet, and where, is said for each feature in its setting.",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "useBackend": true,
   "backendType": "lua",
   "webkitApiVersion": "2.0.0"

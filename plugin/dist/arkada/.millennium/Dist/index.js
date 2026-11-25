@@ -1,4 +1,4 @@
-// Arkada plugin for Millennium, version 0.4.0. Built by plugin/build.js from plugin/src — do not edit by hand.
+// Arkada plugin for Millennium, version 0.4.1. Built by plugin/build.js from plugin/src — do not edit by hand.
 // Runs inside the Steam client and tells the dev.txt hub on this PC (ws://127.0.0.1:42080/hub) what Steam is doing,
 // sends Steam's notifications to Kapsula on this PC (ws://127.0.0.1:42071) and shows the size on disk and How Long To Beat on a game's page.
 // Only How Long To Beat goes to the internet from here (its backend asks howlongtobeat.com), and only while its setting is on.
@@ -2077,9 +2077,122 @@ let PluginEntryPointMain = function () {
 
         module.exports = { createStartPage, STORAGE_KEY };
       },
+      "./browserfix.js": function (module, exports, require) {
+        // Arkada, the main window's browser view: the Store, Community and profile pages open from the first click.
+        // Knows nothing about the rest of the plugin: it gets the SharedJSContext window (where Steam keeps
+        // window.MainWindowBrowserManager, the object behind the Store / Community view of the main window).
+        //
+        //   const f = createBrowserFix({ win: window });   f.state();   f.stop();
+        //
+        // Why. At its start Steam (with Millennium and the theme in) mounts the main window's tree twice: the first
+        // tree makes a browser view and its manager, the second one destroys that view and makes another view and
+        // manager (window.MainWindowBrowserManager then is the second). The first manager stays: it still
+        // listens to the router, and Steam's own controls rendered before the second manager came keep it, Steam
+        // never re-renders them for the new one (its "manager created" flag is already true). Until something makes
+        // them render again (a page change), a click on «Магазин» / «Сообщество» / the profile in the header asks
+        // the FIRST manager: the route becomes /browser/, but the URL is loaded into the destroyed view, and the
+        // window shows an empty page. Seen as «nothing but the library opens».
+        //
+        // What. The managers' class (the prototype of window.MainWindowBrowserManager) is patched once: a manager
+        // that is not the current one (stale) no longer follows the router (the current one does), and what it is
+        // asked to load, reload or show is done by the current one. The current manager runs Steam's code as is.
+        // Steam's code is not touched in any other way; stop() puts the class back as it was.
+        'use strict';
+
+        const EVERY_MS = 250;     // how often to look for the manager while Steam has not made it yet
+        const LIMIT_MS = 120000;  // no manager by then (no main window): stop looking
+        const MARK = '__arkadaBrowserFix';
+        // What a stale manager hands to the current one: methods, then getters Steam's URL bar reads
+        const METHODS = ['LoadURL', 'Reload', 'GetLastActiveTab'];
+        const GETTERS = ['DisplayURL', 'PageSecurity', 'Loading', 'Title'];
+
+        function createBrowserFix(o) {
+          const win = o.win;
+          const every = o.everyMs || EVERY_MS, limit = o.limitMs || LIMIT_MS;
+          const now = o.now || (() => Date.now());
+          const started = now();
+          let stopped = false, timer = null, state = 'waiting', proto = null;
+          const saved = []; // [name, own descriptor or undefined] to put back
+
+          const current = () => { try { return win.MainWindowBrowserManager || null; } catch (e) { return null; } };
+          // The current manager when `m` is not it (and it is one of the same class), else null
+          const newer = m => {
+            const c = current();
+            return c && c !== m && Object.getPrototypeOf(c) === proto ? c : null;
+          };
+
+          function patch(p) {
+            proto = p;
+            const own = name => Object.getOwnPropertyDescriptor(p, name);
+            const put = (name, desc) => { saved.push([name, own(name)]); Object.defineProperty(p, name, Object.assign({ configurable: true }, desc)); };
+
+            const sync = p.SyncWithNewRouterEvent;
+            put('SyncWithNewRouterEvent', {
+              writable: true,
+              value: function (location, action) {
+                if (newer(this)) { this.m_lastLocation = location; return undefined; }
+                return sync.apply(this, arguments);
+              },
+            });
+            for (const name of METHODS) {
+              const fn = p[name];
+              if (typeof fn !== 'function') continue;
+              put(name, {
+                writable: true,
+                value: function () {
+                  const c = newer(this);
+                  if (!c) return fn.apply(this, arguments);
+                  // The current manager expects the browser's history to change (as after its own ShowURL),
+                  // else it would take the change for one made inside the page and push a route of its own
+                  if (name === 'LoadURL' && typeof c.StartWaitingForHistoryCallback === 'function') c.StartWaitingForHistoryCallback();
+                  return c[name].apply(c, arguments);
+                },
+              });
+            }
+            for (const name of GETTERS) {
+              const d = own(name);
+              if (!d || typeof d.get !== 'function') continue;
+              const get = d.get;
+              put(name, { enumerable: d.enumerable, get: function () { const c = newer(this); return c ? c[name] : get.call(this); } });
+            }
+            put(MARK, { writable: true, value: true });
+          }
+
+          function tick() {
+            timer = null;
+            if (stopped) return;
+            const m = current();
+            const p = m && Object.getPrototypeOf(m);
+            if (p && typeof p.SyncWithNewRouterEvent === 'function' && typeof p.LoadURL === 'function') {
+              // A second copy of the plugin (a reload) finds the class patched by the first: that one's stop() undoes it
+              if (Object.prototype.hasOwnProperty.call(p, MARK)) { state = 'patched before'; return; }
+              try { patch(p); state = 'on'; } catch (e) { state = 'failed'; }
+              return;
+            }
+            if (now() - started >= limit) { state = 'gave up'; return; }
+            timer = setTimeout(tick, every);
+          }
+          tick();
+
+          function stop() {
+            stopped = true;
+            if (timer) clearTimeout(timer);
+            timer = null;
+            for (let i = saved.length - 1; i >= 0; i--) {
+              const [name, desc] = saved[i];
+              try { if (desc) Object.defineProperty(proto, name, desc); else delete proto[name]; } catch (e) { }
+            }
+            saved.length = 0;
+            if (state === 'on') state = 'stopped';
+          }
+          return { stop, state: () => state };
+        }
+
+        module.exports = { createBrowserFix };
+      },
       "./version.js": function (module, exports, require) {
         // Written by build.js from plugin.json. Do not edit by hand.
-        module.exports = "0.4.0";
+        module.exports = "0.4.1";
       },
       "./index.js": function (module, exports, require) {
         // Arkada plugin for Millennium: the entry point Millennium calls inside the Steam client.
@@ -2092,6 +2205,8 @@ let PluginEntryPointMain = function () {
         //   hltb        How Long To Beat on a game's page (hltb.js, on pages.js; the requests in the Lua backend,
         //               arkada_hltb.lua) — instead of HLTB for Steam
         //   start page  the main window opens on the library's Home (startpage.js), not on the store
+        //   browser fix the header's Store / Community / profile open from the first click after Steam's start
+        //               (browserfix.js: Steam keeps a stale manager of the main window's browser view)
         //   share       «Поделиться» on a store page: its button lives in the page (webkit.js, share.js); the client's
         //               part here only answers it (arkadaShare below) — instead of Steam Share
         //   dota        Dota 2 statistics on a community profile, from api.opendota.com: lives in the page as well
@@ -2116,6 +2231,7 @@ let PluginEntryPointMain = function () {
         const { createDiskSize } = require('./disksize.js');
         const { createHltb } = require('./hltb.js');
         const { createStartPage } = require('./startpage.js');
+        const { createBrowserFix } = require('./browserfix.js');
 
         const VERSION = require('./version.js'); // written by build.js from plugin.json
         const SLOT = '__arkada_stop__';       // the running copy, so that a second load replaces it instead of doubling it
@@ -2172,6 +2288,10 @@ let PluginEntryPointMain = function () {
           window.__arkadaBackdrop = { set: m => backdrop.set(m), mode: () => backdrop.mode() };
           // The main window opens on the library's Home, once per Steam start (startpage.js, setting «Начальная страница»)
           const startPage = createStartPage({ steam, storage, once: window });
+          // Store / Community / profile from the header: the main window's current browser view loads them (browserfix.js)
+          const browserFix = createBrowserFix({ win: window });
+          // For testing from SharedJSContext: window.__arkadaBrowserFix.state()
+          window.__arkadaBrowserFix = { state: () => browserFix.state() };
           // The main window's pages are watched only once a feature that draws on them is on
           let pages = null;
           const features = createFeatures({
@@ -2193,6 +2313,8 @@ let PluginEntryPointMain = function () {
             if (current === steam) current = null;
             features.stop();
             startPage.stop();
+            browserFix.stop();
+            try { delete window.__arkadaBrowserFix; } catch (e) { }
             if (pages) pages.stop();
             arkada.stop();
             backdrop.stop();

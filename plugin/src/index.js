@@ -8,6 +8,8 @@
 //   hltb        How Long To Beat on a game's page (hltb.js, on pages.js; the requests in the Lua backend,
 //               arkada_hltb.lua) — instead of HLTB for Steam
 //   start page  the main window opens on the library's Home (startpage.js), not on the store
+//   browser fix the header's Store / Community / profile open from the first click after Steam's start
+//               (browserfix.js: Steam keeps a stale manager of the main window's browser view)
 //   share       «Поделиться» on a store page: its button lives in the page (webkit.js, share.js); the client's
 //               part here only answers it (arkadaShare below) — instead of Steam Share
 //   dota        Dota 2 statistics on a community profile, from api.opendota.com: lives in the page as well
@@ -32,6 +34,7 @@ const { createPages } = require('./pages.js');
 const { createDiskSize } = require('./disksize.js');
 const { createHltb } = require('./hltb.js');
 const { createStartPage } = require('./startpage.js');
+const { createBrowserFix } = require('./browserfix.js');
 
 const VERSION = require('./version.js'); // written by build.js from plugin.json
 const SLOT = '__arkada_stop__';       // the running copy, so that a second load replaces it instead of doubling it
@@ -88,6 +91,10 @@ exports.default = async function () {
   window.__arkadaBackdrop = { set: m => backdrop.set(m), mode: () => backdrop.mode() };
   // The main window opens on the library's Home, once per Steam start (startpage.js, setting «Начальная страница»)
   const startPage = createStartPage({ steam, storage, once: window });
+  // Store / Community / profile from the header: the main window's current browser view loads them (browserfix.js)
+  const browserFix = createBrowserFix({ win: window });
+  // For testing from SharedJSContext: window.__arkadaBrowserFix.state()
+  window.__arkadaBrowserFix = { state: () => browserFix.state() };
   // The main window's pages are watched only once a feature that draws on them is on
   let pages = null;
   const features = createFeatures({
@@ -109,6 +116,8 @@ exports.default = async function () {
     if (current === steam) current = null;
     features.stop();
     startPage.stop();
+    browserFix.stop();
+    try { delete window.__arkadaBrowserFix; } catch (e) { }
     if (pages) pages.stop();
     arkada.stop();
     backdrop.stop();

@@ -19,7 +19,7 @@ const path = require('path');
 const here = __dirname;
 const meta = JSON.parse(fs.readFileSync(path.join(here, 'plugin.json'), 'utf8'));
 const MODULES = ['hub-client.js', 'core.js', 'steam-snapshot.js', 'steam.js', 'backdrop.js', 'features.js', 'watch.js', 'pages.js',
-  'disksize.js', 'hltb.js', 'kapsula.js', 'startpage.js', 'version.js', 'index.js']; // index.js is the entry
+  'disksize.js', 'hltb.js', 'kapsula.js', 'startpage.js', 'browserfix.js', 'version.js', 'index.js']; // index.js is the entry
 const WEBKIT_MODULES = ['watch.js', 'web.js', 'share.js', 'dota.js', 'prices.js', 'gameinfo.js', 'hideowned.js', 'wishlist.js',
   'inventory.js', 'markethistory.js', 'tokens.js', 'webkit.js']; // webkit.js is the entry
 

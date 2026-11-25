@@ -591,8 +591,11 @@
     warming = appid;
     try {
       for (const ask of ['RequestDescriptionsData', 'RequestAssociationData', 'RequestAchievements']) {
+        // Steam's asks are async and some reject (RequestAchievements on a game with no data
+        // yet reads `.achievements` of null): a rejection is caught here, not left unhandled
         try {
-          details[ask]?.(appid);
+          const p = details[ask]?.(appid);
+          if (p && typeof p.catch === 'function') p.catch(() => {});
         } catch {}
       }
       await Promise.race([details.RequestAppDetails(appid), new Promise((r) => setTimeout(r, 2000))]);
